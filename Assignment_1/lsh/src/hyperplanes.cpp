@@ -1,19 +1,8 @@
 #include <stdio.h>
-#include <vector>
-#include <random>
+#include "random_functions.h"
+
 
 #define DIMENSIONS 2 // the dimension of the space this hyperplane resides
-
-double random_double(double min, double max){
-    // Create a random number generator engine
-    std::random_device rd;
-    std::mt19937 gen(rd()); // Mersenne Twister PRNG
-
-    // Create a distribution for generating random doubles in the specified range
-    std::uniform_real_distribution<double> dist(min, max);
-
-    return dist(gen);
-}
 
 class Hyperplane{
     double Coefficients[DIMENSIONS]; // the A,B,C...D in the hyperplane equation: Ax + By + Cz + ... + Hw + D = 0, which are the dimensions
@@ -26,9 +15,9 @@ class Hyperplane{
         double max_value = 1.0;
 
         for (int i = 0; i < DIMENSIONS; i++) {
-            this->Coefficients[i] = random_double(min_value, max_value);
+            this->Coefficients[i] = generate_random_double_uniform(min_value, max_value);
         }
-        this->Constant = random_double(min_value, max_value);
+        this->Constant = generate_random_double_uniform(min_value, max_value);
     }
 
     Hyperplane(double* coefficients, double constant){
@@ -68,25 +57,41 @@ class HashFunction{
         int code = 0;
         int boolean;
         for (int i = 0; i < Number_of_Partitions; i++) { // for each partition see if the point is above or below
-            bool boolean = partition[i].evaluate_point_relative_position(point);
-            printf("The %d relative position is %d\n",i+1, boolean);
+            boolean = partition[i].evaluate_point_relative_position(point);
+            //printf("The %d relative position is %d\n",i+1, boolean);
             code <<= 1; // shift so that we have some space for the next boolean
             code |= boolean; // save the code of the particular plain
         }
-        return code;
+        return code; // the number of codes is a bit of a difficult issue 
     }
 
 };
 
+bool distinct(const std::vector<double>& list, double value) {
+    for (double item : list) {
+        if (item == value) return false;
+    }
+    return true;
+}
+
 int main(void) {
     double point[2];
+    int value;
+    int c = 0;
+    std::vector<double> list;
+    HashFunction hash(3);
 
-    for(int i = 0; i < 10; i++){
-        point[0] = random_double(0.0,1.0);
-        point[1] = random_double(0.0,1.0);
-        HashFunction hash(5);
-        printf("%d\n",hash.evaluate_point(point));
+    for(int i = 0; i < 20; i++){
+        point[0] = generate_random_double_uniform(0.0,1.0);
+        point[1] = generate_random_double_uniform(0.0,1.0);
+
+        value = hash.evaluate_point(point);
+        if(distinct(list,value)) c++;
+        
+        list.push_back(value);
+        //printf("%d\n",value);
     }
+    printf("%d\n", c);
     return 0;
 
 }
