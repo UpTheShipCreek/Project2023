@@ -20,8 +20,9 @@ int main(int argc, char **argv){
     extern char *optarg; 
     string givenInput, queryFile, givenOutput;
     int cmdNecessary = 0;
+    char inputCharacters[17] = "d:q:k:M:p:o:N:R:";
 
-    while ((opt = getopt(argc, argv, "d:q:k:M:p:o:N:R:")) != -1){                   //Parse through (potential) command line arguments
+    while ((opt = getopt(argc, argv, inputCharacters)) != -1){                   //Parse through (potential) command line arguments
         switch (opt) {
             case 'd':                                                               //Files
                 givenInput = optarg;
