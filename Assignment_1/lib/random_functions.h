@@ -4,6 +4,7 @@
 #include <random>
 #include <vector>
 
+int generate_random_int_uniform(const int min, const int max);
 double generate_random_double_uniform(const double min, const double max);
 double generate_random_double_normal(const double mean, const double standardDeviation);
 

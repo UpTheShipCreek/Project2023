@@ -1,5 +1,16 @@
 #include "random_functions.h"
 
+int generate_random_int_uniform(const int min, const int max){
+
+    // Might need to change this initialization if it ends up being an important hinderance
+    std::random_device rd; // Initiate a contingency factor
+    std::mt19937 gen(rd()); // And seed them into the Mersenne Twister pseudorandom number generator 
+
+    std::uniform_int_distribution<> distribution(min, max);
+
+    return distribution(gen);
+}
+
 double generate_random_double_uniform(const double min, const double max){
 
     std::random_device rd; // Initiate a contingency factor
