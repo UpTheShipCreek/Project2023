@@ -7,7 +7,7 @@ SRCLSH = ./lsh/src
 INC = ./lib
 
 # Source files
-SRCS = $(SRCLSH)/hyperplanes.cpp $(INC)/random_functions.cpp
+SRCS = $(SRCLSH)/lsh.cpp $(INC)/random_functions.cpp 
 # Add more source files if needed
 
 # Object files
@@ -17,7 +17,7 @@ OBJS = $(SRCS:.cpp=.o)
 INCLUDES = -I$(INC)
 
 # Executable name
-EXEC = hyperplanes
+EXEC = exe
 
 # Targets and rules
 all: $(EXEC)
