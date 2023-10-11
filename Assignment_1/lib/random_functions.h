@@ -4,11 +4,17 @@
 #include <random>
 #include <vector>
 
-int generate_random_int_uniform(const int min, const int max);
-double generate_random_double_uniform(const double min, const double max);
-double generate_random_double_normal(const double mean, const double standardDeviation);
+class Random {
+    static std::random_device rd; // Static in order not to be initialized again and again
+    static std::mt19937 gen;
 
-std::vector<double> generate_random_vector_normal(int size);
-std::vector<double> generate_random_vector_uniform(int size);
+public:
+    int generate_int_uniform(const int min, const int max);
+    double generate_double_uniform(const double min, const double max);
+    double generate_double_normal(const double mean, const double standardDeviation);
+    std::vector<double> generate_vector_normal(int size);
+    std::vector<double> generate_vector_uniform(int size);
+};
+
 
 #endif
