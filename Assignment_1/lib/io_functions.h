@@ -15,7 +15,7 @@ class ImageVector{
     ImageVector(int number, std::vector<double> coordinates);
     int get_number();
     std::vector<double> get_coordinates();
-    void assign_id(int id);
+    void assign_id(int id); // This Id should be different for every bucket but the way I have it implemented it is the same for the same image in different buckets
     int get_id();
 };
 
