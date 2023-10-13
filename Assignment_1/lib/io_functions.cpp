@@ -14,13 +14,13 @@ std::vector<double>  ImageVector::get_coordinates(){
     return this->Coordinates;
 }
 
-void  ImageVector::assign_id(int id){
-    this->Id = id;
-}
+// void  ImageVector::assign_id(int id){
+//     this->Id = id;
+// }
 
-int  ImageVector::get_id(){
-    return this->Id;
-}
+// int  ImageVector::get_id(){
+//     return this->Id;
+// }
 
 
 // Need to make this work with the new ImageVector class

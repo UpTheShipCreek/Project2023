@@ -10,36 +10,7 @@
 #define DIMENSIONS 748
 #define MODULO 60000
 #define LSH_TABLE_SIZE 3750 // 60000/8
-#define WINDOW 100 // Test orders of magnitude
-
-// Define a struct to store distance and the corresponding ImageVector
-class DistanceImagePair {
-    double Distance;
-    ImageVector* Image;
-
-    public:
-    // Constructor to initialize the values
-    DistanceImagePair(double dist, ImageVector* img){
-        this->Distance = dist;
-        this->Image = img;
-    }
-
-    ImageVector* get_image() const{
-        return this->Image;
-    }
-
-    double get_distance() const{
-        return this->Distance;
-    }
-    
-    // Define comparison operators to use with std::priority_queue
-    bool operator>(const DistanceImagePair& other) const {
-        return Distance > other.Distance;
-    }
-    bool operator<(const DistanceImagePair& other) const {
-        return Distance < other.Distance;
-    }
-};
+#define WINDOW 1000 // Test orders of magnitude
 
 class hFunction{
     std::vector<double> V;
@@ -63,7 +34,7 @@ class hFunction{
         
         double result = (product + this->T)/ this->W;
 
-        printf("%d hFunction::%s result = %f\n", __LINE__, __FUNCTION__, result);
+        //printf("%d hFunction::%s result = %f\n", __LINE__, __FUNCTION__, result);
         return (int)std::floor(result); // Casting the result into into so that we may operate it with other ints
     }
 };
@@ -101,11 +72,11 @@ class gFunction{
         res = sum % M;
 
         if(res >= 0){
-            printf("%d gFunction::%s result = %d\n", __LINE__, __FUNCTION__, res);
+            //printf("%d gFunction::%s result = %d\n", __LINE__, __FUNCTION__, res);
             return res;
         }
         else{
-            printf("%d gFunction::%s result:%d + M:%d = %d\n", __LINE__, __FUNCTION__, res, M, res+M);
+            //printf("%d gFunction::%s result:%d + M:%d = %d\n", __LINE__, __FUNCTION__, res, M, res+M);
             return res+M; // Invoking the modular negation property in order to keep the result positive, this should be a very rare case after the changes in the p*v + t calculations 
         }
     }
@@ -116,6 +87,7 @@ class HashTable{
     int NumberOfBuckets; // i.e. table size
     gFunction* HashFunction;
     std::unordered_map<int, std::vector<ImageVector*>> Table; // Actual storage
+    std::unordered_map<int, int> NumberToIdMapping;
 
     public:
     HashTable(int num, int k, int m){ // Constructor
@@ -126,14 +98,15 @@ class HashTable{
         delete (this->HashFunction);
     }
 
-    void insert(ImageVector* image){ // Insert an image pointer to the correct bucket
+    void insert(ImageVector* image){ // Insert an image pointer to the correct bucket, MAYBE CHANGING THIS INTO TAKING IN A COPY OF THE IMAGE WILL FIX THE ISSUE WITH THE IDS
         std::vector<double> p = image->get_coordinates(); // Get the coordinates of the image
 
         int id = (this->HashFunction)->evaluate_point(p); // Get the for the querying trick we saw in the lectures
 
-        printf("%d hash::%s Image Id = %d\n", __LINE__, __FUNCTION__, id);
+        //printf("%d hash::%s Image Id = %d\n", __LINE__, __FUNCTION__, id);
 
-        image->assign_id(id); // Assign the id to the image
+        //image->assign_id(id); // Assign the id to the image ACTUALLY DON'T DO THAT, CAUSE ALL HASHTABLE POINT TO THE SAME IMAGE, SO THE ID WILL BE THE SAME FOR ALL BUCKETS 
+        this->NumberToIdMapping[image->get_number()] = id; // Save the number and the id of the image
 
         int bucketId = id % (this->NumberOfBuckets); // Get the bucket id
 
@@ -142,11 +115,11 @@ class HashTable{
         }
 
         (this->Table)[bucketId].push_back(image); // Add the image to the bucket
-        printf("%d hash::%s Inserted image to bucket %d\n", __LINE__, __FUNCTION__, bucketId);
+        //printf("%d hash::%s Inserted image to bucket %d\n", __LINE__, __FUNCTION__, bucketId);
     }
 
     const std::vector<ImageVector*> get_bucket_of_image(ImageVector* image){ // A function that returns a bucket given a certain image
-        int bucketId = image->get_id() % (this->NumberOfBuckets); // Get the bucket id
+        int bucketId = NumberToIdMapping[image->get_number()] % (this->NumberOfBuckets); // Get the bucket id
         return (this->Table)[bucketId]; // Fetch the bucket
     }
 
@@ -154,46 +127,43 @@ class HashTable{
         int i, bucketId;
         double distance;
         
-        int id = image->get_id();
+        int id = this->NumberToIdMapping[image->get_number()];
         
-        printf("%d hash::%s Image Id = %d\n", __LINE__, __FUNCTION__, id);
+        //printf("%d hash::%s Image Id = %d\n", __LINE__, __FUNCTION__, id);
 
         std::vector<std::pair<double, int>> nearestPairs;
         // priority_queue of pairs, saved in a vector structure, in descending order(greater)
         std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::greater<std::pair<double, int>>> nearest;
 
+        bucketId = id % this->NumberOfBuckets;
 
-        if(id == -1){ //i.e. if the image is not in the hashtable
-            return nearestPairs;
-        }
+        //printf("%d hash::%s Searching on bucket = %d\n", __LINE__, __FUNCTION__, bucketId);
 
-        else{
-            bucketId = id % this->NumberOfBuckets;
+        std::vector<ImageVector*> bucket = this->Table[bucketId]; // Fetch the correct bucket
 
-            printf("%d hash::%s Searching on bucket = %d\n", __LINE__, __FUNCTION__, bucketId);
+        //printf("%d hash::%s bucket.size() = %ld\n", __LINE__, __FUNCTION__, bucket.size());
 
-            std::vector<ImageVector*> bucket = this->Table[bucketId]; // Fetch the correct bucket
+        for(i = 0; i < (int)(bucket.size()); i++){
+            if((this->NumberToIdMapping)[bucket[i]->get_number()] == id && bucket[i] != image){ // The query trick, avoiding comparing with itself though
+                //printf("%d hash::%s FOUND SIMILAR\n", __LINE__, __FUNCTION__);
 
-            printf("%d hash::%s bucket.size() = %ld\n", __LINE__, __FUNCTION__, bucket.size());
+                distance = eucledian_distance(image->get_coordinates(), bucket[i]->get_coordinates());
+            
+                nearest.push(std::make_pair(distance, bucket[i]->get_number()));
 
-            for(i = 0; i < (int)(bucket.size()); i++){
-                if(bucket[i]->get_id() == id && bucket[i] != image){ // The query trick, avoiding comparing with itself though
-                    distance = eucledian_distance(image->get_coordinates(), bucket[i]->get_coordinates());
-                
-                    nearest.push(std::make_pair(distance, bucket[i]->get_number()));
-
-                    if((int)(nearest.size()) > numberOfNearest){ // If the number of nearest we've saved is more than what we need
-                        nearest.pop(); // Remove the furthest neighbour to maintain n nearest neighbours
-                    }
+                if((int)(nearest.size()) > numberOfNearest){ // If the number of nearest we've saved is more than what we need
+                    //printf("%d hash::%s I SHOULD NOT BE GETTING IN HERE\n", __LINE__, __FUNCTION__);
+                    nearest.pop(); // Remove the furthest neighbour to maintain n nearest neighbours
                 }
             }
-            while (!nearest.empty()){ // Copy the vector structure over to the vector we will return
-                nearestPairs.push_back(nearest.top());
-                nearest.pop();
-            }
-            printf("%d hash::%s nearestPairs.size() = %ld\n", __LINE__, __FUNCTION__, nearestPairs.size());
-            return nearestPairs;
         }
+        while (!nearest.empty()){ // Copy the vector structure over to the vector we will return
+            nearestPairs.push_back(nearest.top());
+            nearest.pop();
+        }
+        //printf("%d hash::%s nearestPairs.size() = %ld\n", __LINE__, __FUNCTION__, nearestPairs.size());
+        return nearestPairs;
+        
     }
 };
 
@@ -203,7 +173,7 @@ class LSH{
 
     public:
     LSH(int l, int k, int modulo){
-        printf("%d lsh::%s Entered constructor\n", __LINE__, __FUNCTION__);
+        //printf("%d lsh::%s Entered constructor\n", __LINE__, __FUNCTION__);
         this->K = k;
         this->L = l;
         this->M = modulo;
@@ -213,14 +183,14 @@ class LSH{
             hashtable = new HashTable(LSH_TABLE_SIZE, this->K, this->M);
             (this->Tables).push_back(hashtable);
         }
-        printf("%d lsh::%s Exiting constructor\n", __LINE__, __FUNCTION__);
+        //printf("%d lsh::%s Exiting constructor\n", __LINE__, __FUNCTION__);
     }
     ~LSH(){
-        printf("%d lsh::%s Entered destructor\n", __LINE__, __FUNCTION__);
+        //printf("%d lsh::%s Entered destructor\n", __LINE__, __FUNCTION__);
         for(HashTable* hashtable : this->Tables){
             delete hashtable;
         }
-        printf("%d lsh::%s Exiting destructor\n", __LINE__, __FUNCTION__);
+        //printf("%d lsh::%s Exiting destructor\n", __LINE__, __FUNCTION__);
     }
 
     void load_data(std::vector<ImageVector*> images){ // Load the data to the LSH
@@ -232,30 +202,34 @@ class LSH{
     }
 
     std::vector<std::pair<double, int>> get_n_nearest(ImageVector* image, int numberOfNearest){
-        printf("%d lsh::%s Entered\n", __LINE__, __FUNCTION__);
+        //printf("%d lsh::%s Entered\n", __LINE__, __FUNCTION__);
         std::vector<std::pair<double, int>> nearestImages;
 
-        int tableNearest = std::ceil(static_cast<double>(numberOfNearest) / this->L);
-        printf("%d lsh::%s numberOfNearest:%d/this->L:%d = tableNearest:%d\n", __LINE__, __FUNCTION__, numberOfNearest, this->L,tableNearest);
+        int tableNearest = numberOfNearest;
+        //int tableNearest = std::ceil(static_cast<double>(numberOfNearest) / this->L); // Turns out it is way too restrictive and not needed at all
+        //printf("%d lsh::%s numberOfNearest:%d/this->L:%d = tableNearest:%d\n", __LINE__, __FUNCTION__, numberOfNearest, this->L,tableNearest);
         //HashTable* table;
         // soFarNearest, needs to work with the reworked get_n_nearest of the hashtable, i.e. it needs to be of type std::vector<std::pair<double, int>>
         std::vector<std::pair<double, int>> nearest;
         std::vector<std::pair<double, int>> newNearest;
         for(auto& table : this->Tables){ // Save the nearest of all tables to a new vector that will contain all, it suffices then to sort this vector and return the first numberOfNearest elements
             newNearest = table->get_n_nearest(image, tableNearest);
-            printf("%d lsh::%s newNearest= %ld\n", __LINE__, __FUNCTION__,newNearest.size());
+            //printf("%d lsh::%s newNearest= %ld\n", __LINE__, __FUNCTION__,newNearest.size());
             nearest.insert(nearest.end(), newNearest.begin(), newNearest.end());
         }
-        printf("%d %s Saved all the images into one big vector\n", __LINE__, __FUNCTION__);
+        //printf("%d %s Saved all the images into one big vector\n", __LINE__, __FUNCTION__);
         // We need to sort using the distance, i.e. the first element of the pair
         std::sort(nearest.begin(), nearest.end(), [](const std::pair<double, int>& a, const std::pair<double, int>& b){
             return a.first < b.first;
         });
-        printf("%d %s Sorted the images\n", __LINE__, __FUNCTION__);
+        //printf("%d %s Sorted the images\n", __LINE__, __FUNCTION__);
         // We need to return the first numberOfNearest elements
-        //nearestImages.insert(nearestImages.end(), nearest.begin(), nearest.begin() + numberOfNearest);
+        
+        for(int i = 0; i < numberOfNearest; i++){
+            nearestImages.push_back(nearest[i]);
+        }
         //printf("%d %s Inserted the first n images into the return vector\n", __LINE__, __FUNCTION__);
-        return nearest;
+        return nearestImages;
     }
 };
 
@@ -275,11 +249,11 @@ int main(void){
     std::vector<ImageVector*> images = read_mnist_images("./in/input.dat"); // Read the images
     lsh.load_data(images); // Load the data to the LSH
 
-    printf("%d Loaded data\n", __LINE__);
+    //printf("%d Loaded data\n", __LINE__);
 
-    std::vector<std::pair<double, int>> nearest = lsh.get_n_nearest(images[0], 3); // Get the 3 nearest vectors to the first image
+    std::vector<std::pair<double, int>> nearest = lsh.get_n_nearest(images[0], 10); // Get the 3 nearest vectors to the first image
 
-    printf("%ld\n",nearest.size());
+    //printf("%ld\n",nearest.size());
 
     for(int i = 0; i < (int)nearest.size(); i++){
         printf("<%f, %d>\n", nearest[i].first, nearest[i].second);
