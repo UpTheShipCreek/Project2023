@@ -24,11 +24,12 @@ int  ImageVector::get_id(){
 
 
 // Need to make this work with the new ImageVector class
-std::vector<ImageVector> read_mnist_images(const std::string& filename) {
+std::vector<ImageVector*> read_mnist_images(const std::string& filename) {
     int imageNumberCounter = 0;
+    ImageVector* image;
 
     std::ifstream file(filename, std::ios::binary);
-    std::vector<ImageVector> allImages;
+    std::vector<ImageVector*> allImages;
 
     if (!file.is_open()) {
         std::cerr << "Failed to open MNIST dataset file." << std::endl;
@@ -46,10 +47,10 @@ std::vector<ImageVector> read_mnist_images(const std::string& filename) {
         // Convert pixel values from unsigned char to double and normalize
         std::vector<double> normalizedPixels(784);
         for (int i = 0; i < 784; ++i) {
-            normalizedPixels[i] = static_cast<double>(imagePixels[i]) / 255.0;
+            normalizedPixels[i] = static_cast<double>(imagePixels[i]) / 1.0; // Lets not normalize the pixels?
         }
 
-        ImageVector image(imageNumberCounter, normalizedPixels);
+        image = new ImageVector(imageNumberCounter, normalizedPixels); // Need to free them, maybe in the main
         imageNumberCounter++;
 
         // Store the normalized pixel values in the container for all images
