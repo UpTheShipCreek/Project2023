@@ -24,12 +24,12 @@ std::vector<double>  ImageVector::get_coordinates(){
 
 
 // Need to make this work with the new ImageVector class
-std::vector<ImageVector*> read_mnist_images(const std::string& filename) {
+std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& filename) {
     int imageNumberCounter = 0;
-    ImageVector* image;
+    std::shared_ptr<ImageVector> image;
 
     std::ifstream file(filename, std::ios::binary);
-    std::vector<ImageVector*> allImages;
+    std::vector<std::shared_ptr<ImageVector>> allImages;
 
     if (!file.is_open()) {
         std::cerr << "Failed to open MNIST dataset file." << std::endl;
@@ -50,7 +50,7 @@ std::vector<ImageVector*> read_mnist_images(const std::string& filename) {
             normalizedPixels[i] = static_cast<double>(imagePixels[i]) / 1.0; // Lets not normalize the pixels?
         }
 
-        image = new ImageVector(imageNumberCounter, normalizedPixels); // Need to free them, maybe in the main
+        image = std::make_shared<ImageVector>(imageNumberCounter, normalizedPixels); // Need to free them, maybe in the main
         imageNumberCounter++;
 
         // Store the normalized pixel values in the container for all images
