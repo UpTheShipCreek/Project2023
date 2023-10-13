@@ -1,8 +1,34 @@
 #include "io_functions.h" // includes <iostream>, <fstream>, and <vector>
 
-std::vector<std::vector<double>> readMNISTImages(const std::string& filename){
+
+ImageVector::ImageVector(int number, std::vector<double> coordinates){
+    this->Number = number;
+    this->Coordinates = coordinates;
+}
+
+int  ImageVector::get_number(){
+    return this->Number;
+}
+
+std::vector<double>  ImageVector::get_coordinates(){
+    return this->Coordinates;
+}
+
+void  ImageVector::assign_id(int id){
+    this->Id = id;
+}
+
+int  ImageVector::get_id(){
+    return this->Id;
+}
+
+
+// Need to make this work with the new ImageVector class
+std::vector<ImageVector> read_mnist_images(const std::string& filename) {
+    int imageNumberCounter = 0;
+
     std::ifstream file(filename, std::ios::binary);
-    std::vector<std::vector<double>> allImages;
+    std::vector<ImageVector> allImages;
 
     if (!file.is_open()) {
         std::cerr << "Failed to open MNIST dataset file." << std::endl;
@@ -12,18 +38,22 @@ std::vector<std::vector<double>> readMNISTImages(const std::string& filename){
     // Skip the header information (16 bytes)
     file.seekg(16);
 
-    // Define a vector to store the normalized pixel values for one image
-    std::vector<double> imagePixels(784);
+    // Define a vector to store the pixel values for one image
+    std::vector<unsigned char> imagePixels(784);
 
     // Read and process each image entry
     while (file.read(reinterpret_cast<char*>(imagePixels.data()), 784)) {
-        // Normalize the pixel values by dividing by 255.0
+        // Convert pixel values from unsigned char to double and normalize
+        std::vector<double> normalizedPixels(784);
         for (int i = 0; i < 784; ++i) {
-            imagePixels[i] /= 255.0;
+            normalizedPixels[i] = static_cast<double>(imagePixels[i]) / 255.0;
         }
 
+        ImageVector image(imageNumberCounter, normalizedPixels);
+        imageNumberCounter++;
+
         // Store the normalized pixel values in the container for all images
-        allImages.push_back(imagePixels);
+        allImages.push_back(image);
     }
 
     // Close the dataset file

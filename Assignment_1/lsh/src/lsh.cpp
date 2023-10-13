@@ -1,22 +1,61 @@
 #include <stdio.h>
 #include <unordered_map>
+#include <queue>
+#include <algorithm>
 
 #include "random_functions.h"
 #include "io_functions.h"
 #include "metrics.h"
 
 #define DIMENSIONS 748
+#define MODULO 15000 
+#define LSH_TABLE_SIZE 7500 // 60000/8
+#define WINDOW 100 // Test orders of magnitude
+
+// Define a struct to store distance and the corresponding ImageVector
+class DistanceImagePair {
+    double Distance;
+    ImageVector* Image;
+
+    public:
+    // Constructor to initialize the values
+    DistanceImagePair(double dist, ImageVector* img){
+        this->Distance = dist;
+        this->Image = img;
+    }
+
+    ImageVector* get_image() const{
+        return this->Image;
+    }
+
+    double get_distance() const{
+        return this->Distance;
+    }
+    
+    // Define comparison operators to use with std::priority_queue
+    bool operator>(const DistanceImagePair& other) const {
+        return Distance > other.Distance;
+    }
+    bool operator<(const DistanceImagePair& other) const {
+        return Distance < other.Distance;
+    }
+};
 
 class hFunction{
     std::vector<double> V;
     double T;
-    double  W = 100; // I don't get where we get the value for this, need to change it someday
+    double  W = WINDOW;
     Random Rand;
 
     public:
     hFunction(){
-        this->V = Rand.generate_vector_normal(DIMENSIONS);
-        this->T = Rand.generate_double_uniform(1.0, 2.0); // Changed the min from 0 to 1 and max from 1 to 2, since we were instructed to ensure that p*v + t is positive
+        this->V = Rand.generate_vector_normal(DIMENSIONS); // The N(0,1) is pressuposed in the generate_vector_normal function
+        this->T = Rand.generate_double_uniform(0.0, this->W); 
+        // So we were explicitly instructed to use the uniform(0,W) distribution for t and N(0,1) for the values of v, 
+        // but to also ensure that (p*v + t) is not negative?
+        // Why are we allowing negative values in the first place then? 
+        // Why are we not shifting the normal distribution to N(1,1) and the uniform distribution to (1, W+1) 
+        // so as to not have to worry about negative values?
     }
 
     double evaluate_point(std::vector<double> p){ // h(p) = (p*v + t)/w
@@ -30,7 +69,7 @@ class hFunction{
 
 class gFunction{
     int K; // Number of hi functions that a g will be combining
-    int M; // The modulo, it takes pretty big values
+    int M; // The modulo, it takes pretty big values, DON'T FORGET TO ASSIGN IT TO THE DEFINE VALUE AFTER THE TESTS ARE OVER
     std::vector<hFunction*> H; // Since I am saving pointers I'll need to remove those functions
     std::vector<int> R; // The r values that will be used in the g function
     Random Rand; // Random generator
@@ -64,10 +103,11 @@ class gFunction{
     }
 };
 
+// A modified HashTable class that works with the ImageVector class
 class HashTable{
-    int NumberOfBuckets;
+    int NumberOfBuckets; // i.e. table size
     gFunction* HashFunction;
-    std::unordered_map<int, std::vector<std::vector<double>>> Table; // Actual storage
+    std::unordered_map<int, std::vector<ImageVector*>> Table; // Actual storage
 
     public:
     HashTable(int num, int k, int m){ // Constructor
@@ -78,62 +118,131 @@ class HashTable{
         delete (this->HashFunction);
     }
 
-    void insert(std::vector<double> p){
+    void insert(ImageVector* image){ // Insert an image to the correct bucket
+        std::vector<double> p = image->get_coordinates(); // Get the coordinates of the image
+
         int id = (this->HashFunction)->evaluate_point(p); // Get the for the querying trick we saw in the lectures
+        image->assign_id(id); // Assign the id to the image
+
         int bucketId = id % (this->NumberOfBuckets); // Get the bucket id
 
-
         if ((this->Table).find(bucketId) == (this->Table).end()){ // Check if the bucket is missing, so as to create it
-            (this->Table)[bucketId] = std::vector<std::vector<double>>();
+            (this->Table)[bucketId] = std::vector<ImageVector*>();
         }
-        
-        p.push_back(id); // Add the id to the end of the point vector. p[784] is the id of the point
-        (this->Table)[bucketId].push_back(p); // Add the data point to the bucket
+
+        (this->Table)[bucketId].push_back(image); // Add the image to the bucket
     }
 
-    const std::vector<std::vector<double>> get_bucket_of_point(std::vector<double> p){ // A function that returns a bucket given a certain point
-        int bucketId = ((this->HashFunction)->evaluate_point(p)) % (this->NumberOfBuckets); // Get the bucket id
-        return (this->Table)[bucketId];
+    const std::vector<ImageVector*> get_bucket_of_image(ImageVector* image){ // A function that returns a bucket given a certain image
+        int bucketId = image->get_id() % (this->NumberOfBuckets); // Get the bucket id
+        return (this->Table)[bucketId]; // Fetch the bucket
     }
 
-    std::vector<std::vector<double>> get_n_nearest(std::vector<double> p, int numberOfNearest){ // A function that returns the N nearest points of a given point
-        int i, maxIndex;
-        double maxDistance, distance, dist; 
-        std::vector<std::vector<double>> nearest;
 
-        int id = (this->HashFunction)->evaluate_point(p); // Get the id of the point for the querying trick
+    std::vector<std::pair<int, double>> get_n_nearest(ImageVector* image, int numberOfNearest){
+        printf("%d hashtable::%s Entered\n", __LINE__, __FUNCTION__);
+        int number, bucketId;
+        int id = image->get_id();
+        double distance, dist;
+        DistanceImagePair* distpair;
 
-        int bucketId = id % (this->NumberOfBuckets); // Find its bucket 
-        std::vector<std::vector<double>> bucket = (this->Table)[bucketId]; // and fetch it
+        std::vector<std::pair<int, double>> nearestPairs;
+        std::priority_queue<DistanceImagePair, std::vector<DistanceImagePair>, std::greater<DistanceImagePair>> nearest; // Priority Queue to store the nearest neighbors
 
-        for (i = 0; i < (int)bucket.size(); i++){ // For every element in the bucket
-            if (bucket[i][784] == id){  // Do compare only those with the same Id
-                distance = eucledian_distance(p, bucket[i]);
-                if (distance > 0) { // Exclude oneself
-                    if ((int)nearest.size() < numberOfNearest){ // If the nearest array is not full, add the vector
-                        nearest.push_back(bucket[i]);
-                    } 
-                    else { // If the nearest array is full
-                        maxDistance = 0;
-                        maxIndex = 0;
-                        for (int j = 0; j < numberOfNearest; j++){ // Find the furthest of the nearest vectors
-                            dist = eucledian_distance(p, nearest[j]);
-                            if (dist > maxDistance) {
-                                maxDistance = dist;
-                                maxIndex = j;
-                            }
-                        }
-                        if (distance < maxDistance){ // And compare the furthest with the current vector
-                            nearest[maxIndex] = bucket[i];
-                        }
+        if (id == -1){
+            return nearestPairs;
+        } 
+        else{
+            bucketId = id % this->NumberOfBuckets;
+            std::vector<ImageVector*> bucket = this->Table[bucketId];
+
+            for (int i = 0; i < (int)(bucket.size()); i++){
+                if (bucket[i]->get_id() == id && bucket[i] != image){ // Avoid comparing image to itself
+                    distance = eucledian_distance(image->get_coordinates(), bucket[i]->get_coordinates());
+                    printf("%d hashtable::%s Distance = %f\n", __LINE__, __FUNCTION__, distance);
+
+                    distpair = new DistanceImagePair(distance, bucket[i]);
+                    nearest.push(pair);
+
+                    printf("%d hashtable::%s nearest.size = %ld\n", __LINE__, __FUNCTION__, nearest.size());
+                    if ((int)(nearest.size()) > numberOfNearest){ // If the number of nearest neighbors is greater than the number of nearest neighbors we want to return
+                        nearest.pop(); // Remove the farthest neighbor to maintain "n" nearest neighbors
                     }
                 }
             }
+            while (!nearest.empty()){
+                number = nearest.top().get_image()->get_number();
+                dist = nearest.top().get_distance();
+                
+                nearestPairs.push_back({number, dist});
+                nearest.pop();
+            }
+            return nearestPairs;
         }
-        return nearest;
     }   
 };
 
+class LSH{
+    int K, L, M;
+    std::vector<HashTable*> Tables;
+
+    public:
+    LSH(int l, int k, int modulo){
+        printf("%d %s Entered constructor\n", __LINE__, __FUNCTION__);
+        this->K = k;
+        this->L = l;
+        this->M = modulo;
+        HashTable* hashtable;
+
+        for (int i = 0 ; i < this-> L; i++){
+            hashtable = new HashTable(LSH_TABLE_SIZE, this->K, this->M);
+            (this->Tables).push_back(hashtable);
+        }
+        printf("%d %s Exiting constructor\n", __LINE__, __FUNCTION__);
+    }
+    ~LSH(){
+        printf("%d %s Entered destructor\n", __LINE__, __FUNCTION__);
+        for(HashTable* hashtable : this->Tables){
+            delete hashtable;
+        }
+        printf("%d %s Exiting destructor\n", __LINE__, __FUNCTION__);
+    }
+
+    void load_data(std::vector<ImageVector> images){ // Load the data to the LSH
+        for (int i = 0; i < (int)(images.size()); i++){
+            for (int j = 0; j < this->L; j++){
+                (this->Tables)[j]->insert(&images[i]);
+            }
+        }
+    }
+
+    std::vector<std::pair<int, double>> get_n_nearest(ImageVector* image, int numberOfNearest){
+        printf("%d lsh::%s Entered\n", __LINE__, __FUNCTION__);
+        std::vector<std::pair<int, double>> nearestImages;
+
+        int tableNearest = std::ceil(static_cast<double>(numberOfNearest) / this->L);
+        printf("%d lsh::%s numberOfNearest:%d/this->L:%d = tableNearest:%d\n", __LINE__, __FUNCTION__, numberOfNearest, this->L,tableNearest);
+        //HashTable* table;
+        // soFarNearest, needs to work with the reworked get_n_nearest of the hashtable, i.e. it needs to be of type std::vector<std::pair<int, double>>
+        std::vector<std::pair<int, double>> nearest;
+        std::vector<std::pair<int, double>> newNearest;
+        for(auto& table : this->Tables){ // Save the nearest of all tables to a new vector that will contain all, it suffices then to sort this vector and return the first numberOfNearest elements
+            newNearest = table->get_n_nearest(image, tableNearest);
+            printf("%d lsh::%s newNearest= %ld\n", __LINE__, __FUNCTION__,newNearest.size());
+            nearest.insert(nearest.end(), newNearest.begin(), newNearest.end());
+        }
+        printf("%d %s Saved all the images into one big vector\n", __LINE__, __FUNCTION__);
+        // We need to sort using the second value, i.e. the distance
+        std::sort(nearest.begin(), nearest.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b){
+            return a.second < b.second;
+        });
+        printf("%d %s Sorted the images\n", __LINE__, __FUNCTION__);
+        // We need to return the first numberOfNearest elements
+        //nearestImages.insert(nearestImages.end(), nearest.begin(), nearest.begin() + numberOfNearest);
+        //printf("%d %s Inserted the first n images into the return vector\n", __LINE__, __FUNCTION__);
+        return nearest;
+    }
+};
 
 bool distinct(const std::vector<double>& list, double value) {
     for (double item : list) {
@@ -143,19 +252,23 @@ bool distinct(const std::vector<double>& list, double value) {
 }
 
 int main(void){
-    Random rand;
-    int modulo = 10;
+    int modulo = MODULO;
     int k = 4;
-    int buckets = 10;
-    HashTable hashtable(buckets, k, modulo); // The distinct values should be the same number as the modulo for a large enough number of tries
+    int l = 5; 
+    LSH lsh(l, k, modulo); // The distinct values should be the same number as the modulo for a large enough number of tries
 
-    std::vector<double> point = rand.generate_vector_normal(DIMENSIONS);
-    hashtable.insert(point);
+    std::vector<ImageVector> images = read_mnist_images("./in/input.dat"); // Read the images
+    lsh.load_data(images); // Load the data to the LSH
 
-    for(int i = 0; i < 10000; i++){
-        hashtable.insert(rand.generate_vector_normal(DIMENSIONS));
+    printf("%d Loaded data\n", __LINE__);
+
+    std::vector<std::pair<int,double>> nearest = lsh.get_n_nearest(&images[0], 3); // Get the 3 nearest vectors to the first image
+
+    printf("%ld\n",nearest.size());
+
+    for(int i = 0; i < (int)nearest.size(); i++){
+        printf("<%d, %f>\n", nearest[i].first, nearest[i].second);
     }
 
-    std::vector<std::vector<double>> nearest = hashtable.get_n_nearest(point, 3);
     return 0;
 }
