@@ -38,7 +38,7 @@ std::vector<double> Random::generate_vector_normal(int size){ // Size is the dim
     std::vector<double> vec;
 
     for (int i = 0; i < size; i++) { // Fill the vector with values up to its dimensions
-        double randomValue = generate_double_normal(0.0, 1.0); // d-vector ~ N(0,1)^d from the notes
+        double randomValue = generate_double_normal(1.0, 1.0); // d-vector ~ N(0,1)^d from the notes
         vec.push_back(randomValue); 
     }
 
