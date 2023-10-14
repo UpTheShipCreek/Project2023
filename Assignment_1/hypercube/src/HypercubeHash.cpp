@@ -11,7 +11,7 @@
 #define DIMENSIONS 748
 
 
-class hFunction{
+class HFunction{
     std::vector<double> V;
     double T;
     double  W = 100; // I don't get where we get the value for this, need to change it someday
@@ -32,24 +32,24 @@ class hFunction{
     }
 };
 
-class fFunction{
+class FFunction{
     int numOfH;
     std::vector<hFunction*> H;
     std::vector<int> R;
     Random Rand;
 
     public:
-    fFunction(){
+    FFunction(){
         int i;
         for (i=0; i < this-> numOfH; i++){
             hFunction* h = new hFunction();
-            (this->H).push_back(h);
-            (this->R).push_back(Rand.generate_int_uniform(1, 0)); // Generate and save the r value
+            (this->H).emplace_back(h);
+            (this->R).push_back(Rand.generate_int_uniform(0, 1)); // Generate and save the r value
         }
 
     }
 
-    ~fFunction(){
+    ~FFunction(){
         for (hFunction* h: this->H){
             delete h;
         }
