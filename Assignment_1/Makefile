@@ -7,7 +7,7 @@ SRCLSH = ./lsh/src
 INC = ./lib
 
 # Source files
-SRCS = $(SRCLSH)/lsh.cpp $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp 
+SRCS = $(SRCLSH)/lsh.cpp $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp $(INC)/image_util.cpp 
 # Add more source files if needed
 
 # Object files

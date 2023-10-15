@@ -1,19 +1,5 @@
 #include "io_functions.h" // includes <iostream>, <fstream>, and <vector>
 
-
-ImageVector::ImageVector(int number, std::vector<double> coordinates){
-    this->Number = number;
-    this->Coordinates = coordinates;
-}
-
-int  ImageVector::get_number(){
-    return this->Number;
-}
-
-std::vector<double>  ImageVector::get_coordinates(){
-    return this->Coordinates;
-}
-
 // Need to make this work with the new ImageVector class
 std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& filename) {
     int imageNumberCounter = 0;
