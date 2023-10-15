@@ -2,7 +2,6 @@
 #include <unordered_map>
 #include <queue>
 #include <algorithm>
-//#include <memory>
 
 #include "random_functions.h"
 #include "io_functions.h"
@@ -115,7 +114,7 @@ class HashTable{
     }
 };
 
-class LSH {
+class LSH{
     int K, L, M;
     std::vector<std::shared_ptr<HashTable>> Tables;
 
@@ -175,7 +174,8 @@ class LSH {
             nearestImages.push_back(nearest.top());
             nearest.pop();
         }
-        return nearestImages;
+        std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+        return reversed;
     }
 
     std::vector<std::pair<double, int>> approximate_range_search(std::shared_ptr<ImageVector> image, double r){
@@ -221,19 +221,21 @@ int main(void){
     //printf("%d Loaded data\n", __LINE__);
 
     std::vector<std::pair<double, int>> nearest = lsh.approximate_k_nearest_neighbors(images[0], 10); // Get the k nearest vectors to the first image
-
-    //printf("%ld\n",nearest.size());
-
     for(int i = 0; i < (int)nearest.size(); i++){
         printf("<%f, %d>\n", nearest[i].first, nearest[i].second);
     }
+    printf("\n--------------------------------\n");
 
     std::vector<std::pair<double, int>> rad = lsh.approximate_range_search(images[0], 2000); // Get the k nearest vectors to the first image
+    for(int i = 0; i < (int)rad.size(); i++){
+        printf("<%f, %d>\n", rad[i].first, rad[i].second);
+    }
 
     printf("\n--------------------------------\n");
 
-    for(int i = 0; i < (int)rad.size(); i++){
-        printf("<%f, %d>\n", rad[i].first, rad[i].second);
+    std::vector<std::pair<double, int>> exh = exhaustive_nearest_neighbor_search(images, images[0], 10); // Get the k nearest vectors to the first image
+    for(int i = 0; i < (int)exh.size(); i++){
+        printf("<%f, %d>\n", exh[i].first, exh[i].second);
     }
 
     return 0;

@@ -35,5 +35,6 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vect
         nearestImages.push_back(nearest.top());
         nearest.pop();
     }
-    return nearestImages;
+    std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+    return reversed;
 }
