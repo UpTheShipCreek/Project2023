@@ -1,9 +1,10 @@
 #ifndef IO_FUNCTIONS_H
 #define IO_FUNCTIONS_H
 
-#include <iostream>
+#include <stdio.h>
 #include <fstream>
 #include <vector>
+#include <memory>
 
 
 class ImageVector{
@@ -19,6 +20,6 @@ class ImageVector{
     // int get_id();
 };
 
-std::vector<ImageVector*> read_mnist_images(const std::string& filename);
+std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& filename);
 
 #endif

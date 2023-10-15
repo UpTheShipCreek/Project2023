@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <queue>
 #include <algorithm>
+//#include <memory>
 
 #include "random_functions.h"
 #include "io_functions.h"
@@ -42,7 +43,7 @@ class hFunction{
 class gFunction{
     int K; // Number of hi functions that a g will be combining
     int M; // The modulo, it takes pretty big values, DON'T FORGET TO ASSIGN IT TO THE DEFINE VALUE AFTER THE TESTS ARE OVER
-    std::vector<hFunction*> H; // Since I am saving pointers I'll need to remove those functions
+    std::vector<std::shared_ptr<hFunction>> H; // Since I am saving pointers I'll need to remove those functions
     std::vector<int> R; // The r values that will be used in the g function
     Random Rand; // Random generator
 
@@ -51,15 +52,9 @@ class gFunction{
         this->K = k;
         this->M = m;
         for(int i = 0; i < this->K; i++){
-            hFunction* h = new hFunction(); // Create a new h function, I used a pointer might not need it, I just said to myself after OOP that I'd always use pointers instead of storing objects directly, something that I haven't followed here generally
+            std::shared_ptr<hFunction> h = std::make_shared<hFunction>(); // Create a new h function, I used a pointer might not need it, I just said to myself after OOP that I'd always use pointers instead of storing objects directly, something that I haven't followed here generally
             (this->H).push_back(h); // Save its pointer to the vector
             (this->R).push_back(Rand.generate_int_uniform(1, 100)); // Generate and save the r value
-        }
-    }
-
-    ~gFunction() {
-        for (hFunction* h : this->H) {
-            delete h; // Delete each dynamically allocated hFunction
         }
     }
 
@@ -84,116 +79,59 @@ class gFunction{
 
 // A modified HashTable class that works with the ImageVector class
 class HashTable{
-    int NumberOfBuckets; // i.e. table size
-    gFunction* HashFunction;
-    std::unordered_map<int, std::vector<ImageVector*>> Table; // Actual storage
-    std::unordered_map<int, int> NumberToIdMapping;
+    int NumberOfBuckets;
+    std::shared_ptr<gFunction> HashFunction;
+    std::unordered_map<int, std::vector<std::shared_ptr<ImageVector>>> Table;
+    std::unordered_map<int, int> NumberToId; // <number, id> pairs
 
     public:
     HashTable(int num, int k, int m){ // Constructor
         this->NumberOfBuckets = num;
-        this->HashFunction = new gFunction(k, m);
-    }
-    ~HashTable(){ // Destructor
-        delete (this->HashFunction);
+        this->HashFunction = std::make_shared<gFunction>(k, m);
     }
 
-    void insert(ImageVector* image){ // Insert an image pointer to the correct bucket, MAYBE CHANGING THIS INTO TAKING IN A COPY OF THE IMAGE WILL FIX THE ISSUE WITH THE IDS
-        std::vector<double> p = image->get_coordinates(); // Get the coordinates of the image
+    bool same_id(std::shared_ptr<ImageVector> image1, std::shared_ptr<ImageVector> image2){ // Compares the id of two images, used in the querying trick
+        return NumberToId[image1->get_number()] == NumberToId[image2->get_number()];
+    }
 
-        int id = (this->HashFunction)->evaluate_point(p); // Get the for the querying trick we saw in the lectures
+    void insert(std::shared_ptr<ImageVector> image){ // Insert an image to the hash table and save its id
+        std::vector<double> p = image->get_coordinates();
+        int id = HashFunction->evaluate_point(p);
 
-        //printf("%d hash::%s Image Id = %d\n", __LINE__, __FUNCTION__, id);
+        NumberToId[image->get_number()] = id;
 
-        //image->assign_id(id); // Assign the id to the image ACTUALLY DON'T DO THAT, CAUSE ALL HASHTABLE POINT TO THE SAME IMAGE, SO THE ID WILL BE THE SAME FOR ALL BUCKETS 
-        this->NumberToIdMapping[image->get_number()] = id; // Save the number and the id of the image
+        int bucketId = id % NumberOfBuckets;
 
-        int bucketId = id % (this->NumberOfBuckets); // Get the bucket id
-
-        if ((this->Table).find(bucketId) == (this->Table).end()){ // Check if the bucket is missing, so as to create it
-            (this->Table)[bucketId] = std::vector<ImageVector*>();
+        if (Table.find(bucketId) == Table.end()) {
+            Table[bucketId] = std::vector<std::shared_ptr<ImageVector>>();
         }
 
-        (this->Table)[bucketId].push_back(image); // Add the image to the bucket
-        //printf("%d hash::%s Inserted image to bucket %d\n", __LINE__, __FUNCTION__, bucketId);
+        Table[bucketId].push_back(image);
     }
 
-    const std::vector<ImageVector*> get_bucket_of_image(ImageVector* image){ // A function that returns a bucket given a certain image
-        int bucketId = NumberToIdMapping[image->get_number()] % (this->NumberOfBuckets); // Get the bucket id
-        return (this->Table)[bucketId]; // Fetch the bucket
-    }
-
-    std::vector<std::pair<double, int>> get_n_nearest(ImageVector* image, int numberOfNearest){
-        int i, bucketId;
-        double distance;
-        
-        int id = this->NumberToIdMapping[image->get_number()];
-        
-        //printf("%d hash::%s Image Id = %d\n", __LINE__, __FUNCTION__, id);
-
-        std::vector<std::pair<double, int>> nearestPairs;
-        // priority_queue of pairs, saved in a vector structure, in descending order(greater)
-        std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::greater<std::pair<double, int>>> nearest;
-
-        bucketId = id % this->NumberOfBuckets;
-
-        //printf("%d hash::%s Searching on bucket = %d\n", __LINE__, __FUNCTION__, bucketId);
-
-        std::vector<ImageVector*> bucket = this->Table[bucketId]; // Fetch the correct bucket
-
-        //printf("%d hash::%s bucket.size() = %ld\n", __LINE__, __FUNCTION__, bucket.size());
-
-        for(i = 0; i < (int)(bucket.size()); i++){
-            if((this->NumberToIdMapping)[bucket[i]->get_number()] == id && bucket[i] != image){ // The query trick, avoiding comparing with itself though
-                //printf("%d hash::%s FOUND SIMILAR\n", __LINE__, __FUNCTION__);
-
-                distance = eucledian_distance(image->get_coordinates(), bucket[i]->get_coordinates());
-            
-                nearest.push(std::make_pair(distance, bucket[i]->get_number()));
-
-                if((int)(nearest.size()) > numberOfNearest){ // If the number of nearest we've saved is more than what we need
-                    //printf("%d hash::%s I SHOULD NOT BE GETTING IN HERE\n", __LINE__, __FUNCTION__);
-                    nearest.pop(); // Remove the furthest neighbour to maintain n nearest neighbours
-                }
-            }
-        }
-        while (!nearest.empty()){ // Copy the vector structure over to the vector we will return
-            nearestPairs.push_back(nearest.top());
-            nearest.pop();
-        }
-        //printf("%d hash::%s nearestPairs.size() = %ld\n", __LINE__, __FUNCTION__, nearestPairs.size());
-        return nearestPairs;
-        
+    const std::vector<std::shared_ptr<ImageVector>>& get_bucket_of_image(std::shared_ptr<ImageVector> image){ // Returns the bucket a specific image resides in 
+        int bucketId = NumberToId[image->get_number()] % NumberOfBuckets;
+        return Table[bucketId];
     }
 };
 
-class LSH{
+class LSH {
     int K, L, M;
-    std::vector<HashTable*> Tables;
+    std::vector<std::shared_ptr<HashTable>> Tables;
 
     public:
-    LSH(int l, int k, int modulo){
-        //printf("%d lsh::%s Entered constructor\n", __LINE__, __FUNCTION__);
-        this->K = k;
+    LSH(int l, int k, int modulo, int tableSize){
         this->L = l;
+        this->K = k;
         this->M = modulo;
-        HashTable* hashtable;
 
-        for (int i = 0 ; i < this-> L; i++){
-            hashtable = new HashTable(LSH_TABLE_SIZE, this->K, this->M);
-            (this->Tables).push_back(hashtable);
+        Tables.reserve(L); // Supposed to be making it faster, couldn't tell the difference (guessing the bottleneck is elsewhere)
+        for (int i = 0; i < L; i++) {
+            Tables.push_back(std::make_shared<HashTable>(tableSize, K, M));
         }
-        //printf("%d lsh::%s Exiting constructor\n", __LINE__, __FUNCTION__);
-    }
-    ~LSH(){
-        //printf("%d lsh::%s Entered destructor\n", __LINE__, __FUNCTION__);
-        for(HashTable* hashtable : this->Tables){
-            delete hashtable;
-        }
-        //printf("%d lsh::%s Exiting destructor\n", __LINE__, __FUNCTION__);
     }
 
-    void load_data(std::vector<ImageVector*> images){ // Load the data to the LSH
+    void load_data(std::vector<std::shared_ptr<ImageVector>> images){ // Load the data to the LSH
         for (int i = 0; i < (int)(images.size()); i++){
             for (int j = 0; j < this->L; j++){
                 (this->Tables)[j]->insert(images[i]);
@@ -201,57 +139,88 @@ class LSH{
         }
     }
 
-    std::vector<std::pair<double, int>> get_n_nearest(ImageVector* image, int numberOfNearest){
-        //printf("%d lsh::%s Entered\n", __LINE__, __FUNCTION__);
+    std::vector<std::pair<double, int>> approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
+        int i, j;
+        double distance;
+
+        // I will be using a priority queue to keep the k nearest neighbors
+        std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
+
+        // Let b ← Null; db ← ∞; initialize k best candidates and distances;
         std::vector<std::pair<double, int>> nearestImages;
 
-        int tableNearest = numberOfNearest;
-        //int tableNearest = std::ceil(static_cast<double>(numberOfNearest) / this->L); // Turns out it is way too restrictive and not needed at all
-        //printf("%d lsh::%s numberOfNearest:%d/this->L:%d = tableNearest:%d\n", __LINE__, __FUNCTION__, numberOfNearest, this->L,tableNearest);
-        //HashTable* table;
-        // soFarNearest, needs to work with the reworked get_n_nearest of the hashtable, i.e. it needs to be of type std::vector<std::pair<double, int>>
-        std::vector<std::pair<double, int>> nearest;
-        std::vector<std::pair<double, int>> newNearest;
-        for(auto& table : this->Tables){ // Save the nearest of all tables to a new vector that will contain all, it suffices then to sort this vector and return the first numberOfNearest elements
-            newNearest = table->get_n_nearest(image, tableNearest);
-            //printf("%d lsh::%s newNearest= %ld\n", __LINE__, __FUNCTION__,newNearest.size());
-            nearest.insert(nearest.end(), newNearest.begin(), newNearest.end());
-        }
-        //printf("%d %s Saved all the images into one big vector\n", __LINE__, __FUNCTION__);
-        // We need to sort using the distance, i.e. the first element of the pair
-        std::sort(nearest.begin(), nearest.end(), [](const std::pair<double, int>& a, const std::pair<double, int>& b){
-            return a.first < b.first;
-        });
-        //printf("%d %s Sorted the images\n", __LINE__, __FUNCTION__);
-        // We need to return the first numberOfNearest elements
+        // The pointer of each bucket
+        std::vector<std::shared_ptr<ImageVector>> bucket;
         
-        for(int i = 0; i < numberOfNearest; i++){
-            nearestImages.push_back(nearest[i]);
+        // for i from 1 to L do
+        for(i = 0; i < this->L; i++){
+            bucket = Tables[i]->get_bucket_of_image(image);
+            // for each item p in bucket gi (q) do
+            for(j = 0; j < (int)(bucket.size()); j++){ 
+                if((Tables[i]->same_id(image, bucket[j])) && (bucket[j]->get_number() != image->get_number())){ // Querying trick but ignore comparing it to itself
+                    // dist(p,q)
+                    distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                    
+                    // if dist(q, p) < db = k-th best distance then b ← p; db ← dist(q, p), implemented with a priority queue
+                    nearest.push(std::make_pair(distance, bucket[j]->get_number()));    
+
+                    if ((int)(nearest.size()) > numberOfNearest){
+                        nearest.pop();
+                    }  
+                }
+            }
         }
-        //printf("%d %s Inserted the first n images into the return vector\n", __LINE__, __FUNCTION__);
+        // Fill up the a structure that we can return
+        while (!nearest.empty()){
+            nearestImages.push_back(nearest.top());
+            nearest.pop();
+        }
         return nearestImages;
+    }
+
+    std::vector<std::pair<double, int>> approximate_range_search(std::shared_ptr<ImageVector> image, double r){
+        int i, j;
+        double distance;
+
+        // The returned vector
+        std::vector<std::pair<double, int>> inRangeImages;
+
+        // The pointer of each bucket
+        std::vector<std::shared_ptr<ImageVector>> bucket;
+
+        // for i from 1 to L do
+        for(i = 0; i < L; i++){
+            bucket = Tables[i]->get_bucket_of_image(image);
+            // for each item p in bucket gi (q) do
+            for(j = 0; j < (int)bucket.size(); j++){
+                if(bucket[j]->get_number() != image->get_number()){ // Ignore comparing to itself
+
+                    // if dist(q, p) < r then output p
+                    distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                    if(distance < r){
+                        inRangeImages.push_back(std::make_pair(distance, bucket[j]->get_number()));
+                    }
+                }
+                // if large number of retrieved items (e.g. > 20L) then return
+                if((int)inRangeImages.size() > 20*(this->L)) return inRangeImages;
+            }
+        }
+        return inRangeImages;
     }
 };
 
-bool distinct(const std::vector<double>& list, double value) {
-    for (double item : list) {
-        if (item == value) return false;
-    }
-    return true;
-}
 
 int main(void){
-    int modulo = MODULO;
     int k = 4;
     int l = 5; 
-    LSH lsh(l, k, modulo); // The distinct values should be the same number as the modulo for a large enough number of tries
+    LSH lsh(l, k, MODULO, LSH_TABLE_SIZE); // The distinct values should be the same number as the modulo for a large enough number of tries
 
-    std::vector<ImageVector*> images = read_mnist_images("./in/input.dat"); // Read the images
+    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images("./in/input.dat"); // Read the images
     lsh.load_data(images); // Load the data to the LSH
 
     //printf("%d Loaded data\n", __LINE__);
 
-    std::vector<std::pair<double, int>> nearest = lsh.get_n_nearest(images[0], 10); // Get the 3 nearest vectors to the first image
+    std::vector<std::pair<double, int>> nearest = lsh.approximate_k_nearest_neighbors(images[0], 10); // Get the k nearest vectors to the first image
 
     //printf("%ld\n",nearest.size());
 
@@ -259,8 +228,12 @@ int main(void){
         printf("<%f, %d>\n", nearest[i].first, nearest[i].second);
     }
 
-    for(ImageVector* image : images){
-        delete image;
+    std::vector<std::pair<double, int>> rad = lsh.approximate_range_search(images[0], 2000); // Get the k nearest vectors to the first image
+
+    printf("\n--------------------------------\n");
+
+    for(int i = 0; i < (int)rad.size(); i++){
+        printf("<%f, %d>\n", rad[i].first, rad[i].second);
     }
 
     return 0;
