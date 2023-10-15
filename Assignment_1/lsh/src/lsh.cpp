@@ -88,7 +88,7 @@ class HashTable{
     int NumberOfBuckets;
     std::shared_ptr<gFunction> HashFunction;
     std::unordered_map<int, std::vector<std::shared_ptr<ImageVector>>> Table;
-    std::unordered_map<int, int> NumberToId;
+    std::unordered_map<int, int> NumberToId; // <number, id> pairs
 
     public:
     HashTable(int num, int k, int m){ // Constructor
@@ -101,6 +101,10 @@ class HashTable{
     //         bucket.second.clear(); 
     //     }
     // }
+
+    bool same_id(std::shared_ptr<ImageVector> image1, std::shared_ptr<ImageVector> image2) {
+        return NumberToId[image1->get_number()] == NumberToId[image2->get_number()];
+    }
 
     void insert(std::shared_ptr<ImageVector> image) {
         std::vector<double> p = image->get_coordinates();
@@ -117,17 +121,12 @@ class HashTable{
         Table[bucketId].push_back(image);
     }
 
-    const std::vector<std::shared_ptr<ImageVector>>& get_bucket_of_image(std::shared_ptr<ImageVector> image) {
+    const std::vector<std::shared_ptr<ImageVector>>& get_bucket_of_image(std::shared_ptr<ImageVector> image){
         int bucketId = NumberToId[image->get_number()] % NumberOfBuckets;
-
-        if (Table.find(bucketId) != Table.end()) {
-            return Table[bucketId];
-        }
-
-        // Handle the case where the bucket is not found, e.g., return an empty vector or throw an exception.
+        return Table[bucketId];
     }
 
-    std::vector<std::pair<double, int>> get_n_nearest(std::shared_ptr<ImageVector> image, int numberOfNearest) {
+    std::vector<std::pair<double, int>> get_n_nearest(std::shared_ptr<ImageVector> image, int numberOfNearest){
         int i, bucketId;
         double distance;
         int id = NumberToId[image->get_number()];
@@ -154,7 +153,6 @@ class HashTable{
             nearestPairs.push_back(nearest.top());
             nearest.pop();
         }
-
         return nearestPairs;
     }
 };
@@ -177,6 +175,49 @@ class LSH {
                 (this->Tables)[j]->insert(images[i]);
             }
         }
+    }
+
+    std::vector<std::pair<double, int>> approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
+        int i, j;
+        double distance;
+
+        // I will be using a priority queue to keep the k nearest neighbors
+        std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
+
+        // Let b ← Null; db ← ∞; initialize k best candidates and distances;
+        std::vector<std::pair<double, int>> nearestImages;
+
+        // The pointer of each bucket
+        std::vector<std::shared_ptr<ImageVector>> bucket;
+        
+        // for i from 1 to L do
+        for(i = 0; i < this->L; i++){
+            bucket = Tables[i]->get_bucket_of_image(image);
+            // for each item p in bucket gi (q) do
+            for(j = 0; j < (int)(bucket.size()); j++){ 
+                if((Tables[i]->same_id(image, bucket[j])) && (bucket[j]->get_number() != image->get_number())){ // Querying trick but ignore comparing it to itself
+                    // dist(p,q)
+                    distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                    
+                    printf("%d lsh::%s distance: %f\n", __LINE__, __FUNCTION__, distance);
+
+                    // if dist(q, p) < db = k-th best distance then b ← p; db ← dist(q, p), implemented with a priority queue
+                    nearest.push(std::make_pair(distance, bucket[j]->get_number()));    
+
+                    printf("%d lsh::%s size: %ld\n", __LINE__, __FUNCTION__, nearest.size());
+
+                    if ((int)(nearest.size()) > numberOfNearest){
+                        nearest.pop();
+                    }  
+                }
+            }
+        }
+        // Fill up the a structure that we can return
+        while (!nearest.empty()){
+            nearestImages.push_back(nearest.top());
+            nearest.pop();
+        }
+        return nearestImages;
     }
 
     std::vector<std::pair<double, int>> get_n_nearest(std::shared_ptr<ImageVector> image, int numberOfNearest){
@@ -210,12 +251,20 @@ int main(void){
 
     //printf("%d Loaded data\n", __LINE__);
 
-    std::vector<std::pair<double, int>> nearest = lsh.get_n_nearest(images[0], 10); // Get the 3 nearest vectors to the first image
+    std::vector<std::pair<double, int>> nearest = lsh.approximate_k_nearest_neighbors(images[0], 10); // Get the k nearest vectors to the first image
 
     //printf("%ld\n",nearest.size());
 
     for(int i = 0; i < (int)nearest.size(); i++){
         printf("<%f, %d>\n", nearest[i].first, nearest[i].second);
+    }
+
+    std::vector<std::pair<double, int>> nearest2 = lsh.get_n_nearest(images[0], 10); // Get the k nearest vectors to the first image
+
+    printf("\n---------------Original-----------------\n");
+
+    for(int i = 0; i < (int)nearest2.size(); i++){
+        printf("<%f, %d>\n", nearest2[i].first, nearest2[i].second);
     }
 
     return 0;
