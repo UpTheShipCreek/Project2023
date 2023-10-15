@@ -1,7 +1,7 @@
 #ifndef IO_FUNCTIONS_H
 #define IO_FUNCTIONS_H
 
-#include <iostream>
+#include <stdio.h>
 #include <fstream>
 #include <vector>
 #include <memory>

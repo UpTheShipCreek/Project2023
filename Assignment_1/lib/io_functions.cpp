@@ -14,15 +14,6 @@ std::vector<double>  ImageVector::get_coordinates(){
     return this->Coordinates;
 }
 
-// void  ImageVector::assign_id(int id){
-//     this->Id = id;
-// }
-
-// int  ImageVector::get_id(){
-//     return this->Id;
-// }
-
-
 // Need to make this work with the new ImageVector class
 std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& filename) {
     int imageNumberCounter = 0;
@@ -31,8 +22,8 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
     std::ifstream file(filename, std::ios::binary);
     std::vector<std::shared_ptr<ImageVector>> allImages;
 
-    if (!file.is_open()) {
-        std::cerr << "Failed to open MNIST dataset file." << std::endl;
+    if (!file.is_open()){
+        perror("Error while opening file");
         return allImages; // Return an empty vector in case of an error
     }
 
@@ -46,11 +37,11 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
     while (file.read(reinterpret_cast<char*>(imagePixels.data()), 784)) {
         // Convert pixel values from unsigned char to double and normalize
         std::vector<double> normalizedPixels(784);
-        for (int i = 0; i < 784; ++i) {
-            normalizedPixels[i] = static_cast<double>(imagePixels[i]) / 1.0; // Lets not normalize the pixels?
+        for (int i = 0; i < 784; i++){
+            normalizedPixels[i] = static_cast<double>(imagePixels[i]); // Lets not normalize the pixels?
         }
 
-        image = std::make_shared<ImageVector>(imageNumberCounter, normalizedPixels); // Need to free them, maybe in the main
+        image = std::make_shared<ImageVector>(imageNumberCounter, normalizedPixels); // Ended up using smart pointers cause having to keep in mind to free that memory is not very good practice
         imageNumberCounter++;
 
         // Store the normalized pixel values in the container for all images
