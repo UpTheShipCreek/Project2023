@@ -42,7 +42,7 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
 
 
 // Takes as input the query and two vectors, one of the approximate results and one of the exhaustive results
-void write_approx_exhaust(shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tLSH, double tTrue){
+void write_approx_exhaust(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tLSH, double tTrue){
     printf("Query: %d\n", query->get_number());
     for(int i = 0; i < (int)approx.size(); i++){
         printf("Nearest neighbor-%d: %d\n", i+1, approx[i].second);
@@ -53,7 +53,7 @@ void write_approx_exhaust(shared_ptr<ImageVector> query, std::vector<std::pair<d
     printf("tTrue: %f\n", tTrue);
 }
 // Write the results of the range search
-void write_r_near(shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> inRange){
+void write_r_near(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> inRange){
     printf("%d-near neighbors:\n", query->get_number());
     for(int i = 0; i < (int)inRange.size(); i++){
         printf("Nearest neighbor-%d: %d\n", i+1, inRange[i].second);
