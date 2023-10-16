@@ -1,0 +1,1 @@
+lsh call: ./lsh_exe -d ./in/input.dat -q ./in/query.dat -k 4 -L 5 -o ./out/lsh.out -N 10 -R 2000.0

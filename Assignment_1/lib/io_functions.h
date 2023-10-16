@@ -8,7 +8,7 @@
 #include "image_util.h"
 
 
-std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& filename);
-void write_approx_exhaust(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tLSH, double tTrue);
-void write_r_near(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> inRange);
+std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& filename, int imagesAlreadyRead);
+void write_approx_exhaust(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tLSH, double tTrue, FILE* outputFile);
+void write_r_near(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> inRange, FILE* outputFile);
 #endif

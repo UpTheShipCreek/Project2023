@@ -1,30 +1,38 @@
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <fstream>
-#include <vector>
-#include <chrono>
+#include <stdio.h>
+#include <unordered_map>
+#include <queue>
 #include <algorithm>
 #include <climits>
-#include <fstream>
-#include <string>
-#include <getopt.h>
+#include <chrono>
+#include <unistd.h>
 
-using namespace std;
-
+#include "random_functions.h"
+#include "io_functions.h"
+#include "metrics.h"
+#include "lsh.h"
 
 int main(int argc, char **argv){
-    int k = 4, L = 5, N = 1, R = 10000;                               //Default values for LSH algorithm, if not altered by user
+    // ------------------------------------------------------------------- //
+    // --------------------- PROGRAM INITIALIZATIONS --------------------- //
+    // ------------------------------------------------------------------- //
+    int k = 4, L = 5, N = 1; // Default values  
+    double R = 2000.0;                           
     int opt;
     extern char *optarg; 
-    string givenInput, queryFile, givenOutput;
+    std::string inputFile, queryFile, outputFileName;
     int cmdNecessary = 0;
+    // ------------------------------------------------------------------- //
+    // --------------------- PROGRAM INITIALIZATIONS --------------------- //
+    // ------------------------------------------------------------------- //
 
+
+    // ------------------------------------------------------------------- //
+    // -------------------------- INPUT PARSING -------------------------- //
+    // ------------------------------------------------------------------- //
     while ((opt = getopt(argc, argv, "d:q:k:L:o:N:R:")) != -1){                   //Parse through (potential) command line arguments
         switch (opt) {
             case 'd':                                                               //Files
-                givenInput = optarg;
+                inputFile = optarg;
                 cmdNecessary++;
                 break;
             case 'q':
@@ -32,76 +40,130 @@ int main(int argc, char **argv){
                 cmdNecessary++;
                 break;
             case 'o':
-                givenOutput = optarg;
+                outputFileName = optarg;
                 cmdNecessary++;
                 break;
             case 'k':                                                               //Parameters
                 k = atoi(optarg);
+                break;
             case 'L':
                 L = atoi(optarg);
+                break;
             case 'N':
                 N = atoi(optarg);
                 break;
             case 'R':
-                R = atoi(optarg);
+                R = atof(optarg);
                 break;
         }
     }
 
     if(cmdNecessary != 3){
-        cout << "Program execution requires an input file, output file and a query file.";
-        exit(-1);
+        printf("Program execution requires an input file, output file and a query file.");
+        return -1;
     }
     else{
-        cout << "Program will proceed with values: k = " << k << ",L = " << L <<  "N = " << N << "R = " << R << "\n";
+        printf("Program will proceed with values: k = %d, L = %d, N = %d, R = %f\n", k, L, N, R);
     }
+    // ------------------------------------------------------------------- //
+    // -------------------------- INPUT PARSING -------------------------- //
+    // ------------------------------------------------------------------- //
 
-    //Input files parcing
-    // Open the MNIST dataset file
-    std::ifstream file(givenInput, std::ios::binary);
+    // ------------------------------------------------------------------- //
+    // -------------------------- OPEN OUTPUT FILE ----------------------- //
+    // ------------------------------------------------------------------- //
+    FILE* outputFile = fopen(outputFileName.c_str(), "w");
+    // ------------------------------------------------------------------- //
+    // -------------------------- OPEN OUTPUT FILE ----------------------- //
+    // ------------------------------------------------------------------- //
 
-    if (!file.is_open()) {
-        std::cerr << "Failed to open MNIST dataset file." << std::endl;
-        return 1;
+    // ------------------------------------------------------------------- //
+    // ------------------------- INITIALIZE LSH -------------------------- //
+    // ------------------------------------------------------------------- //
+    LSH lsh(L, k, MODULO, LSH_TABLE_SIZE);
+    // ------------------------------------------------------------------- //
+    // ------------------------- INITIALIZE LSH -------------------------- //
+    // ------------------------------------------------------------------- //
+
+    // ------------------------------------------------------------------- //
+    // ---------------------- METHOD INITIALIZATIONS --------------------- //
+    // ------------------------------------------------------------------- //
+    std::vector<std::pair<double, int>> nearest_approx;
+    std::vector<std::pair<double, int>> nearest_exhaust;
+    std::vector<std::pair<double, int>> range_exhaust;
+    // ------------------------------------------------------------------- //
+    // ---------------------- METHOD INITIALIZATIONS --------------------- //
+    // ------------------------------------------------------------------- //
+
+    // ------------------------------------------------------------------- //
+    // ------------------------- INITIALIZE TIME ------------------------- //
+    // ------------------------------------------------------------------- //
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration_approx = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    auto duration_exhaust = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    // ------------------------------------------------------------------- //
+    // ------------------------- INITIALIZE TIME ------------------------- //
+    // ------------------------------------------------------------------- //
+
+    // ------------------------------------------------------------------- //
+    // ------------------------ OPEN AND LOAD INPUT ---------------------- //
+    // ------------------------------------------------------------------- //
+    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, 0);
+    std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images(queryFile, (int)images.size());
+    images.insert(images.end(), queries.begin(), queries.end()); // Merge the two vectors of images so you can load them all at once
+    lsh.load_data(images); // Load the data to the LSH
+    // ------------------------------------------------------------------- //
+    // ------------------------ OPEN AND LOAD INPUT ---------------------- //
+    // ------------------------------------------------------------------- //
+
+    for(int i = 0; i < 5; i++){
+        // ------------------------------------------------------------------- //
+        // ----------------------- APPROXIMATE NEAREST ----------------------- //
+        // ------------------------------------------------------------------- //
+        start = std::chrono::high_resolution_clock::now(); // Start the timer
+        nearest_approx = lsh.approximate_k_nearest_neighbors(queries[i], N); // Get the k approximate nearest vectors to the query
+        end  = std::chrono::high_resolution_clock::now(); // End the timer 
+        duration_approx = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); // Calculate the duration
+        // ------------------------------------------------------------------- //
+        // ----------------------- APPROXIMATE NEAREST ----------------------- //
+        // ------------------------------------------------------------------- //
+
+        // ------------------------------------------------------------------- //
+        // ----------------------- EXHAUSTIVE NEAREST ------------------------ //
+        // ------------------------------------------------------------------- //
+        start = std::chrono::high_resolution_clock::now(); // Start the timer
+        nearest_exhaust = exhaustive_nearest_neighbor_search(images, queries[i], N); // Get the k real nearest vectors to the query
+        end  = std::chrono::high_resolution_clock::now(); // End the timer 
+        duration_exhaust = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); // Calculate the duration
+        // ------------------------------------------------------------------- //
+        // ----------------------- EXHAUSTIVE NEAREST ------------------------ //
+        // ------------------------------------------------------------------- //
+
+        // ------------------------------------------------------------------- //
+        // ------------------------ EXHAUSTIVE RANGE ------------------------- //
+        // ------------------------------------------------------------------- //
+        //range_exhaust = exhaustive_range_search(images, queries[i], R); // Get all the images that are in range R from the query
+        // ------------------------------------------------------------------- //
+        // ------------------------ EXHAUSTIVE RANGE ------------------------- //
+        // ------------------------------------------------------------------- //
+
+        // ------------------------------------------------------------------- //
+        // ---------------------------- WRITES ------------------------------- //
+        // ------------------------------------------------------------------- //
+        write_approx_exhaust(queries[i], nearest_approx, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
+        //write_r_near(images[0], range_exhaust, outputFile);
+        // ------------------------------------------------------------------- //
+        // ---------------------------- WRITES ------------------------------- //
+        // ------------------------------------------------------------------- //
     }
-
-    // Skip the header information (16 bytes)
-    file.seekg(16);
-
-    // Define a vector to store the normalized pixel values for one image
-    std::vector<double> imagePixels(784);
-
-    // Create a vector to store all images
-    std::vector<std::vector<double>> allImages;
-
-    // Read and process each image entry
-    while (file.read(reinterpret_cast<char*>(imagePixels.data()), 784)) {
-        // Normalize the pixel values by dividing by 255.0
-        for (int i = 0; i < 784; ++i) {
-            imagePixels[i] /= 255.0;
-        }
-
-        // Store the normalized pixel values in the container for all images
-        allImages.push_back(imagePixels);
-    }
-
-    // Close the dataset file
-    file.close();
-
-    // Now, 'allImages' contains all the images from the MNIST dataset
-    // You can access each image as 'allImages[i]' where 'i' is the image index.
-    if (allImages.size() > 1) {
-        std::cout << "Pixel values of the second image (allImages[2]):" << std::endl;
-        
-        // Iterate through the pixel values and print them
-        for (int i = 0; i < allImages[2].size(); ++i) {
-            std::cout << allImages[2][i] << " ";
-        }
-        
-        std::cout << std::endl;
-    } else {
-        std::cerr << "There are not enough images in 'allImages' to display allImages[1]." << std::endl;
-    }
+    // ------------------------------------------------------------------- //
+    // -------------------------- CLOSE OUTPUT FILE ---------------------- //
+    // ------------------------------------------------------------------- //
+    fclose(outputFile);
+    // ------------------------------------------------------------------- //
+    // -------------------------- CLOSE OUTPUT FILE ---------------------- //
+    // ------------------------------------------------------------------- //
 
     return 0;
 }
