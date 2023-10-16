@@ -18,6 +18,6 @@ class ImageVector{
 };
 
 std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, int numberOfNearest);
-
+std::vector<std::pair<double, int>> exhaustive_range_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, double r);
 
 #endif

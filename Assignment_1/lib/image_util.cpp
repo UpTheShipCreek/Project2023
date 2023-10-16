@@ -38,3 +38,21 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vect
     std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
     return reversed;
 }
+
+std::vector<std::pair<double, int>> exhaustive_range_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, double r){
+        int i;
+        double distance;
+
+        // The returned vector
+        std::vector<std::pair<double, int>> inRangeImages;
+
+        for(i = 0; i < (int)(images.size()); i++){
+            if(images[i]->get_number() != image->get_number()){ // Ignore comparing to itself
+                distance = eucledian_distance(image->get_coordinates(), images[i]->get_coordinates());
+                if(distance <= r){
+                    inRangeImages.push_back(std::make_pair(distance, images[i]->get_number()));
+                }
+            }
+        }
+    return inRangeImages;
+    }
