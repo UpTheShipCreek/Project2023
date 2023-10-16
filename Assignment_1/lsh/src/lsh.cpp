@@ -2,15 +2,18 @@
 #include <unordered_map>
 #include <queue>
 #include <algorithm>
+#include <climits>
 
 #include "random_functions.h"
 #include "io_functions.h"
 #include "metrics.h"
 
 #define DIMENSIONS 748
-#define MODULO 60000
-#define LSH_TABLE_SIZE 3750 // 60000/8
-#define WINDOW 1000 // Test orders of magnitude
+#define MODULO INT_MAX - 5
+#define LSH_TABLE_SIZE 3750 // 60000/2^n
+#define WINDOW 2000 // Test orders of magnitude
+#define MEAN 0.0
+#define STANDARD_DEVIATION 1.0
 
 class hFunction{
     std::vector<double> V;
@@ -20,8 +23,8 @@ class hFunction{
 
     public:
     hFunction(){
-        this->V = Rand.generate_vector_normal(DIMENSIONS); // The N(0,1) is pressuposed in the generate_vector_normal function
-        this->T = Rand.generate_double_uniform(1.0, this->W); 
+        this->V = Rand.generate_vector_normal(DIMENSIONS, MEAN, STANDARD_DEVIATION); // The N(0,1) distribution
+        this->T = Rand.generate_double_uniform(0.0, this->W); 
         // So we were explicitly instructed to use the uniform(0,W) distribution for t and N(0,1) for the values of v, 
         // but to also ensure that (p*v + t) is not negative?
         // Why are we allowing negative values in the first place then? 
@@ -131,16 +134,23 @@ class LSH{
     }
 
     void load_data(std::vector<std::shared_ptr<ImageVector>> images){ // Load the data to the LSH
+        printf("Initializing LSH tables... ");
         for (int i = 0; i < (int)(images.size()); i++){
             for (int j = 0; j < this->L; j++){
                 (this->Tables)[j]->insert(images[i]);
             }
         }
+        printf("Done\n");
     }
 
     std::vector<std::pair<double, int>> approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
-        int i, j;
+        int i, j, imageNumber;
         double distance;
+
+        // Ignore itself and every other image it has met before
+        std::vector<int> ignore;
+        std::vector<int>::iterator it; // Initializing the iteration variable
+        ignore.push_back(image->get_number());
 
         // I will be using a priority queue to keep the k nearest neighbors
         std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
@@ -156,12 +166,21 @@ class LSH{
             bucket = Tables[i]->get_bucket_of_image(image);
             // for each item p in bucket gi (q) do
             for(j = 0; j < (int)(bucket.size()); j++){ 
-                if((Tables[i]->same_id(image, bucket[j])) && (bucket[j]->get_number() != image->get_number())){ // Querying trick but ignore comparing it to itself
+                // Get the number of the image
+                imageNumber = bucket[j]->get_number();
+
+                // See if we have encountered it before
+                it = std::find(ignore.begin(), ignore.end(), imageNumber);
+                
+                if((Tables[i]->same_id(image, bucket[j])) && (it == ignore.end())){ // Query trick + ignore the images we have encountered before
+                    // Ignore the image if you find it again
+                    ignore.push_back(imageNumber);
+
                     // dist(p,q)
                     distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
                     
                     // if dist(q, p) < db = k-th best distance then b ← p; db ← dist(q, p), implemented with a priority queue
-                    nearest.push(std::make_pair(distance, bucket[j]->get_number()));    
+                    nearest.push(std::make_pair(distance, imageNumber));    
 
                     if ((int)(nearest.size()) > numberOfNearest){
                         nearest.pop();
@@ -226,17 +245,30 @@ int main(void){
     }
     printf("\n--------------------------------\n");
 
-    std::vector<std::pair<double, int>> rad = lsh.approximate_range_search(images[0], 2000); // Get the k nearest vectors to the first image
-    for(int i = 0; i < (int)rad.size(); i++){
-        printf("<%f, %d>\n", rad[i].first, rad[i].second);
-    }
-
-    printf("\n--------------------------------\n");
-
     std::vector<std::pair<double, int>> exh = exhaustive_nearest_neighbor_search(images, images[0], 10); // Get the k nearest vectors to the first image
     for(int i = 0; i < (int)exh.size(); i++){
         printf("<%f, %d>\n", exh[i].first, exh[i].second);
     }
+
+    printf("\n--------------------------------\n");
+
+    std::vector<std::pair<double, int>> nearest1 = lsh.approximate_k_nearest_neighbors(images[1], 10); // Get the k nearest vectors to the first image
+    for(int i = 0; i < (int)nearest1.size(); i++){
+        printf("<%f, %d>\n", nearest1[i].first, nearest1[i].second);
+    }
+    printf("\n--------------------------------\n");
+
+    std::vector<std::pair<double, int>> exh1 = exhaustive_nearest_neighbor_search(images, images[1], 10); // Get the k nearest vectors to the first image
+    for(int i = 0; i < (int)exh1.size(); i++){
+        printf("<%f, %d>\n", exh1[i].first, exh1[i].second);
+    }
+
+    printf("\n--------------------------------\n");
+
+    // std::vector<std::pair<double, int>> exh2 = exhaustive_range_search(images, images[0], 2000); // Get the k nearest vectors to the first image
+    // for(int i = 0; i < (int)exh2.size(); i++){
+    //     printf("<%f, %d>\n", exh2[i].first, exh2[i].second);
+    // }
 
     return 0;
 }

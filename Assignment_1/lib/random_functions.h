@@ -12,8 +12,8 @@ public:
     int generate_int_uniform(const int min, const int max);
     double generate_double_uniform(const double min, const double max);
     double generate_double_normal(const double mean, const double standardDeviation);
-    std::vector<double> generate_vector_normal(int size);
-    std::vector<double> generate_vector_uniform(int size);
+    std::vector<double> generate_vector_normal(int size, const double mean, const double standardDeviation);
+    std::vector<double> generate_vector_uniform(int size, const double min, const double max);
 };
 
 
