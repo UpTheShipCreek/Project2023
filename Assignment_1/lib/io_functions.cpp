@@ -18,6 +18,8 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
 
     // Define a vector to store the pixel values for one image
     std::vector<unsigned char> imagePixels(784);
+    
+    printf("Reading images... \n");
 
     // Read and process each image entry
     while (file.read(reinterpret_cast<char*>(imagePixels.data()), 784)) {
