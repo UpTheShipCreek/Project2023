@@ -31,4 +31,3 @@ $(EXEC): $(OBJS)
 clean:
 	rm -f $(OBJS) $(EXEC)
 	rm -f $(SRCLSH)/*.o 
-	rm -f $(OUT)/*.out
