@@ -14,7 +14,7 @@
 #define DIMENSIONS 748
 #define MODULO INT_MAX - 5
 #define LSH_TABLE_SIZE 3750 // 60000/2^n
-#define WINDOW 1350 // Test orders of magnitude
+#define WINDOW 1500 // Test orders of magnitude
 #define MEAN 0.0
 #define STANDARD_DEVIATION 1.0
 

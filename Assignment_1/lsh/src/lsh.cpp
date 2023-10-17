@@ -86,6 +86,7 @@ const std::vector<std::shared_ptr<ImageVector>>& HashTable::get_bucket_of_image(
   
 LSH::LSH(int l, int k, int modulo, int tableSize){
     printf("Creating LSH... ");
+    fflush(stdout);
     this->L = l;
     this->K = k;
     this->M = modulo;
@@ -95,16 +96,19 @@ LSH::LSH(int l, int k, int modulo, int tableSize){
         Tables.push_back(std::make_shared<HashTable>(tableSize, K, M));
     }
     printf("Done \n");
+    fflush(stdout);
 }
 
 void LSH::load_data(std::vector<std::shared_ptr<ImageVector>> images){ // Load the data to the LSH
     printf("Initializing LSH tables... ");
+    fflush(stdout);
     for (int i = 0; i < (int)(images.size()); i++){
         for (int j = 0; j < this->L; j++){
             (this->Tables)[j]->insert(images[i]);
         }
     }
     printf("Done\n");
+    fflush(stdout);
 }
 
 std::vector<std::pair<double, int>> LSH::approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
@@ -162,8 +166,13 @@ std::vector<std::pair<double, int>> LSH::approximate_k_nearest_neighbors(std::sh
 }
 
 std::vector<std::pair<double, int>> LSH::approximate_range_search(std::shared_ptr<ImageVector> image, double r){
-    int i, j;
+    int i, j, imageNumber;
     double distance;
+
+    // Ignore itself and every other image it has met before
+    std::vector<int> ignore;
+    std::vector<int>::iterator it; // Initializing the iteration variable
+    ignore.push_back(image->get_number());
 
     // The returned vector
     std::vector<std::pair<double, int>> inRangeImages;
@@ -176,12 +185,20 @@ std::vector<std::pair<double, int>> LSH::approximate_range_search(std::shared_pt
         bucket = Tables[i]->get_bucket_of_image(image);
         // for each item p in bucket gi (q) do
         for(j = 0; j < (int)bucket.size(); j++){
-            if(bucket[j]->get_number() != image->get_number()){ // Ignore comparing to itself
+            // Get the number of the image
+            imageNumber = bucket[j]->get_number();
+
+            // See if we have encountered it before
+            it = std::find(ignore.begin(), ignore.end(), imageNumber);
+
+            if((Tables[i]->same_id(image, bucket[j])) && (it == ignore.end())){ // Query trick + ignore the images we have encountered before
+                // Ignore the image if you find it again
+                ignore.push_back(imageNumber);
 
                 // if dist(q, p) < r then output p
                 distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
                 if(distance < r){
-                    inRangeImages.push_back(std::make_pair(distance, bucket[j]->get_number()));
+                    inRangeImages.push_back(std::make_pair(distance, imageNumber));
                 }
             }
             // if large number of retrieved items (e.g. > 20L) then return

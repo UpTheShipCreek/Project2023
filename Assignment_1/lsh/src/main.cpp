@@ -11,6 +11,8 @@
 #include "metrics.h"
 #include "lsh.h"
 
+#define QUERY_NUMBER 10
+
 int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
@@ -90,7 +92,7 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     std::vector<std::pair<double, int>> nearest_approx;
     std::vector<std::pair<double, int>> nearest_exhaust;
-    std::vector<std::pair<double, int>> range_exhaust;
+    std::vector<std::pair<double, int>> range_approx;
     // ------------------------------------------------------------------- //
     // ---------------------- METHOD INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
@@ -109,15 +111,15 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // ------------------------ OPEN AND LOAD INPUT ---------------------- //
     // ------------------------------------------------------------------- //
-    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, 0);
-    std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images(queryFile, (int)images.size());
+    std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images(queryFile, 0);
+    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, (int)queries.size());
     images.insert(images.end(), queries.begin(), queries.end()); // Merge the two vectors of images so you can load them all at once
     lsh.load_data(images); // Load the data to the LSH
     // ------------------------------------------------------------------- //
     // ------------------------ OPEN AND LOAD INPUT ---------------------- //
     // ------------------------------------------------------------------- //
-
-    for(int i = 0; i < 5; i++){
+    int i = 0;
+    while(i < QUERY_NUMBER  && i < (int)(queries.size())){
         // ------------------------------------------------------------------- //
         // ----------------------- APPROXIMATE NEAREST ----------------------- //
         // ------------------------------------------------------------------- //
@@ -141,21 +143,22 @@ int main(int argc, char **argv){
         // ------------------------------------------------------------------- //
 
         // ------------------------------------------------------------------- //
-        // ------------------------ EXHAUSTIVE RANGE ------------------------- //
+        // ------------------------ APPROXIMATE RANGE ------------------------ //
         // ------------------------------------------------------------------- //
-        //range_exhaust = exhaustive_range_search(images, queries[i], R); // Get all the images that are in range R from the query
+        range_approx = lsh.approximate_range_search(queries[i], R); // Get all the images that are in range R from the query
         // ------------------------------------------------------------------- //
-        // ------------------------ EXHAUSTIVE RANGE ------------------------- //
+        // ------------------------ APPROXIMATE RANGE ------------------------ //
         // ------------------------------------------------------------------- //
 
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //
         write_approx_exhaust(queries[i], nearest_approx, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
-        //write_r_near(images[0], range_exhaust, outputFile);
+        write_r_near(queries[i], range_approx, outputFile);
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //
+        i++;
     }
     // ------------------------------------------------------------------- //
     // -------------------------- CLOSE OUTPUT FILE ---------------------- //
