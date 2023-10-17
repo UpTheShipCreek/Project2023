@@ -8,7 +8,7 @@ INC = ./lib
 OUT = ./out
 
 # Source files
-SRCS = $(SRCLSH)/main.cpp $(SRCLSH)/lsh.cpp $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp $(INC)/image_util.cpp 
+SRCS = $(SRCLSH)/main.cpp $(SRCLSH)/lsh.cpp $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp $(INC)/image_util.cpp $(INC)/hashtable.cpp 
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
