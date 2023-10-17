@@ -1,18 +1,21 @@
 #include "lsh.h"
 
 LSH::LSH(int l, int k, int modulo, int tableSize){
-    printf("Creating LSH... ");
-    fflush(stdout);
-    this->L = l;
-    this->K = k;
-    this->M = modulo;
+        printf("Creating LSH... ");
+        fflush(stdout);
+        this->L = l;
+        this->K = k;
+        this->M = modulo;
 
-    Tables.reserve(L); // Supposed to be making it faster, couldn't tell the difference (guessing the bottleneck is elsewhere)
-    for (int i = 0; i < L; i++) {
-        Tables.push_back(std::make_shared<HashTable>(tableSize, K, M));
-    }
-    printf("Done \n");
-    fflush(stdout);
+        Tables.reserve(L);
+
+        for (int i = 0; i < L; i++) {
+            std::shared_ptr<HashFunction> hashFunction = std::make_shared<gFunction>(this->K, this->M);
+            Tables.push_back(std::make_shared<HashTable>(tableSize, hashFunction));
+        }
+
+        printf("Done\n");
+        fflush(stdout);
 }
 
 void LSH::load_data(std::vector<std::shared_ptr<ImageVector>> images){ // Load the data to the LSH
@@ -26,7 +29,6 @@ void LSH::load_data(std::vector<std::shared_ptr<ImageVector>> images){ // Load t
     printf("Done\n");
     fflush(stdout);
 }
-
 std::vector<std::pair<double, int>> LSH::approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
     int i, j, imageNumber;
     double distance;

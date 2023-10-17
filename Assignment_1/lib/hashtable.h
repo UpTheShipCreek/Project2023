@@ -18,6 +18,11 @@
 #define MEAN 0.0
 #define STANDARD_DEVIATION 1.0
 
+class HashFunction{
+    public:
+    virtual int evaluate_point(std::vector<double> p) = 0;
+};
+
 class hFunction{
     std::vector<double> V;
     double T;
@@ -29,7 +34,7 @@ class hFunction{
     double evaluate_point(std::vector<double> p);
 };
 
-class gFunction{
+class gFunction : public HashFunction{
     int K; // Number of hi functions that a g will be combining
     int M; // The modulo
     std::vector<std::shared_ptr<hFunction>> H;
@@ -38,17 +43,21 @@ class gFunction{
 
     public:
     gFunction(int k, int m);
-    int evaluate_point(std::vector<double> p);
+    int evaluate_point(std::vector<double> p) override;
 };
+
+// class fFunction : public HashFunction{
+
+// };
 
 class HashTable{
     int NumberOfBuckets;
-    std::shared_ptr<gFunction> HashFunction;
+    std::shared_ptr<HashFunction> HF;
     std::unordered_map<int, std::vector<std::shared_ptr<ImageVector>>> Table;
     std::unordered_map<int, int> NumberToId; // <number, id> pairs
 
     public:
-    HashTable(int num, int k, int m);
+    HashTable(int num, std::shared_ptr<HashFunction> hashfunction);
     bool same_id(std::shared_ptr<ImageVector> image1, std::shared_ptr<ImageVector> image2);
     void insert(std::shared_ptr<ImageVector> image);
     const std::vector<std::shared_ptr<ImageVector>>& get_bucket_of_image(std::shared_ptr<ImageVector> image);
