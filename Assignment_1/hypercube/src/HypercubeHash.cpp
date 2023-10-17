@@ -18,7 +18,7 @@ class HFunction{
     Random Rand;
 
     public:
-    hFunction(){
+    HFunction(){
         this->V = Rand.generate_vector_normal(DIMENSIONS);
         this->T = Rand.generate_double_uniform(1.0, 2.0); // Changed the min from 0 to 1 and max from 1 to 2, since we were instructed to ensure that p*v + t is positive
     }
@@ -42,7 +42,7 @@ class FFunction{
     FFunction(){
         int i;
         for (i=0; i < this-> numOfH; i++){
-            hFunction* h = new hFunction();
+            HFunction* h = new hFunction();
             (this->H).emplace_back(h);
             (this->R).push_back(Rand.generate_int_uniform(0, 1)); // Generate and save the r value
         }
@@ -50,13 +50,26 @@ class FFunction{
     }
 
     ~FFunction(){
-        for (hFunction* h: this->H){
+        for (HFunction* h: this->H){
             delete h;
         }
     }
 
 };
 
-class HashTable{
-    int 
+class CubeHashTable{
+    private:
+        int demension;
+        int projectDemension;
+        int probes;
+        int maxOfCandidatePoints;
+        unsigned numOfBuckets;
+
+    public:
+        CubeHashTable(int dimension, int projectDimension, int probes, int maxOfCandidatePoints);
+        ~CubeHashTable();
+        void AddPoint();
+        unsigned long HashFunction;
+        <type> findNearestNeighbours();
+
 }
