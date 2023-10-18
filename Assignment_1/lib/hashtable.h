@@ -51,7 +51,6 @@ class fFunction{
     Random Rand;
 
     public:
-    fFunction();
     int evaluate_point(int h_p); // Taking the projection of a point and projecting it into 0 or 1
 };
 

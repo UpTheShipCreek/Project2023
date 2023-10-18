@@ -18,4 +18,14 @@ class HypercubeHashFunction : public HashFunction{
     int evaluate_point(std::vector<double> p) override;
 };
 
+class HyperCube{
+    int K, Probes, M;
+    std::shared_ptr<HashTable> Table;
+
+    public:
+    HyperCube(int dimensions, int probes, int numberOfElementsToCheck);
+    void load_data(std::vector<std::shared_ptr<ImageVector>> images);
+    std::vector<std::pair<double, int>> approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest);
+};
+
 #endif

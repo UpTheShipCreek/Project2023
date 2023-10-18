@@ -37,7 +37,7 @@ std::vector<int> get_probes(int number, int numberOfProbes, int dimensions){
         std::vector<int> hammingDistanceOne = find_all_with_hamming_distance_one(number, dimensions);
         std::vector<int> temp;
         
-        for (int i = 0; i < hammingDistanceOne.size(); i++) {
+        for (int i = 0; i < (int)hammingDistanceOne.size(); i++) {
             temp = get_probes(hammingDistanceOne[i], numberOfProbes - 1, dimensions); // Recursive call cause it is easier to think of it that way
             uniqueProbes.insert(temp.begin(), temp.end());  // Insert into the set to ensure uniqueness
         }
@@ -62,85 +62,99 @@ int HypercubeHashFunction::evaluate_point(std::vector<double> p){
     int bDigit;
     int hashCode = 0;
     for(int i = 0; i < this->K; i++){
-        bDigit = F[i]->evaluate_point(H[i]->evaluate_point(p))
+        bDigit = F[i]->evaluate_point(H[i]->evaluate_point(p));
         hashCode <<= 1; // shift so that we have some space for the next digit
         hashCode |= bDigit; // save the code of the particular projection
     }
+    //printf("HashCode: %d\n", hashCode);
     return hashCode;
 }
 
-class HyperCube{
-    int K, Probes, M;
-    std::shared_ptr<HashTable> Table;
 
-    public:
-    HyperCube(int dimensions, int probes, int numberOfElementsToCheck){
-        this->M = numberOfElementsToCheck;
-        this->K = dimensions;
-        this->Probes = probes;
+HyperCube::HyperCube(int dimensions, int probes, int numberOfElementsToCheck){
+    this->M = numberOfElementsToCheck;
+    this->K = dimensions;
+    this->Probes = probes;
 
-        std::shared_ptr<HashFunction> hashFunction = std::make_shared<HypercubeHashFunction>(this->K);
-        numberOfBuckets = 2^K;
+    std::shared_ptr<HashFunction> hashFunction = std::make_shared<HypercubeHashFunction>(this->K);
+    int numberOfBuckets = 1 << K;
 
-        this->Table = std::make_shared<HashTable>(numberOfBuckets, hashFunction);
+    //printf("Number of buckets: %d\n", numberOfBuckets);
+
+    this->Table = std::make_shared<HashTable>(numberOfBuckets, hashFunction);
+}
+void HyperCube::load_data(std::vector<std::shared_ptr<ImageVector>> images){
+    printf("Loading data into the hypercube... ");
+    fflush(stdout);
+    for (int i = 0; i < (int)(images.size()); i++){
+        (this->Table)->insert(images[i]);
     }
-    void load_data(std::vector<std::shared_ptr<ImageVector>> images){
-        for (int i = 0; i < (int)(images.size()); i++){
-            this->Table->insert(images[i]);
-        }
+    printf("Done\n");
+    fflush(stdout);
+}
+std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
+    int i, j, prospectImageNumber;
+    double distance;
+    int visitedPointsCounter = 0;
+    int queryImageNumber = image->get_number();
+
+    // This will be saving all the bucket_ids/hypercube vertices that we will be visiting
+    std::vector<int> probes;
+    std::vector<std::shared_ptr<ImageVector>> bucket;
+
+    // I will be using a priority queue to keep the k nearest neighbors
+    std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
+
+    // Let b ← Null; db ← ∞; initialize k best candidates and distances;
+    std::vector<std::pair<double, int>> nearestImages;
+    
+    // Get the bucket id
+    int bucketId = Table->get_bucket_id_from_image_vector(image);
+
+    // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
+    probes = get_probes(bucketId, this->Probes, this->K);
+    //printf("Probes of %d are : \n", bucketId);
+    for(i = 0; i < (int)(probes.size()); i++){
+        //printf("%d\n", probes[i]);
     }
-    std::vector<std::pair<double, int>> approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
-        int i, j, prospectImageNumber;
-        int visitedPointsCounter = 0
-        int queryImageNumber = image->get_number();
 
-        // This will be saving all the bucket_ids/hypercube vertices that we will be visiting
-        std::vector<int> probes;
-        std::vector<std::shared_ptr<ImageVector>> bucket;
+    // For each probe 
+    for(i = 0; i < (int)(probes.size()); i++){
+        // Get the bucket
+        bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
-        // I will be using a priority queue to keep the k nearest neighbors
-        std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
+        // Search the bucket for the nearest neighbors
+        j = 0;
+        //while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
+        while(j < (int)(bucket.size())){
+            //printf("Bucket size is: %ld\n", bucket.size());
 
-        // Let b ← Null; db ← ∞; initialize k best candidates and distances;
-        std::vector<std::pair<double, int>> nearestImages;
-        
-        // Get the bucket id
-        int bucketId = Table->get_bucket_id_from_image_vector(image);
+            visitedPointsCounter++;
+            prospectImageNumber = bucket[j]->get_number();
 
-        // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
-        probes = get_probes(bucketId, this->Probes, this->K);
+            // Ignore comparing with itself
+            if(prospectImageNumber != queryImageNumber){ 
+                // dist(p,q)
+                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
 
-        // For each probe 
-        for(i = 0; i < (int)(probes.size()); i++){
-            // Get the bucket
-            bucket = get_bucket_from_bucket_id(probes[i]);  
+                //printf("Found distance: %f\n", distance);
 
-            // Search the bucket for the nearest neighbors
-            j = 0;
-            while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
-                visitedPointsCounter++;
-                prospectImageNumber = bucket[j]->get_number();
+                nearest.push(std::make_pair(distance, prospectImageNumber));
 
-                // Ignore comparing with itself
-                if(prospectImageNumber != queryImageNumber){ 
-                    // dist(p,q)
-                    distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
-                    nearest.push(std::make_pair(distance, prospectImageNumber));
-
-                    // Keep the number of nearest neighbors the correct size
-                    if((int)nearest.size() > numberOfNearest){
-                        nearest.pop();
-                    }
+                // Keep the number of nearest neighbors the correct size
+                if((int)nearest.size() > numberOfNearest){
+                    nearest.pop();
                 }
             }
+            j++;
         }
-        // Fill up the a structure that we can return
-        while (!nearest.empty()){
-            nearestImages.push_back(nearest.top());
-            nearest.pop();
-        }
-        std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
-        return reversed;
     }
-}  
+    // Fill up the a structure that we can return
+    while (!nearest.empty()){
+        nearestImages.push_back(nearest.top());
+        nearest.pop();
+    }
+    std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+    return reversed;
+} 
 
