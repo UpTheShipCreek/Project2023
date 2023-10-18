@@ -44,6 +44,17 @@ int gFunction::evaluate_point(std::vector<double> p){
     }
 }
 
+int fFunction::evaluate_point(int h_p){ // Taking the projection of a point and projecting it into 0 or 1
+    for(int i = 0; i < (int)(KnownValues.size()); i++){
+        if((KnownValues[i].first == h_p)){ // If we've encountered the value before
+            return KnownValues[i].second; // Fetch it from the known values
+        }
+    }
+    int result = Rand.generate_int_uniform(0, 1); // else generate a new one 
+    KnownValues.push_back(std::make_pair(h_p, result)); // and don't forget to save it 
+    return result;
+}
+
 HashTable::HashTable(int num, std::shared_ptr<HashFunction> hashfunction){ // Constructor
         this->NumberOfBuckets = num;
         this->HF = hashfunction;
@@ -65,7 +76,16 @@ void HashTable::insert(std::shared_ptr<ImageVector> image){ // Insert an image t
 
     Table[bucketId].push_back(image);
 }
-const std::vector<std::shared_ptr<ImageVector>>& HashTable::get_bucket_of_image(std::shared_ptr<ImageVector> image){ // Returns the bucket a specific image resides in 
+const std::vector<std::shared_ptr<ImageVector>>& HashTable::get_bucket_from_image_vector(std::shared_ptr<ImageVector> image){ // Returns the bucket a specific image resides in 
     int bucketId = NumberToId[image->get_number()] % NumberOfBuckets;
     return Table[bucketId];
+}
+
+
+
+const std::vector<std::shared_ptr<ImageVector>>& HashTable::get_bucket_from_bucket_id(int bucketId){ 
+    return Table[bucketId];
+}
+int HashTable::get_bucket_id_from_image_vector(std::shared_ptr<ImageVector> image){
+    return NumberToId[image->get_number()] % NumberOfBuckets;
 }

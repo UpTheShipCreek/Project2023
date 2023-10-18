@@ -46,9 +46,14 @@ class gFunction : public HashFunction{
     int evaluate_point(std::vector<double> p) override;
 };
 
-// class fFunction : public HashFunction{
+class fFunction{
+    std::vector<std::pair<int, int>> KnownValues; // <h(p), f(h(p)) pairs
+    Random Rand;
 
-// };
+    public:
+    fFunction();
+    int evaluate_point(int h_p); // Taking the projection of a point and projecting it into 0 or 1
+};
 
 class HashTable{
     int NumberOfBuckets;
@@ -60,7 +65,10 @@ class HashTable{
     HashTable(int num, std::shared_ptr<HashFunction> hashfunction);
     bool same_id(std::shared_ptr<ImageVector> image1, std::shared_ptr<ImageVector> image2);
     void insert(std::shared_ptr<ImageVector> image);
-    const std::vector<std::shared_ptr<ImageVector>>& get_bucket_of_image(std::shared_ptr<ImageVector> image);
+    const std::vector<std::shared_ptr<ImageVector>>& get_bucket_from_image_vector(std::shared_ptr<ImageVector> image);
+
+    const std::vector<std::shared_ptr<ImageVector>>& get_bucket_from_bucket_id(int bucketId);
+    int get_bucket_id_from_image_vector(std::shared_ptr<ImageVector> image);
 };
 
 #endif
