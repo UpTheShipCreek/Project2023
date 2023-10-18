@@ -49,7 +49,7 @@ std::vector<std::pair<double, int>> LSH::approximate_k_nearest_neighbors(std::sh
     
     // for i from 1 to L do
     for(i = 0; i < this->L; i++){
-        bucket = Tables[i]->get_bucket_of_image(image);
+        bucket = Tables[i]->get_bucket_from_image_vector(image);
         // for each item p in bucket gi (q) do
         for(j = 0; j < (int)(bucket.size()); j++){ 
             // Get the number of the image
@@ -100,7 +100,7 @@ std::vector<std::pair<double, int>> LSH::approximate_range_search(std::shared_pt
 
     // for i from 1 to L do
     for(i = 0; i < L; i++){
-        bucket = Tables[i]->get_bucket_of_image(image);
+        bucket = Tables[i]->get_bucket_from_image_vector(image);
         // for each item p in bucket gi (q) do
         for(j = 0; j < (int)bucket.size(); j++){
             // Get the number of the image
