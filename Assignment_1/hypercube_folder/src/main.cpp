@@ -132,8 +132,12 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // -------------- INITIALIZE HYPECUBE AND LOAD IMAGES----------------- //
     // ------------------------------------------------------------------- //
-    if(M == -1){ // M = (#_of_dataset_images / 2^k) * k!/probes!(k-probes)!  
-        M = (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(probes)*factorial(k-probes))));
+    if(M == -1){ // M = (#_of_dataset_images / 2^k) * k!/probes!(k-probes)!
+        M = 0;
+        for(int i = 1; i <= probes; i++){
+            M += (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(i)*factorial(k-i))));
+        }  
+        // M = (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(probes)*factorial(k-probes))));
         printf("Calculated minimum required value M = %d\n", M);
     }
 
