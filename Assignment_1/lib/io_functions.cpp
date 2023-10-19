@@ -45,7 +45,7 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
 
 
 // Takes as input the query and two vectors, one of the approximate results and one of the exhaustive results
-void write_approx_exhaust(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tLSH, double tTrue, FILE* outputFile){
+void write_approx_lsh(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tLSH, double tTrue, FILE* outputFile){
     fprintf(outputFile, "\nQuery: %d\n", query->get_number());
     for(int i = 0; i < (int)approx.size(); i++){
         fprintf(outputFile,"Nearest neighbor-%d: %d\n", i+1, approx[i].second);
@@ -55,6 +55,18 @@ void write_approx_exhaust(std::shared_ptr<ImageVector> query, std::vector<std::p
     fprintf(outputFile,"tLSH: %f\n", tLSH);
     fprintf(outputFile,"tTrue: %f\n", tTrue);
 }
+
+void write_approx_cube(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tCube, double tTrue, FILE* outputFile){
+    fprintf(outputFile, "\nQuery: %d\n", query->get_number());
+    for(int i = 0; i < (int)approx.size(); i++){
+        fprintf(outputFile,"Nearest neighbor-%d: %d\n", i+1, approx[i].second);
+        fprintf(outputFile,"distanceHypercube: %f\n", approx[i].first);
+        fprintf(outputFile,"distanceTrue: %f\n", exhaust[i].first);
+    }
+    fprintf(outputFile,"tHypercube: %f\n", tCube);
+    fprintf(outputFile,"tTrue: %f\n", tTrue);
+}
+
 // Write the results of the range search
 void write_r_near(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> inRange, FILE* outputFile){
     fprintf(outputFile,"%d-near neighbors:\n", query->get_number());

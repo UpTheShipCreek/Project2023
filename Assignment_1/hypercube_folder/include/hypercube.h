@@ -26,6 +26,7 @@ class HyperCube{
     HyperCube(int dimensions, int probes, int numberOfElementsToCheck);
     void load_data(std::vector<std::shared_ptr<ImageVector>> images);
     std::vector<std::pair<double, int>> approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest);
+    std::vector<std::pair<double, int>> approximate_range_search(std::shared_ptr<ImageVector> image, double r);
 };
 
 #endif

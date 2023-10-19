@@ -148,7 +148,7 @@ int main(int argc, char **argv){
         // ------------------------------------------------------------------- //
         // ------------------------ APPROXIMATE RANGE ------------------------ //
         // ------------------------------------------------------------------- //
-        //range_approx = lsh.approximate_range_search(queries[i], R); // Get all the images that are in range R from the query
+        range_approx = hypercube.approximate_range_search(queries[i], R); // Get all the images that are in range R from the query
         // ------------------------------------------------------------------- //
         // ------------------------ APPROXIMATE RANGE ------------------------ //
         // ------------------------------------------------------------------- //
@@ -156,8 +156,8 @@ int main(int argc, char **argv){
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //
-        write_approx_exhaust(queries[i], nearest_approx, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
-        //write_r_near(queries[i], range_approx, outputFile);
+        write_approx_cube(queries[i], nearest_approx, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
+        write_r_near(queries[i], range_approx, outputFile);
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //
