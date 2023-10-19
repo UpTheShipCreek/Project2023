@@ -15,18 +15,18 @@ int hamming_distance(int x, int y){
 }
 
 std::vector<int> find_all_with_hamming_distance_one(int input, int dimensions){
+    int neighbor;
     std::vector<int> result;
     
-    for (int i = 0; i < dimensions; i++) {
-        int flippedBit = input ^ (1 << i);
-        result.push_back(flippedBit);
+    for (int i = 0; i < dimensions; i++){
+        neighbor = input ^ (1 << i); // The XOR operation with a 1 at the i-th position flips the i-th bit, so we end up finding all the direct neighbors i.e. numbers with one flipped bit
+        result.push_back(neighbor);
     }
-    
     return result;
 }
 
 std::vector<int> get_probes(int number, int numberOfProbes, int dimensions){
-    std::set<int> uniqueProbes;  // So that we can ignore duplicates
+    std::unordered_set<int> uniqueProbes;  // So that we can ignore duplicates
     std::vector<int> probes;
 
     if (numberOfProbes <= 0){
@@ -37,7 +37,7 @@ std::vector<int> get_probes(int number, int numberOfProbes, int dimensions){
         std::vector<int> hammingDistanceOne = find_all_with_hamming_distance_one(number, dimensions);
         std::vector<int> temp;
         
-        for (int i = 0; i < (int)hammingDistanceOne.size(); i++) {
+        for (int i = 0; i < (int)hammingDistanceOne.size(); i++){
             temp = get_probes(hammingDistanceOne[i], numberOfProbes - 1, dimensions); // Recursive call cause it is easier to think of it that way
             uniqueProbes.insert(temp.begin(), temp.end());  // Insert into the set to ensure uniqueness
         }
@@ -66,7 +66,6 @@ int HypercubeHashFunction::evaluate_point(std::vector<double> p){
         hashCode <<= 1; // shift so that we have some space for the next digit
         hashCode |= bDigit; // save the code of the particular projection
     }
-    //printf("HashCode: %d\n", hashCode);
     return hashCode;
 }
 
@@ -77,9 +76,7 @@ HyperCube::HyperCube(int dimensions, int probes, int numberOfElementsToCheck){
     this->Probes = probes;
 
     std::shared_ptr<HashFunction> hashFunction = std::make_shared<HypercubeHashFunction>(this->K);
-    int numberOfBuckets = 1 << K;
-
-    //printf("Number of buckets: %d\n", numberOfBuckets);
+    int numberOfBuckets = 1 << K; // Essentially 2^K
 
     this->Table = std::make_shared<HashTable>(numberOfBuckets, hashFunction);
 }
@@ -113,21 +110,15 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
 
     // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
     probes = get_probes(bucketId, this->Probes, this->K);
-    //printf("Probes of %d are : \n", bucketId);
-    for(i = 0; i < (int)(probes.size()); i++){
-        //printf("%d\n", probes[i]);
-    }
 
-    // For each probe 
+    // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
     for(i = 0; i < (int)(probes.size()); i++){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
         // Search the bucket for the nearest neighbors
         j = 0;
-        //while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
-        while(j < (int)(bucket.size())){
-            //printf("Bucket size is: %ld\n", bucket.size());
+        while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
 
             visitedPointsCounter++;
             prospectImageNumber = bucket[j]->get_number();
@@ -137,8 +128,6 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
                 // dist(p,q)
                 distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
 
-                //printf("Found distance: %f\n", distance);
-
                 nearest.push(std::make_pair(distance, prospectImageNumber));
 
                 // Keep the number of nearest neighbors the correct size
@@ -146,7 +135,7 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
                     nearest.pop();
                 }
             }
-            j++;
+            j++; // That's why I hate while loops, I always forget to increment the counter
         }
     }
     // Fill up the a structure that we can return

@@ -2,7 +2,7 @@
 #define HYPERCUBE_H
 
 #include "hashtable.h"
-#include <set>
+#include <unordered_set>
 
 int hamming_distance(int x, int y);
 std::vector<int> find_all_with_hamming_distance_one(int input, int dimensions);
