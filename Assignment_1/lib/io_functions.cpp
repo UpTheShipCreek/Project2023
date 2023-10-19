@@ -68,8 +68,8 @@ void write_approx_cube(std::shared_ptr<ImageVector> query, std::vector<std::pair
 }
 
 // Write the results of the range search
-void write_r_near(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> inRange, FILE* outputFile){
-    fprintf(outputFile,"%d-near neighbors:\n", query->get_number());
+void write_r_near(std::vector<std::pair<double, int>> inRange, int r, FILE* outputFile){
+    fprintf(outputFile,"%d-near neighbors:\n", r);
     for(int i = 0; i < (int)inRange.size(); i++){
         fprintf(outputFile,"Nearest neighbor-%d: %d\n", i+1, inRange[i].second);
     }

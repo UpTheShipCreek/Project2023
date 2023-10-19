@@ -13,11 +13,23 @@
 
 #define QUERY_NUMBER 10
 
+long double factorial(int n){
+    if(n < 0) return 0;
+
+    int i;
+    long double  result = 1; 
+
+    for(i = 1; i <= n; i++){
+        result *= i;
+    }
+    return result;
+}
+
 int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
-    int k = 14, M = 10, probes = 2, N = 1;                              //Default values for hypercube projection, if not altered by user
+    int k = 14, M = -1, probes = 2, N = 1;                              //Default values for hypercube projection, if not altered by user
     double R = 1000.0;
     int opt;
     extern char *optarg; 
@@ -62,13 +74,17 @@ int main(int argc, char **argv){
                 break;
         }
     }
-
     if(cmdNecessary != 3){
         printf("Program execution requires an input file, output file and a query file.");
         return -1;
     }
     else{
-        printf("Program will proceed with values: k = %d, M = %d, probes = %d, R = %f\n", k, M, probes, R);
+        if(M != -1){
+            printf("Program will proceed with values: k = %d, M = %d, probes = %d, N = %d, R = %f\n", k, M, probes, N, R);
+        }
+        else{
+            printf("Program will proceed with values: k = %d, M = Default, probes = %d, N = %d, R = %f\n", k, probes, N, R);
+        }
     }
     // ------------------------------------------------------------------- //
     // -------------------------- INPUT PARSING -------------------------- //
@@ -80,14 +96,6 @@ int main(int argc, char **argv){
     FILE* outputFile = fopen(outputFileName.c_str(), "w");
     // ------------------------------------------------------------------- //
     // -------------------------- OPEN OUTPUT FILE ----------------------- //
-    // ------------------------------------------------------------------- //
-
-    // ------------------------------------------------------------------- //
-    // ------------------------- INITIALIZE LSH -------------------------- //
-    // ------------------------------------------------------------------- //
-    HyperCube hypercube(k, probes, M);
-    // ------------------------------------------------------------------- //
-    // ------------------------- INITIALIZE LSH -------------------------- //
     // ------------------------------------------------------------------- //
 
     // ------------------------------------------------------------------- //
@@ -112,15 +120,31 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
 
     // ------------------------------------------------------------------- //
-    // ------------------------ OPEN AND LOAD INPUT ---------------------- //
+    // -------------------------- READ IMAGES ---------------------------- //
     // ------------------------------------------------------------------- //
     std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images(queryFile, 0);
     std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, (int)queries.size());
     images.insert(images.end(), queries.begin(), queries.end()); // Merge the two vectors of images so you can load them all at once
+    // ------------------------------------------------------------------- //
+    // -------------------------- READ IMAGES ---------------------------- //
+    // ------------------------------------------------------------------- //
+
+    // ------------------------------------------------------------------- //
+    // -------------- INITIALIZE HYPECUBE AND LOAD IMAGES----------------- //
+    // ------------------------------------------------------------------- //
+    if(M == -1){// M = (#_of_dataset_images / 2^k) * k!/probes!(k-probes)!  
+        M = (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(probes)*factorial(k-probes))));
+    }
+    printf("Calculated minimum required value M = %d\n", M);
+
+    HyperCube hypercube(k, probes, M);
     hypercube.load_data(images); // Load the data to the hypercube
     // ------------------------------------------------------------------- //
-    // ------------------------ OPEN AND LOAD INPUT ---------------------- //
+    // -------------- INITIALIZE HYPECUBE AND LOAD IMAGES----------------- //
     // ------------------------------------------------------------------- //
+
+    
+   
     int i = 0;
     while(i < QUERY_NUMBER  && i < (int)(queries.size())){
         // ------------------------------------------------------------------- //
@@ -157,7 +181,7 @@ int main(int argc, char **argv){
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //
         write_approx_cube(queries[i], nearest_approx, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
-        write_r_near(queries[i], range_approx, outputFile);
+        write_r_near(range_approx, R, outputFile);
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //

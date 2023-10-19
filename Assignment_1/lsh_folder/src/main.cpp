@@ -154,7 +154,7 @@ int main(int argc, char **argv){
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //
         write_approx_lsh(queries[i], nearest_approx, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
-        write_r_near(queries[i], range_approx, outputFile);
+        write_r_near(range_approx, R, outputFile);
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //

@@ -93,7 +93,7 @@ void HyperCube::load_data(std::vector<std::shared_ptr<ImageVector>> images){
 std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest){
     int i, j, prospectImageNumber;
     double distance;
-    int visitedVerticesCounter = 0;
+    int visitedPointsCounter = 0;
     int queryImageNumber = image->get_number();
 
     // This will be saving all the bucket_ids/hypercube vertices that we will be visiting
@@ -113,15 +113,18 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
     probes = get_probes(bucketId, this->Probes, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-    i = 0;
-    while(i < (int)(probes.size()) && visitedVerticesCounter < (this->M)){
-        visitedVerticesCounter++;
-
+    // i = 0;
+    // while(i < (int)(probes.size()) && visitedPointsCounter < (this->M)){
+    for(i = 0; i < (int)(probes.size()); i++){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
         // Search the bucket for the nearest neighbors
-        for(j = 0; j < (int)(bucket.size()); j++){
+        //for(j = 0; j < (int)(bucket.size()); j++){
+        j = 0;
+        while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
+            visitedPointsCounter++;
+
             prospectImageNumber = bucket[j]->get_number();
 
             // Ignore comparing with itself
@@ -136,8 +139,9 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
                     nearest.pop();
                 }
             }
+            j++;
         }
-        i++;
+        // i++;
     }
     // Fill up the a structure that we can return
     while (!nearest.empty()){
@@ -151,7 +155,7 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
 std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::shared_ptr<ImageVector> image, double r){
     int i, j, prospectImageNumber;
     double distance;
-    int visitedVerticesCounter = 0;
+    int visitedPointsCounter = 0;
     int queryImageNumber = image->get_number();
 
     // This will be saving all the bucket_ids/hypercube vertices that we will be visiting
@@ -171,15 +175,16 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
     probes = get_probes(bucketId, this->Probes, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-    i = 0;
-    while(i < (int)(probes.size()) && visitedVerticesCounter < (this->M)){
-        visitedVerticesCounter++;
-
+   for(i = 0; i < (int)(probes.size()); i++){
         // Get the bucket
-        bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);
+        bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
         // Search the bucket for the nearest neighbors
-        for(j = 0; j < (int)(bucket.size()); j++){
+        //for(j = 0; j < (int)(bucket.size()); j++){
+        j = 0;
+        while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
+            visitedPointsCounter++;
+
             prospectImageNumber = bucket[j]->get_number();
 
             // Ignore comparing with itself
@@ -191,8 +196,9 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
                     nearest.push(std::make_pair(distance, prospectImageNumber));
                 }
             }
+            j++;
         }
-        i++;
+        // i++;
     }
     // Fill up the a structure that we can return
     while (!nearest.empty()){
