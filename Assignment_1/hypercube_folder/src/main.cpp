@@ -132,10 +132,10 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // -------------- INITIALIZE HYPECUBE AND LOAD IMAGES----------------- //
     // ------------------------------------------------------------------- //
-    if(M == -1){// M = (#_of_dataset_images / 2^k) * k!/probes!(k-probes)!  
+    if(M == -1){ // M = (#_of_dataset_images / 2^k) * k!/probes!(k-probes)!  
         M = (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(probes)*factorial(k-probes))));
+        printf("Calculated minimum required value M = %d\n", M);
     }
-    printf("Calculated minimum required value M = %d\n", M);
 
     HyperCube hypercube(k, probes, M);
     hypercube.load_data(images); // Load the data to the hypercube
