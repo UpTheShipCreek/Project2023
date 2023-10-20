@@ -1,8 +1,10 @@
 #ifndef HYPERCUBE_H
 #define HYPERCUBE_H
 
-#include "hashtable.h"
 #include <unordered_set>
+
+#include "hashtable.h"
+#include "approximate_methods.h"
 
 int hamming_distance(int x, int y);
 std::vector<int> find_all_with_hamming_distance_one(int input, int dimensions);
@@ -18,7 +20,7 @@ class HypercubeHashFunction : public HashFunction{
     int evaluate_point(std::vector<double> p) override;
 };
 
-class HyperCube{
+class HyperCube : public ApproximateMethods{
     int K, Probes, M;
     std::shared_ptr<HashTable> Table;
 

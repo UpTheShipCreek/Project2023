@@ -1,7 +1,6 @@
 #include "lsh.h"
 
 LSH::LSH(int l, int k, int modulo, int tableSize){
-        printf("Creating LSH... ");
         fflush(stdout);
         this->L = l;
         this->K = k;
