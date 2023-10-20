@@ -30,7 +30,7 @@ HYPERCUBE_EXEC = cube
 CLUSTER_EXEC = cluster
 
 # Targets and rules
-all: lsh cube
+all: lsh cube cluster
 
 lsh: $(LSH_EXEC)
 
