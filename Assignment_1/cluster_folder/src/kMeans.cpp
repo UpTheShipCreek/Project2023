@@ -144,6 +144,12 @@ class kMeans{
     }
 };
 
+
+template <typename T>
+std::vector<std::pair<double, int>> call(std::vector<std::pair<double, int>>(T::*func)(std::shared_ptr<ImageVector>, double), T& obj, std::shared_ptr<ImageVector> image, double r) {
+    return (obj.*func)(image, r);
+}
+
 int main(void){
     std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("/home/xv6/Desktop/Project2023/Assignment_1/in/query.dat", 0);
     kMeans kmeans(10, dataset);
@@ -151,4 +157,13 @@ int main(void){
     for(int i = 0; i < (int)kmeans.get_centroids().size(); i++){
         printf("Centroid %d: %d\n", i, kmeans.get_centroids()[i]->get_number());
     }
+
+    LSH lsh(4,5,MODULO,LSH_TABLE_SIZE);
+    lsh.load_data(dataset);
+
+    std::vector<std::pair<double, int>> nearest_approx = call(&LSH::approximate_range_search, lsh, dataset[0], 2000.0);
+
+    printf("Number of points: %d\n", (int)nearest_approx.size());
+
+    return 0;
 }
