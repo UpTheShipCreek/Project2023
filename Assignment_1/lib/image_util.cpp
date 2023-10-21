@@ -9,8 +9,17 @@ int  ImageVector::get_number(){
     return this->Number;
 }
 
-std::vector<double>  ImageVector::get_coordinates(){
+std::vector<double> ImageVector::get_coordinates(){
     return this->Coordinates;
+}
+
+std::size_t ImageVector::hash() const{
+    return std::hash<int>()(Number);
+}
+
+// Implement custom equality operator for ImageVector
+bool ImageVector::operator==(const ImageVector& other) const{
+    return Coordinates == other.Coordinates && Number == other.Number;
 }
 
 std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, int numberOfNearest){

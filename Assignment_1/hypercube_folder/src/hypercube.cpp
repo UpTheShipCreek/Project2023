@@ -209,3 +209,57 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
     return reversed;
 }
 
+std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approximate_range_search_return_images(std::shared_ptr<ImageVector> image, double r){
+//     int i, j, prospectImageNumber;
+//     double distance;
+//     int visitedPointsCounter = 0;
+//     int queryImageNumber = image->get_number();
+
+//     // This will be saving all the bucket_ids/hypercube vertices that we will be visiting
+//     std::vector<int> probes;
+//     std::vector<std::shared_ptr<ImageVector>> bucket;
+
+//     // Let b ← Null; db ← ∞; initialize k best candidates and distances;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest;
+
+//     // Get the bucket id
+//     int bucketId = Table->get_bucket_id_from_image_vector(image);
+
+//     // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
+//     probes = get_probes(bucketId, this->Probes, this->K);
+
+//     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
+//    for(i = 0; i < (int)(probes.size()); i++){
+//         // Get the bucket
+//         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
+
+//         // Search the bucket for the nearest neighbors
+//         //for(j = 0; j < (int)(bucket.size()); j++){
+//         j = 0;
+//         while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
+//             visitedPointsCounter++;
+
+//             prospectImageNumber = bucket[j]->get_number();
+
+//             // Ignore comparing with itself
+//             if(prospectImageNumber != queryImageNumber){
+//                 // dist(p,q)
+//                 distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+
+//                 if(distance <= r){
+//                     nearest.push(std::make_pair(distance, bucket[j]));
+//                 }
+//             }
+//             j++;
+//         }
+//         // i++;
+//     }
+//     // Fill up the a structure that we can return
+//     while (!nearest.empty()){
+//         nearestImages.push_back(nearest.top());
+//         nearest.pop();
+//     }
+//     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+    return nearest;
+}
+

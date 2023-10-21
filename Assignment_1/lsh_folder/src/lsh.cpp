@@ -1,7 +1,6 @@
 #include "lsh.h"
 
 LSH::LSH(int l, int k, int modulo, int tableSize){
-        fflush(stdout);
         this->L = l;
         this->K = k;
         this->M = modulo;
@@ -12,9 +11,6 @@ LSH::LSH(int l, int k, int modulo, int tableSize){
             std::shared_ptr<HashFunction> hashFunction = std::make_shared<gFunction>(this->K, this->M);
             Tables.push_back(std::make_shared<HashTable>(tableSize, hashFunction));
         }
-
-        printf("Done\n");
-        fflush(stdout);
 }
 
 void LSH::load_data(std::vector<std::shared_ptr<ImageVector>> images){ // Load the data to the LSH
@@ -115,7 +111,57 @@ std::vector<std::pair<double, int>> LSH::approximate_range_search(std::shared_pt
                 // if dist(q, p) < r then output p
                 distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
                 if(distance < r){
-                    inRangeImages.push_back(std::make_pair(distance, imageNumber));
+                    inRangeImages.push_back(std::make_pair(distance, imageNumber)); // maybe add bucket[j] also
+                }
+            }
+            // if large number of retrieved items (e.g. > 20L) then return
+            if((int)inRangeImages.size() > 20*(this->L)) return inRangeImages;
+        }
+    }
+    return inRangeImages;
+}
+
+// Turns out I did some assumptions making the LSH/Hypercube programs that weren't so good for the k-means. 
+// Firstly I assummed that it was okay to treat every query as a query from within the dataset itself, so I just pushed the queries into the dataset as well
+// and secondly I chose to not return the imagevector type at all but only the distance and the imagenumber
+// This implemntation solves both of these problems; it assumes that the query is not from the dataset and it returns the imagevector type along with the distance
+// Downside of this is that I had to implement some hashtable class methods that are arguably violating encapsulation 
+std::vector<std::pair<double, std::shared_ptr<ImageVector>>> LSH::approximate_range_search_return_images(std::shared_ptr<ImageVector> image, double r){ 
+    int i, j, imageNumber;
+    double distance;
+
+    std::pair<int,int> imageBucketIdAndId;
+
+    // Ignore itself and every other image it has met before
+    std::vector<int> ignore;
+    std::vector<int>::iterator it; // Initializing the iteration variable
+
+    // The returned vector
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> inRangeImages;
+
+    // The pointer of each bucket
+    std::vector<std::shared_ptr<ImageVector>> bucket;
+
+    // for i from 1 to L do
+    for(i = 0; i < L; i++){
+        imageBucketIdAndId = Tables[i]->virtual_insert(image);
+        bucket = Tables[i]->get_bucket_from_bucket_id(imageBucketIdAndId.first);
+        // for each item p in bucket gi (q) do
+        for(j = 0; j < (int)bucket.size(); j++){ // For each image in the bucket
+            // Get the number of the image
+            imageNumber = bucket[j]->get_number();
+
+            // See if we have encountered it before
+            it = std::find(ignore.begin(), ignore.end(), imageNumber);
+
+            if(Tables[i]->get_image_id(bucket[j]) == imageBucketIdAndId.second && (it == ignore.end())){ // Query trick + ignore the images we have encountered before
+                // Ignore the image if you find it again
+                ignore.push_back(imageNumber);
+
+                // if dist(q, p) < r then output p
+                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                if(distance < r){
+                    inRangeImages.push_back(std::make_pair(distance, bucket[j])); // maybe add bucket[j] also
                 }
             }
             // if large number of retrieved items (e.g. > 20L) then return

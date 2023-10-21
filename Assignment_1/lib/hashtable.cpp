@@ -70,7 +70,7 @@ void HashTable::insert(std::shared_ptr<ImageVector> image){ // Insert an image t
 
     int bucketId = id % NumberOfBuckets;
 
-    if (Table.find(bucketId) == Table.end()) {
+    if(Table.find(bucketId) == Table.end()) {
         Table[bucketId] = std::vector<std::shared_ptr<ImageVector>>();
     }
 
@@ -82,6 +82,19 @@ const std::vector<std::shared_ptr<ImageVector>>& HashTable::get_bucket_from_imag
 }
 
 
+// Retroactive change to the code, I need to be able to inquire about an image without it being in the hash table
+
+std::pair<int, int> HashTable::virtual_insert(std::shared_ptr<ImageVector> image){ // Get the bucket_id and the id of the image if you were to insert it
+    std::vector<double> p = image->get_coordinates();
+    int id = HF->evaluate_point(p);
+    int bucketId = id % NumberOfBuckets;
+
+    return std::make_pair(bucketId, id);
+}
+
+int HashTable::get_image_id(std::shared_ptr<ImageVector> image){ // Get the id of an image
+    return NumberToId[image->get_number()];
+}
 
 const std::vector<std::shared_ptr<ImageVector>>& HashTable::get_bucket_from_bucket_id(int bucketId){ 
     return Table[bucketId];

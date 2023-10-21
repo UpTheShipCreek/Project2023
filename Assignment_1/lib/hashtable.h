@@ -66,6 +66,8 @@ class HashTable{
     void insert(std::shared_ptr<ImageVector> image);
     const std::vector<std::shared_ptr<ImageVector>>& get_bucket_from_image_vector(std::shared_ptr<ImageVector> image);
 
+    std::pair<int, int> virtual_insert(std::shared_ptr<ImageVector> image);
+    int get_image_id(std::shared_ptr<ImageVector> image);
     const std::vector<std::shared_ptr<ImageVector>>& get_bucket_from_bucket_id(int bucketId);
     int get_bucket_id_from_image_vector(std::shared_ptr<ImageVector> image);
 };
