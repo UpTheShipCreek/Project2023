@@ -135,6 +135,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> LSH::approximate_ra
     // Ignore itself and every other image it has met before
     std::vector<int> ignore;
     std::vector<int>::iterator it; // Initializing the iteration variable
+    ignore.push_back(image->get_number());
 
     // The returned vector
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> inRangeImages;
