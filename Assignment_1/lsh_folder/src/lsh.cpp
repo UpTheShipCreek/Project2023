@@ -1,9 +1,10 @@
 #include "lsh.h"
 
-LSH::LSH(int l, int k, int modulo, int tableSize){
+LSH::LSH(int l, int k, int modulo, int tableSize, Metric* metric){
         this->L = l;
         this->K = k;
         this->M = modulo;
+        this->Lmetric = metric;
 
         Tables.reserve(L);
 
@@ -58,7 +59,7 @@ std::vector<std::pair<double, int>> LSH::approximate_k_nearest_neighbors(std::sh
                 ignore.push_back(imageNumber);
 
                 // dist(p,q)
-                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                distance = Lmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
                 
                 // if dist(q, p) < db = k-th best distance then b ← p; db ← dist(q, p), implemented with a priority queue
                 nearest.push(std::make_pair(distance, imageNumber));    
@@ -109,7 +110,7 @@ std::vector<std::pair<double, int>> LSH::approximate_range_search(std::shared_pt
                 ignore.push_back(imageNumber);
 
                 // if dist(q, p) < r then output p
-                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                distance = Lmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
                 if(distance < r){
                     inRangeImages.push_back(std::make_pair(distance, imageNumber)); // maybe add bucket[j] also
                 }
@@ -160,7 +161,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> LSH::approximate_ra
                 ignore.push_back(imageNumber);
 
                 // if dist(q, p) < r then output p
-                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                distance = Lmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
                 if(distance < r){
                     inRangeImages.push_back(std::make_pair(distance, bucket[j])); // maybe add bucket[j] also
                 }

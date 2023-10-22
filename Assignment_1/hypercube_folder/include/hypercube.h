@@ -23,9 +23,10 @@ class HypercubeHashFunction : public HashFunction{
 class HyperCube : public ApproximateMethods{
     int K, Probes, M;
     std::shared_ptr<HashTable> Table;
+    Metric* Hmetric; // Raw pointer cause it doesn't matter
 
     public:
-    HyperCube(int dimensions, int probes, int numberOfElementsToCheck);
+    HyperCube(int dimensions, int probes, int numberOfElementsToCheck, Metric* metric);
     void load_data(std::vector<std::shared_ptr<ImageVector>> images) override;
     std::vector<std::pair<double, int>> approximate_k_nearest_neighbors(std::shared_ptr<ImageVector> image, int numberOfNearest) override;
     std::vector<std::pair<double, int>> approximate_range_search(std::shared_ptr<ImageVector> image, double r) override;

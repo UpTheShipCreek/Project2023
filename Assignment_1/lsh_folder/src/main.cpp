@@ -23,6 +23,7 @@ int main(int argc, char **argv){
     extern char *optarg; 
     std::string inputFile, queryFile, outputFileName;
     int cmdNecessary = 0;
+    Eucledean metric;
     // ------------------------------------------------------------------- //
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
@@ -82,7 +83,7 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // ------------------------- INITIALIZE LSH -------------------------- //
     // ------------------------------------------------------------------- //
-    LSH lsh(L, k, MODULO, LSH_TABLE_SIZE);
+    LSH lsh(L, k, MODULO, LSH_TABLE_SIZE, &metric);
     // ------------------------------------------------------------------- //
     // ------------------------- INITIALIZE LSH -------------------------- //
     // ------------------------------------------------------------------- //
@@ -135,7 +136,7 @@ int main(int argc, char **argv){
         // ----------------------- EXHAUSTIVE NEAREST ------------------------ //
         // ------------------------------------------------------------------- //
         start = std::chrono::high_resolution_clock::now(); // Start the timer
-        nearest_exhaust = exhaustive_nearest_neighbor_search(images, queries[i], N); // Get the k real nearest vectors to the query
+        nearest_exhaust = exhaustive_nearest_neighbor_search(images, queries[i], N, &metric); // Get the k real nearest vectors to the query
         end  = std::chrono::high_resolution_clock::now(); // End the timer 
         duration_exhaust = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); // Calculate the duration
         // ------------------------------------------------------------------- //

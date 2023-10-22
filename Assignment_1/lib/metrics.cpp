@@ -1,6 +1,6 @@
 #include "metrics.h"
 
-double eucledian_distance(const std::vector<double>& p1, const std::vector<double>& p2){ // Eucledean distance function between two points in vector form
+double Eucledean::calculate_distance(const std::vector<double>& p1, const std::vector<double>& p2){ // Eucledean distance function between two points in vector form
     double sum = 0.0;
     int size;
 

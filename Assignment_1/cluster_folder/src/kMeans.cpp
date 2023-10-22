@@ -89,11 +89,13 @@ class kMeans{
     Random R;
     using AssignmentFunction = std::function<void()>; // Define a function pointer type for the mac_queen method
     double MaxDist;
+    Metric* Kmetric;
 
     public:
-    kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points){ // Needs the number of clusters and the dataset
+    kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* metric){ // Needs the number of clusters and the dataset
         this->K = k;
         this->Points = points;
+        this->Kmetric = metric;
 
         // ------------------------------------------------------------------------------ //
         // ------------------------------ Initialization++ ------------------------------ //
@@ -121,7 +123,7 @@ class kMeans{
         fflush(stdout);
 
         for(i = 0; i < (int)std::sqrt(Points.size()); i++){ // Get the distances of some points we don't need many since we are rounding up anyhow
-            allDistances.push(eucledian_distance((this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates(), (this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates()));
+            allDistances.push(Kmetric->calculate_distance((this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates(), (this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates()));
         }
 
         
@@ -156,7 +158,7 @@ class kMeans{
                     centroid = (this->Clusters)[j]->get_centroid(); // Get the centroid of the cluster
 
                     if((this->Points)[i] != centroid){ // If the point is a centroid, ignore it
-                        distancesFromCentroids.push(eucledian_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates()));
+                        distancesFromCentroids.push(Kmetric->calculate_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates()));
                     }
                 }
                 minDistance = distancesFromCentroids.top(); // Pop the first element, which least distance from a centroid
@@ -197,7 +199,7 @@ class kMeans{
     
         for(j = 0; j < (int)(this->Clusters).size(); j++){
             tempCentroid = (this->Clusters)[j]->get_centroid();
-            distance = eucledian_distance(point->get_coordinates(), tempCentroid->get_coordinates()); // Calculate the distance from each centroid
+            distance = Kmetric->calculate_distance(point->get_coordinates(), tempCentroid->get_coordinates()); // Calculate the distance from each centroid
             if(distance < minDinstace){
                 minDinstace = distance; // Get the minimum distance
                 nearestCluster = (this->Clusters)[j]; // Get the nearest cluster
@@ -253,7 +255,7 @@ class kMeans{
         for(i = 0; i < (int)Clusters.size(); i++){
             for(j = 0; j < (int)Clusters.size(); j++){
                 if(i != j){
-                    dinstaceBetweenCentroids = eucledian_distance((this->Clusters)[i]->get_centroid()->get_coordinates(), (this->Clusters)[j]->get_centroid()->get_coordinates());
+                    dinstaceBetweenCentroids = Kmetric->calculate_distance((this->Clusters)[i]->get_centroid()->get_coordinates(), (this->Clusters)[j]->get_centroid()->get_coordinates());
                     if(dinstaceBetweenCentroids < minDistanceBetweenCentroids){
                         minDistanceBetweenCentroids = dinstaceBetweenCentroids;
                     }
@@ -308,7 +310,7 @@ class kMeans{
         std::shared_ptr<ImageVector> newCentroid;
 
         for(i = 0; i < (int)(this->Clusters).size(); i++){ // Initialize the oldDistanceDifference
-            oldDistanceDifferenceVector[i] = eucledian_distance((this->Clusters)[i]->get_centroid()->get_coordinates(),zeroVector);
+            oldDistanceDifferenceVector[i] = Kmetric->calculate_distance((this->Clusters)[i]->get_centroid()->get_coordinates(),zeroVector);
         }
 
         do{
@@ -316,7 +318,7 @@ class kMeans{
             clustersConvergedCounter = 0;
             for(i = 0; i < (int)(this->Clusters).size(); i++){ // Recalculate the centroids
                 newCentroid = (this->Clusters)[i]->recalculate_centroid();
-                newDistanceDifference = eucledian_distance(newCentroid->get_coordinates(), (this->Clusters)[i]->get_centroid()->get_coordinates());
+                newDistanceDifference = Kmetric->calculate_distance(newCentroid->get_coordinates(), (this->Clusters)[i]->get_centroid()->get_coordinates());
 
                 changeOfDistanceDifferencePercentage = (oldDistanceDifferenceVector[i] - newDistanceDifference) / oldDistanceDifferenceVector[i];
                 
@@ -343,11 +345,11 @@ std::vector<std::pair<double, int>> approximate_range_search(ApproximateMethods*
 }
 
 int main(void){
-    
+    Eucledean metric;
     std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("/home/xv6/Desktop/Project2023/Assignment_1/in/query.dat", 0);
 
     std::shared_ptr<kMeans> kmeans;
-    kmeans = std::make_shared<kMeans>(10, dataset);
+    kmeans = std::make_shared<kMeans>(10, dataset, &metric);
 
     double sumOfDistances = 0;
     printf("Number of centroids: %d\n", (int)kmeans->get_centroids().size());
@@ -357,13 +359,13 @@ int main(void){
 
     for(int i = 0; i < (int)kmeans->get_centroids().size(); i++){ 
         for(int j = 0; j < (int)kmeans->get_centroids().size(); j++){ 
-            sumOfDistances += eucledian_distance(kmeans->get_centroids()[i]->get_coordinates(), kmeans->get_centroids()[j]->get_coordinates());
+            sumOfDistances += metric.calculate_distance(kmeans->get_centroids()[i]->get_coordinates(), kmeans->get_centroids()[j]->get_coordinates());
         }
     }
     printf("Metric: %f\n", sumOfDistances);
 
     std::shared_ptr<LSH> lsh;
-    lsh = std::make_shared<LSH>(4,5,MODULO,LSH_TABLE_SIZE);
+    lsh = std::make_shared<LSH>(4,5,MODULO,LSH_TABLE_SIZE, &metric);
     lsh->load_data(dataset);
 
 

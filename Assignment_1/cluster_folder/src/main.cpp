@@ -9,25 +9,64 @@
 #include <fstream>
 #include <string>
 #include <getopt.h>
-using namespace std;
 
 #include "random_functions.h"
 #include "io_functions.h"
 
+struct Config {
+    int number_of_clusters;
+    int number_of_vector_hash_tables;
+    int number_of_vector_hash_functions;
+    int max_number_M_hypercube;
+    int number_of_hypercube_dimensions;
+    int number_of_probes;
+};
+
+bool parseConfigFile(const std::string& filename, Config& config){
+    std::ifstream file(filename);
+    if(!file.is_open()){
+        std::cerr << "Error: Unable to open the config file." << std::endl;
+        return false;
+    }
+
+    std::map<std::string, int> configMap;
+
+    std::string line;
+    while(std::getline(file, line)){
+        size_t pos = line.find(':');
+        if(pos != std::string::npos){
+            std::string key = line.substr(0, pos);
+            int value = std::stoi(line.substr(pos + 1));
+            configMap[key] = value;
+        }
+    }
+
+    file.close();
+
+    // Populate the Config struct with parsed values
+    config.number_of_clusters = configMap["number_of_clusters"];
+    config.number_of_vector_hash_tables = configMap["number_of_vector_hash_tables"];
+    config.number_of_vector_hash_functions = configMap["number_of_vector_hash_functions"];
+    config.max_number_M_hypercube = configMap["max_number_M_hypercube"];
+    config.number_of_hypercube_dimensions = configMap["number_of_hypercube_dimensions"];
+    config.number_of_probes = configMap["number_of_probes"];
+
+    return true;
+}
 
 int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
     int kLSH = 4, L = 5, N = 1;                                             // Default values for lsh
-    int  kHC = 3, M = 10, probes = 2;                                       //Default values for hypercube
+    int kHC = 3, M = 10, probes = 2;                                       //Default values for hypercube
     int completeF;
     double R = 2000.0;                           
     int opt;
     extern char *optarg; 
     std::string inputFile, configFile, outputFileName, methodChoice;
     int cmdNecessary = 0;
-    enum methods {classic = 0,lsh,hypercube};
+    enum methods {classic = 0, lsh, hypercube};
     methods method;
     // ------------------------------------------------------------------- //
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //

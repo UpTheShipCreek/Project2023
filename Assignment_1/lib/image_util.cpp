@@ -22,7 +22,12 @@ bool ImageVector::operator==(const ImageVector& other) const{
     return Coordinates == other.Coordinates && Number == other.Number;
 }
 
-std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, int numberOfNearest){
+std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
+    std::vector<std::shared_ptr<ImageVector>> images, 
+    std::shared_ptr<ImageVector> image, 
+    int numberOfNearest,
+    Metric* metric){
+
     int i;
     double distance;
 
@@ -33,7 +38,7 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vect
 
     for(i = 0; i < (int)(images.size()); i++){
         if(images[i]->get_number() != image->get_number()){ // Ignore comparing it to itself
-            distance = eucledian_distance(image->get_coordinates(), images[i]->get_coordinates());
+            distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
             nearest.push(std::make_pair(distance, images[i]->get_number()));
             if ((int)(nearest.size()) > numberOfNearest){
                 nearest.pop();
@@ -48,7 +53,11 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vect
     return reversed;
 }
 
-std::vector<std::pair<double, int>> exhaustive_range_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, double r){
+std::vector<std::pair<double, int>> exhaustive_range_search(
+    std::vector<std::shared_ptr<ImageVector>> images, 
+    std::shared_ptr<ImageVector> image, 
+    double r,
+    Metric* metric){
         int i;
         double distance;
 
@@ -57,7 +66,7 @@ std::vector<std::pair<double, int>> exhaustive_range_search(std::vector<std::sha
 
         for(i = 0; i < (int)(images.size()); i++){
             if(images[i]->get_number() != image->get_number()){ // Ignore comparing to itself
-                distance = eucledian_distance(image->get_coordinates(), images[i]->get_coordinates());
+                distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
                 if(distance <= r){
                     inRangeImages.push_back(std::make_pair(distance, images[i]->get_number()));
                 }

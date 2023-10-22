@@ -71,10 +71,11 @@ int HypercubeHashFunction::evaluate_point(std::vector<double> p){
 }
 
 
-HyperCube::HyperCube(int dimensions, int probes, int numberOfElementsToCheck){
+HyperCube::HyperCube(int dimensions, int probes, int numberOfElementsToCheck, Metric* metric){
     this->M = numberOfElementsToCheck;
     this->K = dimensions;
     this->Probes = probes;
+    this->Hmetric = metric;
 
     std::shared_ptr<HashFunction> hashFunction = std::make_shared<HypercubeHashFunction>(this->K);
     int numberOfBuckets = 1 << K; // Essentially 2^K
@@ -130,7 +131,7 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
             // Ignore comparing with itself
             if(prospectImageNumber != queryImageNumber){ 
                 // dist(p,q)
-                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                distance = Hmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
 
                 nearest.push(std::make_pair(distance, prospectImageNumber));
 
@@ -190,7 +191,7 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
             // Ignore comparing with itself
             if(prospectImageNumber != queryImageNumber){
                 // dist(p,q)
-                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                distance = Hmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
 
                 if(distance <= r){
                     nearest.push(std::make_pair(distance, prospectImageNumber));
@@ -252,7 +253,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
             // Ignore comparing with itself
             if(prospectImageNumber != queryImageNumber){
                 // dist(p,q)
-                distance = eucledian_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+                distance = Hmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
 
                 if(distance <= r){
                     nearest.push(std::make_pair(distance, bucket[j]));

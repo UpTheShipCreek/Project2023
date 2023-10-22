@@ -22,7 +22,7 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
     printf("Reading images... ");
 
     // Read and process each image entry
-    while (file.read(reinterpret_cast<char*>(imagePixels.data()), 784)) {
+    while(file.read(reinterpret_cast<char*>(imagePixels.data()), 784)){
         // Convert pixel values from unsigned char to double and normalize
         std::vector<double> normalizedPixels(784);
         for (int i = 0; i < 784; i++){
