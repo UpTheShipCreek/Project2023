@@ -7,12 +7,17 @@
 #include <chrono>
 #include <unistd.h>
 #include <cfloat>
+#include <functional>
 
 #include "random_functions.h"
 #include "io_functions.h"
 #include "metrics.h"
 #include "lsh.h"
 #include "hypercube.h"
+
+#define NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE 0.8 // If at 80% of the clusters are converged then we have converged
+#define DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE 0.01 // If the change in the distance is less than 1% of the max distance between two points in our dataset then we have converged
+#define CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE 0.2 // Taking into account the percentage of the change of the change of distance between two epochs
 
 double round_up_to_nearest_order_of_magnitude(double number){
     double order = std::pow(10, std::floor(std::log10(number)));
@@ -51,6 +56,9 @@ class Cluster{
         return this->Centroid;
     }
 
+    std::vector<std::shared_ptr<ImageVector>> get_points(){
+        return this->Points;
+    }
     std::shared_ptr<ImageVector> recalculate_centroid(){
         int j;
         int clusterSize = (int)(this->Points).size();
@@ -79,6 +87,8 @@ class kMeans{
     std::vector<std::shared_ptr<ImageVector>> Points;
     std::vector<std::shared_ptr<Cluster>> Clusters;
     Random R;
+    using AssignmentFunction = std::function<void()>; // Define a function pointer type for the mac_queen method
+    double MaxDist;
 
     public:
     kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points){ // Needs the number of clusters and the dataset
@@ -113,7 +123,11 @@ class kMeans{
         for(i = 0; i < (int)std::sqrt(Points.size()); i++){ // Get the distances of some points we don't need many since we are rounding up anyhow
             allDistances.push(eucledian_distance((this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates(), (this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates()));
         }
+
+        
+
         maxDistance = round_up_to_nearest_order_of_magnitude(allDistances.top()); // Get the max distance
+        this->MaxDist = maxDistance;
 
         printf("Max distance approximation: %f\n", maxDistance);
         fflush(stdout);
@@ -260,12 +274,12 @@ class kMeans{
                 inRangeImages = method->approximate_range_search_return_images(centroid, radius);
                 for(j = 0; j < (int)inRangeImages.size(); j++){
                     if(unassignedImages.find((inRangeImages[j].second)) != unassignedImages.end()){ // If the point is unassingned
-                        (this->Clusters)[i]->add_point(inRangeImages[j].second);
+                        (this->Clusters)[i]->add_point(inRangeImages[j].second); // Add the point to the cluster
                         unassignedImages.erase((inRangeImages[j].second));  // Delete the image from the unassigned images
                     }
                 }
             }
-            radius *= 2;
+            radius *= 2; // Increase the radius
         }
 
         // Assign the remaining points to the nearest centroid
@@ -273,6 +287,54 @@ class kMeans{
             nearestCluster = get_nearest_cluster(item);
             nearestCluster->add_point(item);
         }
+    }
+
+    void mac_queen(AssignmentFunction assignment){
+        int i, clustersConvergedCounter;
+        int clusterNumberConvergenceTolerance = int((double)(this->Clusters).size() * NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE); // If at 80% of the clusters are converged then we have converged
+        bool hasConverged = false;
+
+        std::vector<double> oldDistanceDifferenceVector((this->Clusters).size(), 0.0); // I need to initialize this with the distance of each centroid from the (0, 0...0) point
+        double newDistanceDifference;
+        double distanceDifferenceAsMaxPercentageTolerance = this->MaxDist * DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE; //  If the change in the distance is less than 1% of the max distance between two points in our dataset then we have converged
+        
+        double changeOfDistanceDifferencePercentage;
+
+        std::vector<double> zeroVector(((this->Clusters)[0]->get_centroid()->get_coordinates()).size(), 0.0);
+
+        printf("Need at least %d clusters to converge\n", clusterNumberConvergenceTolerance);
+        printf("Tolerance percentage: %f\n", distanceDifferenceAsMaxPercentageTolerance);
+
+        std::shared_ptr<ImageVector> newCentroid;
+
+        for(i = 0; i < (int)(this->Clusters).size(); i++){ // Initialize the oldDistanceDifference
+            oldDistanceDifferenceVector[i] = eucledian_distance((this->Clusters)[i]->get_centroid()->get_coordinates(),zeroVector);
+        }
+
+        do{
+            assignment(); // Assign the points to the clusters
+            clustersConvergedCounter = 0;
+            for(i = 0; i < (int)(this->Clusters).size(); i++){ // Recalculate the centroids
+                newCentroid = (this->Clusters)[i]->recalculate_centroid();
+                newDistanceDifference = eucledian_distance(newCentroid->get_coordinates(), (this->Clusters)[i]->get_centroid()->get_coordinates());
+
+                changeOfDistanceDifferencePercentage = (oldDistanceDifferenceVector[i] - newDistanceDifference) / oldDistanceDifferenceVector[i];
+                
+                oldDistanceDifferenceVector[i] = newDistanceDifference;
+
+                printf("%d distance: %f and percentage change: %f\n", i, newDistanceDifference, changeOfDistanceDifferencePercentage);
+
+                if(newDistanceDifference < distanceDifferenceAsMaxPercentageTolerance ||  changeOfDistanceDifferencePercentage < CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE){ // If the distance is bigger than the tolerance
+                    clustersConvergedCounter++;
+                }
+
+                (this->Clusters)[i]->set_centroid(newCentroid);
+            }
+            printf("%d clusters converged\n", clustersConvergedCounter);
+            if(clustersConvergedCounter >= clusterNumberConvergenceTolerance){ // Check if our 80% floor has been reached
+                hasConverged = true;
+            }
+        }while(!hasConverged);
     }
 };
 
@@ -283,17 +345,19 @@ std::vector<std::pair<double, int>> approximate_range_search(ApproximateMethods*
 int main(void){
     
     std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("/home/xv6/Desktop/Project2023/Assignment_1/in/query.dat", 0);
-    kMeans kmeans(10, dataset);
+
+    std::shared_ptr<kMeans> kmeans;
+    kmeans = std::make_shared<kMeans>(10, dataset);
 
     double sumOfDistances = 0;
-    printf("Number of centroids: %d\n", (int)kmeans.get_centroids().size());
-    for(int i = 0; i < (int)kmeans.get_centroids().size(); i++){
-        printf("Centroid %d: %d\n", i, kmeans.get_centroids()[i]->get_number());
+    printf("Number of centroids: %d\n", (int)kmeans->get_centroids().size());
+    for(int i = 0; i < (int)kmeans->get_centroids().size(); i++){
+        printf("Centroid %d: %d\n", i, kmeans->get_centroids()[i]->get_number());
     }
 
-    for(int i = 0; i < (int)kmeans.get_centroids().size(); i++){ 
-        for(int j = 0; j < (int)kmeans.get_centroids().size(); j++){ 
-            sumOfDistances += eucledian_distance(kmeans.get_centroids()[i]->get_coordinates(), kmeans.get_centroids()[j]->get_coordinates());
+    for(int i = 0; i < (int)kmeans->get_centroids().size(); i++){ 
+        for(int j = 0; j < (int)kmeans->get_centroids().size(); j++){ 
+            sumOfDistances += eucledian_distance(kmeans->get_centroids()[i]->get_coordinates(), kmeans->get_centroids()[j]->get_coordinates());
         }
     }
     printf("Metric: %f\n", sumOfDistances);
@@ -301,21 +365,13 @@ int main(void){
     std::shared_ptr<LSH> lsh;
     lsh = std::make_shared<LSH>(4,5,MODULO,LSH_TABLE_SIZE);
     lsh->load_data(dataset);
-    kmeans.reverse_assignment(lsh);
-
-    // LSH lsh(4,5,MODULO,LSH_TABLE_SIZE);
-    // lsh.load_data(dataset);
-    // HyperCube hypercube(14,2,2000);
-    // hypercube.load_data(dataset);
 
 
-    // std::vector<std::pair<double, int>> nearest_l = approximate_range_search(&lsh, dataset[0], 2000.0);       // Use LSH methods
-    // std::vector<std::pair<double, int>> nearest_h = approximate_range_search(&hypercube, dataset[0], 2000.0); // Use HyperCube method
-
-    //std::vector<std::pair<double, int>> nearest_l = call(&LSH::approximate_range_search, lsh, dataset[0], 2000.0);
-    //std::vector<std::pair<double, int>> nearest_h = call(&HyperCube::approximate_range_search, hypercube, dataset[0], 2000.0);
-
-    // printf("Number of points: %d %d\n", (int)nearest_l.size(), (int)nearest_l.size());
+    // kmeansInstance.mac_queen([&kmeansInstance](){ kmeansInstance.lloyds_assignment(); });
+    kmeans->mac_queen([kmeans](){kmeans->lloyds_assigment();});
+    
+    // kmeansInstance.mac_queen(std::bind(&kMeans::reverse_assignment, &kmeansInstance, method));
+    kmeans->mac_queen(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
 
     return 0;
 }
