@@ -23,14 +23,14 @@ gFunction::gFunction(int k, int m){
     for(int i = 0; i < this->K; i++){
         std::shared_ptr<hFunction> h = std::make_shared<hFunction>(); // Create a new h function, I used a pointer might not need it, I just said to myself after OOP that I'd always use pointers instead of storing objects directly, something that I haven't followed here generally
         (this->H).push_back(h); // Save its pointer to the vector
-        (this->R).push_back(Rand.generate_int_uniform(0, 100)); // Generate and save the r value
+        (this->R).push_back(Rand.generate_int_uniform(0, INT_MAX)); // Generate and save the r value
     }
 }
 int gFunction::evaluate_point(std::vector<double> p){
     int res;
     int sum = 0;
     for(int i = 0; i < this->K; i++){
-        sum += (this->R)[i] * ((this->H)[i]->evaluate_point(p)); 
+        sum += ((this->R)[i] % M) * (((int)(this->H)[i]->evaluate_point(p)) % M); 
     }
     res = sum % M;
 
