@@ -9,7 +9,7 @@ int  ImageVector::get_number(){
     return this->Number;
 }
 
-std::vector<double> ImageVector::get_coordinates(){
+std::vector<double>& ImageVector::get_coordinates(){
     return this->Coordinates;
 }
 
