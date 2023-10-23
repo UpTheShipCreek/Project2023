@@ -17,7 +17,7 @@
 
 #define NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE 0.8 // If at 80% of the clusters are converged then we have converged
 #define DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE 0.01 // If the change in the distance is less than 1% of the max distance between two points in our dataset then we have converged
-#define CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE 0.2 // Taking into account the percentage of the change of the change of distance between two epochs
+#define CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE 0.95 // Taking into account the percentage of the change of the change of distance between two epochs
 
 double round_up_to_nearest_order_of_magnitude(double number){
     double order = std::pow(10, std::floor(std::log10(number)));
@@ -86,16 +86,22 @@ class kMeans{
     int K; // Number of clusters
     std::vector<std::shared_ptr<ImageVector>> Points;
     std::vector<std::shared_ptr<Cluster>> Clusters;
+    std::vector<double> CenterMass;
+
     Random R;
     using AssignmentFunction = std::function<void()>; // Define a function pointer type for the mac_queen method
     double MaxDist;
     Metric* Kmetric;
+
 
     public:
     kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* metric){ // Needs the number of clusters and the dataset
         this->K = k;
         this->Points = points;
         this->Kmetric = metric;
+        // Using this to calculate the first centroid distance differences, i.e. the difference between the center of mass and the assigned from initialization++
+        // It is part of this convergence condition CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE
+        this->CenterMass.resize((this->Points)[0]->get_coordinates().size(), 0); // Initialize the center of mass vector with 0s
 
         // ------------------------------------------------------------------------------ //
         // ------------------------------ Initialization++ ------------------------------ //
@@ -122,11 +128,21 @@ class kMeans{
         printf("Approximating max distance\n");
         fflush(stdout);
 
-        for(i = 0; i < (int)std::sqrt(Points.size()); i++){ // Get the distances of some points we don't need many since we are rounding up anyhow
-            allDistances.push(Kmetric->calculate_distance((this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates(), (this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates()));
-        }
+        std::vector<double> coordinates1, coordinates2;
+        int numberOfPointsToCheck = (int)std::sqrt(Points.size()); // Get the distances of some points we don't need many since we are rounding up anyhow
 
-        
+        for(i = 0; i < (int)std::sqrt(Points.size()); i++){ 
+            // Get the coordinates of two random images
+            coordinates1 = (this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates();
+            coordinates2 = (this->Points)[R.generate_int_uniform(0,(int)(this->Points).size()-1)]->get_coordinates();
+
+            allDistances.push(Kmetric->calculate_distance(coordinates1, coordinates2));
+
+            for(j = 0; j < (int)coordinates1.size(); j++){ // Get the distances of some points we don't need many since we are rounding up anyhow
+                this->CenterMass[j] += (coordinates1[j] + coordinates2[j]) / numberOfPointsToCheck;
+            }
+        }
+     
 
         maxDistance = round_up_to_nearest_order_of_magnitude(allDistances.top()); // Get the max distance
         this->MaxDist = maxDistance;
@@ -161,7 +177,7 @@ class kMeans{
                         distancesFromCentroids.push(Kmetric->calculate_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates()));
                     }
                 }
-                minDistance = distancesFromCentroids.top(); // Pop the first element, which least distance from a centroid
+                minDistance = distancesFromCentroids.top(); // Get the first element, which least distance from a centroid
                 minDistance /= maxDistance; // Normalize the distance
                 minDistanceSquared = minDistance * minDistance; // Get the square of the distance
                 sumOfSquaredDistances += minDistanceSquared ; // Add the square of the distance to the sum of squared distances
@@ -217,18 +233,11 @@ class kMeans{
     }
 
     void lloyds_assigment(){ // Lloyds-type assignment
-        int i, j;
-        std::shared_ptr<ImageVector> nearestCentroid;
+        int i;
         std::shared_ptr<Cluster> nearestCluster;
         for(i = 0; i < (int)(this->Points).size(); i++){
             nearestCluster = get_nearest_cluster((this->Points)[i]); // Get the nearest centroid to the point
-            nearestCentroid = nearestCluster->get_centroid(); // Get the centroid
-            for(j = 0; j < (int)(this->Clusters).size(); j++){
-                if((this->Clusters)[j]->get_centroid() == nearestCentroid){ // If the centroid is the nearest centroid
-                    (this->Clusters)[j]->add_point((this->Points)[i]); // Add the point to the cluster
-                    break;
-                }
-            }
+            nearestCluster->add_point((this->Points)[i]); // Add the point to the cluster
         }
     }
 
@@ -291,18 +300,16 @@ class kMeans{
         }
     }
 
-    void mac_queen(AssignmentFunction assignment){
+    void traditional_convergence_algorithm(AssignmentFunction assignment){
         int i, clustersConvergedCounter;
         int clusterNumberConvergenceTolerance = int((double)(this->Clusters).size() * NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE); // If at 80% of the clusters are converged then we have converged
         bool hasConverged = false;
 
         std::vector<double> oldDistanceDifferenceVector((this->Clusters).size(), 0.0); // I need to initialize this with the distance of each centroid from the (0, 0...0) point
-        double newDistanceDifference;
+        double distanceOfNewCentroidFromThePrevious;
         double distanceDifferenceAsMaxPercentageTolerance = this->MaxDist * DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE; //  If the change in the distance is less than 1% of the max distance between two points in our dataset then we have converged
         
         double changeOfDistanceDifferencePercentage;
-
-        std::vector<double> zeroVector(((this->Clusters)[0]->get_centroid()->get_coordinates()).size(), 0.0);
 
         printf("Need at least %d clusters to converge\n", clusterNumberConvergenceTolerance);
         printf("Tolerance percentage: %f\n", distanceDifferenceAsMaxPercentageTolerance);
@@ -310,26 +317,30 @@ class kMeans{
         std::shared_ptr<ImageVector> newCentroid;
 
         for(i = 0; i < (int)(this->Clusters).size(); i++){ // Initialize the oldDistanceDifference
-            oldDistanceDifferenceVector[i] = Kmetric->calculate_distance((this->Clusters)[i]->get_centroid()->get_coordinates(),zeroVector);
+            oldDistanceDifferenceVector[i] = Kmetric->calculate_distance((this->Clusters)[i]->get_centroid()->get_coordinates(), this->CenterMass);
         }
+
+        printf("Initialized the old differences vector successfully\n");
 
         do{
             assignment(); // Assign the points to the clusters
             clustersConvergedCounter = 0;
             for(i = 0; i < (int)(this->Clusters).size(); i++){ // Recalculate the centroids
                 newCentroid = (this->Clusters)[i]->recalculate_centroid();
-                newDistanceDifference = Kmetric->calculate_distance(newCentroid->get_coordinates(), (this->Clusters)[i]->get_centroid()->get_coordinates());
+                distanceOfNewCentroidFromThePrevious = Kmetric->calculate_distance(newCentroid->get_coordinates(), (this->Clusters)[i]->get_centroid()->get_coordinates());
 
-                changeOfDistanceDifferencePercentage = (oldDistanceDifferenceVector[i] - newDistanceDifference) / oldDistanceDifferenceVector[i];
+                changeOfDistanceDifferencePercentage = (oldDistanceDifferenceVector[i] - distanceOfNewCentroidFromThePrevious) / oldDistanceDifferenceVector[i];
                 
-                oldDistanceDifferenceVector[i] = newDistanceDifference;
+                oldDistanceDifferenceVector[i] = distanceOfNewCentroidFromThePrevious;
 
-                printf("%d distance: %f and percentage change: %f\n", i, newDistanceDifference, changeOfDistanceDifferencePercentage);
+                printf("%d distance: %f and percentage change: %f\n", i, distanceOfNewCentroidFromThePrevious, changeOfDistanceDifferencePercentage);
 
-                if(newDistanceDifference < distanceDifferenceAsMaxPercentageTolerance ||  changeOfDistanceDifferencePercentage < CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE){ // If the distance is bigger than the tolerance
+                // Going from a step of 100 to a step of 5 is a 95% step change which means that we've basically found our converence point
+                // But going from a step of 100 to a step of 50, means that our rate of convergence hasn't changed much and we could keep going
+                // In any case, if we are taking steps that are very small in orders of magnitude (less than 1% of our max distance) then we can stop as well
+                if(distanceOfNewCentroidFromThePrevious < distanceDifferenceAsMaxPercentageTolerance || changeOfDistanceDifferencePercentage >= CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE){ // If the distance is bigger than the tolerance
                     clustersConvergedCounter++;
                 }
-
                 (this->Clusters)[i]->set_centroid(newCentroid);
             }
             printf("%d clusters converged\n", clustersConvergedCounter);
@@ -370,10 +381,10 @@ int main(void){
 
 
     // kmeansInstance.mac_queen([&kmeansInstance](){ kmeansInstance.lloyds_assignment(); });
-    kmeans->mac_queen([kmeans](){kmeans->lloyds_assigment();});
+    //kmeans->traditional_convergence_algorithm([kmeans](){kmeans->lloyds_assigment();});
     
     // kmeansInstance.mac_queen(std::bind(&kMeans::reverse_assignment, &kmeansInstance, method));
-    kmeans->mac_queen(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
+    kmeans->traditional_convergence_algorithm(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
 
     return 0;
 }
