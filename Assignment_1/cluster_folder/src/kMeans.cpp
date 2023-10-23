@@ -66,11 +66,7 @@ class Cluster{
             temp =  (long double)(this->Centroid)->get_coordinates()[i];
             newvalue = (fraction * temp) + (point->get_coordinates()[i] / (numberOfPoints + 1));
             
-            (this->Centroid)->get_coordinates()[i] = (double)newvalue; // THIS IS THE BUG, GET COORDINATES DOESN'T RETURN THE VECTOR BUT A COPY OF IT, MASSIVE CHANGES INC I GUESS
-
-            if(temp != newvalue){
-                printf("%f -> %f %f\n", (double)temp, (double)newvalue, (this->Centroid)->get_coordinates()[i]);
-            }
+            (this->Centroid)->get_coordinates()[i] = (double)newvalue;
         }
     }
 
@@ -378,8 +374,6 @@ class kMeans{
         int epochs = 0;
         bool converged = false; // Initialize the convergence flag
 
-        double distanceDifferenceTolerance = this->MaxDist * DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE;
-
         std::shared_ptr<Cluster> nearestCluster;
         // std::shared_ptr<Cluster> cluster;
         std::shared_ptr<ImageVector> centroid;
@@ -390,41 +384,24 @@ class kMeans{
             std::vector<std::shared_ptr<ImageVector>> previousCentroids;
             for(const auto& cluster : this->Clusters){
                 previousCentroids.push_back(std::make_shared<ImageVector>(-1, cluster->get_centroid()->get_coordinates()));
-                printf("Image centroid has a positive number: %d\n", cluster->get_centroid()->get_number());
+                // printf("Image centroid has a positive number: %d\n", cluster->get_centroid()->get_number());
             }
 
-            printf("Got previous centroids\n");
+            // printf("Got previous centroids\n");
 
-            //for (i = 0; i < (int)(this->Points.size()); i++){
-            for (i = 0; i < 10; i++){
-                nearestCluster = get_nearest_cluster(this->Points[i]);
-                
-                // centroid = nearestCluster->get_centroid();
-                // printf("\n[");
-                // for(int j = 0; j < (int)centroid->get_coordinates().size(); j++){
-                //     printf("%f ", centroid->get_coordinates()[j]);
-                //     fflush(stdout);
-                // }
-                // printf("]\n");
-               
+            for (i = 0; i < (int)(this->Points.size()); i++){
+                nearestCluster = get_nearest_cluster(this->Points[i]);      
                 nearestCluster->add_point_and_set_centroid(this->Points[i]);
-                
-                // printf("\n[");
-                // for(int j = 0; j < (int)centroid->get_coordinates().size(); j++){
-                //     printf("%f ", centroid->get_coordinates()[j]);
-                //     fflush(stdout);
-                // }
-                // printf("]\n");
             }
 
-            printf("Assigned each point to the nearest cluster\n");
+            // printf("Assigned each point to the nearest cluster\n");
 
             // Check for convergence by comparing the new centroids with the previous centroids
             converged = true;
             for(i = 0; i < (int)(this->Clusters.size()); i++){
                 double centroidDistance = Kmetric->calculate_distance(previousCentroids[i]->get_coordinates(), this->Clusters[i]->get_centroid()->get_coordinates());
-                printf("Centroid %d distance: %f\n", i, centroidDistance);
-                converged = converged && (centroidDistance > distanceDifferenceTolerance);
+                // printf("Centroid %d distance: %f\n", i, centroidDistance);
+                converged = converged && (centroidDistance < DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE * (this->MaxDist));
             }
         }while(!converged);
     }
