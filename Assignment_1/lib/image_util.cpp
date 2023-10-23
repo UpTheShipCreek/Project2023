@@ -19,7 +19,7 @@ std::size_t ImageVector::hash() const{
 
 // Implement custom equality operator for ImageVector
 bool ImageVector::operator==(const ImageVector& other) const{
-    return Coordinates == other.Coordinates && Number == other.Number;
+    return Coordinates == other.Coordinates;
 }
 
 std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(

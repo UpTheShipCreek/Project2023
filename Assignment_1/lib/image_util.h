@@ -15,6 +15,7 @@ class ImageVector{
     ImageVector(int number, std::vector<double> coordinates);
     int get_number();
     std::vector<double> get_coordinates();
+    void set_number(int number);
 
     std::size_t hash() const;
     bool operator==(const ImageVector& other) const;

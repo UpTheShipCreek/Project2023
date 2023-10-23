@@ -52,6 +52,28 @@ class Cluster{
         (this->Points).push_back(point);
     }
 
+    // Centroid_[n+1] = (N/N+1) Centroid_[n] + newPoint/N+1
+    void add_point_and_set_centroid(std::shared_ptr<ImageVector> point){
+        (this->Points).push_back(point);
+        long double numberOfPoints = (long double)((this->Points).size());
+        long double fraction = (numberOfPoints) / (numberOfPoints + 1);
+
+        long double temp;
+        long double newvalue;
+
+
+        for (int i = 0; i < (int)(this->Centroid)->get_coordinates().size(); i++){
+            temp =  (long double)(this->Centroid)->get_coordinates()[i];
+            newvalue = (fraction * temp) + (point->get_coordinates()[i] / (numberOfPoints + 1));
+            
+            (this->Centroid)->get_coordinates()[i] = (double)newvalue; // THIS IS THE BUG, GET COORDINATES DOESN'T RETURN THE VECTOR BUT A COPY OF IT, MASSIVE CHANGES INC I GUESS
+
+            if(temp != newvalue){
+                printf("%f -> %f %f\n", (double)temp, (double)newvalue, (this->Centroid)->get_coordinates()[i]);
+            }
+        }
+    }
+
     std::shared_ptr<ImageVector> get_centroid(){
         return this->Centroid;
     }
@@ -238,6 +260,7 @@ class kMeans{
         for(i = 0; i < (int)(this->Points).size(); i++){
             nearestCluster = get_nearest_cluster((this->Points)[i]); // Get the nearest centroid to the point
             nearestCluster->add_point((this->Points)[i]); // Add the point to the cluster
+            // printf("Cluster with centroid id: %d has %d points\n",(nearestCluster->get_centroid())->get_number(), (int)nearestCluster->get_points().size());
         }
     }
 
@@ -294,7 +317,7 @@ class kMeans{
         }
 
         // Assign the remaining points to the nearest centroid
-        for (const auto& item : unassignedImages) {
+        for(const auto& item : unassignedImages){
             nearestCluster = get_nearest_cluster(item);
             nearestCluster->add_point(item);
         }
@@ -349,15 +372,162 @@ class kMeans{
             }
         }while(!hasConverged);
     }
-};
 
-std::vector<std::pair<double, int>> approximate_range_search(ApproximateMethods* method, std::shared_ptr<ImageVector> image, double r) {
-    return method->approximate_range_search(image, r);
-}
+    void mac_queen_with_lloyds(){
+        int i; 
+        int epochs = 0;
+        bool converged = false; // Initialize the convergence flag
+
+        double distanceDifferenceTolerance = this->MaxDist * DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE;
+
+        std::shared_ptr<Cluster> nearestCluster;
+        // std::shared_ptr<Cluster> cluster;
+        std::shared_ptr<ImageVector> centroid;
+
+        do{
+            printf("Epoch: %d\n", epochs++);
+            // Save the previous centroids
+            std::vector<std::shared_ptr<ImageVector>> previousCentroids;
+            for(const auto& cluster : this->Clusters){
+                previousCentroids.push_back(std::make_shared<ImageVector>(-1, cluster->get_centroid()->get_coordinates()));
+                printf("Image centroid has a positive number: %d\n", cluster->get_centroid()->get_number());
+            }
+
+            printf("Got previous centroids\n");
+
+            //for (i = 0; i < (int)(this->Points.size()); i++){
+            for (i = 0; i < 10; i++){
+                nearestCluster = get_nearest_cluster(this->Points[i]);
+                
+                // centroid = nearestCluster->get_centroid();
+                // printf("\n[");
+                // for(int j = 0; j < (int)centroid->get_coordinates().size(); j++){
+                //     printf("%f ", centroid->get_coordinates()[j]);
+                //     fflush(stdout);
+                // }
+                // printf("]\n");
+               
+                nearestCluster->add_point_and_set_centroid(this->Points[i]);
+                
+                // printf("\n[");
+                // for(int j = 0; j < (int)centroid->get_coordinates().size(); j++){
+                //     printf("%f ", centroid->get_coordinates()[j]);
+                //     fflush(stdout);
+                // }
+                // printf("]\n");
+            }
+
+            printf("Assigned each point to the nearest cluster\n");
+
+            // Check for convergence by comparing the new centroids with the previous centroids
+            converged = true;
+            for(i = 0; i < (int)(this->Clusters.size()); i++){
+                double centroidDistance = Kmetric->calculate_distance(previousCentroids[i]->get_coordinates(), this->Clusters[i]->get_centroid()->get_coordinates());
+                printf("Centroid %d distance: %f\n", i, centroidDistance);
+                converged = converged && (centroidDistance > distanceDifferenceTolerance);
+            }
+        }while(!converged);
+    }
+
+    void mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
+        bool converged = false;
+        int i, j; 
+        int epochs = 0;
+
+        double dinstaceBetweenCentroids, radius;
+        double minDistanceBetweenCentroids = DBL_MAX;
+        double maxDistanceBetweenCentroids = DBL_MIN;
+
+        double distanceDifferenceTolerance = this->MaxDist * DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE;
+
+
+        std::shared_ptr<ImageVector> centroid;
+        std::shared_ptr<Cluster> nearestCluster;
+        // std::shared_ptr<Cluster> cluster;
+        std::vector<std::pair<double, std::shared_ptr<ImageVector>>> inRangeImages;
+
+        
+        // Create a new structure that keeps track of the assigned images
+        std::shared_ptr<ImageVector> tempImageVector;
+        std::unordered_set<std::shared_ptr<ImageVector>> unassignedImages;
+
+        do{
+            printf("Epoch: %d\n", epochs++);
+            std::vector<std::shared_ptr<ImageVector>> previousCentroids;
+            for(const auto& cluster : this->Clusters){
+                previousCentroids.push_back(cluster->get_centroid());
+            }
+
+            for(i = 0; i < (int)(this->Points).size(); i++){
+                tempImageVector = std::make_shared<ImageVector>((this->Points)[i]->get_number(), (this->Points)[i]->get_coordinates());
+                unassignedImages.insert(tempImageVector);
+            }
+            
+            // Find the minimum and the maximum distance between centroids
+            for(i = 0; i < (int)Clusters.size(); i++){
+                for(j = 0; j < (int)Clusters.size(); j++){
+                    if(i != j){
+                        dinstaceBetweenCentroids = Kmetric->calculate_distance((this->Clusters)[i]->get_centroid()->get_coordinates(), (this->Clusters)[j]->get_centroid()->get_coordinates());
+                        if(dinstaceBetweenCentroids < minDistanceBetweenCentroids){
+                            minDistanceBetweenCentroids = dinstaceBetweenCentroids;
+                        }
+                        if(dinstaceBetweenCentroids > maxDistanceBetweenCentroids){
+                            maxDistanceBetweenCentroids = dinstaceBetweenCentroids;
+                        }
+                    }
+                }
+            }
+            
+            // Start the assignation 
+            radius = minDistanceBetweenCentroids / 2;
+            while(!unassignedImages.empty() && radius < maxDistanceBetweenCentroids){ // Keep going until you have assigned all the points or the radius is bigger than the max distance between centroids
+                // Assign imagevectors to clusters
+                for(i = 0; i < (int)Clusters.size(); i++){
+                    centroid = (this->Clusters)[i]->get_centroid();
+                    inRangeImages = method->approximate_range_search_return_images(centroid, radius);
+                    for(j = 0; j < (int)inRangeImages.size(); j++){
+                        if(unassignedImages.find((inRangeImages[j].second)) != unassignedImages.end()){ // If the point is unassingned
+                            (this->Clusters)[i]->add_point(inRangeImages[j].second); // Add the point to the cluster
+                            unassignedImages.erase((inRangeImages[j].second));  // Delete the image from the unassigned images
+                        }
+                    }
+                }
+                radius *= 2; // Increase the radius
+            }
+
+            // Assign the remaining points to the nearest centroid
+            for(const auto& item : unassignedImages){
+                nearestCluster = get_nearest_cluster(item);
+                centroid = nearestCluster->get_centroid();
+                printf("\n[");
+                for(int j = 0; j < (int)centroid->get_coordinates().size(); j++){
+                    printf("%f ", centroid->get_coordinates()[j]);
+                    fflush(stdout);
+                }
+                printf("]\n");
+                nearestCluster->add_point_and_set_centroid(item);
+                printf("\n[");
+                for(int j = 0; j < (int)centroid->get_coordinates().size(); j++){
+                    printf("%f ", centroid->get_coordinates()[j]);
+                    fflush(stdout);
+                }
+                printf("]\n");
+            }
+
+            // Check for convergence by comparing the new centroids with the previous centroids
+            converged = true; //  Need to reset this, otherwise we will never converge
+            for(i = 0; i < (int)(this->Clusters.size()); i++){
+                double centroidDistance = Kmetric->calculate_distance(previousCentroids[i]->get_coordinates(), this->Clusters[i]->get_centroid()->get_coordinates());
+                printf("Centroid %d distance: %f\n", i, centroidDistance);
+                converged = converged && (centroidDistance > distanceDifferenceTolerance);
+            }
+        }while(!converged);
+    }
+};
 
 int main(void){
     Eucledean metric;
-    std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("/home/xv6/Desktop/Project2023/Assignment_1/in/query.dat", 0);
+    std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("./in/query.dat", 0);
 
     std::shared_ptr<kMeans> kmeans;
     kmeans = std::make_shared<kMeans>(10, dataset, &metric);
@@ -381,10 +551,14 @@ int main(void){
 
 
     // kmeansInstance.mac_queen([&kmeansInstance](){ kmeansInstance.lloyds_assignment(); });
-    //kmeans->traditional_convergence_algorithm([kmeans](){kmeans->lloyds_assigment();});
+    // kmeans->traditional_convergence_algorithm([kmeans](){kmeans->lloyds_assigment();});
     
     // kmeansInstance.mac_queen(std::bind(&kMeans::reverse_assignment, &kmeansInstance, method));
-    kmeans->traditional_convergence_algorithm(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
+    // kmeans->traditional_convergence_algorithm(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
+
+    kmeans->mac_queen_with_lloyds();
+
+    //kmeans->mac_queen_with_reverse(lsh);
 
     return 0;
 }
