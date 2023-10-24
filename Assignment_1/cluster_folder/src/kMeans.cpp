@@ -513,6 +513,64 @@ class kMeans{
 
         }while(!converged);
     }
+
+    std::shared_ptr<Cluster> get_second_nearest_cluster(std::shared_ptr<ImageVector> point){
+        int j;
+        double distance;
+        std::shared_ptr<ImageVector> tempCentroid;
+        std::shared_ptr<Cluster> nearestCluster;
+        std::shared_ptr<Cluster> secondNearestCluster;
+        std::priority_queue<std::pair<double, std::shared_ptr<Cluster>>, std::vector<std::pair<double, std::shared_ptr<Cluster>>>, std::greater<std::pair<double, std::shared_ptr<Cluster>>>> distancesFromCentroids;
+
+        for(j = 0; j < (int)(this->Clusters).size(); j++){
+            tempCentroid = (this->Clusters)[j]->get_centroid();
+            distance = Kmetric->calculate_distance(point->get_coordinates(), tempCentroid->get_coordinates()); // Calculate the distance from each centroid
+            distancesFromCentroids.push(make_pair(distance, (this->Clusters)[j]));
+        }
+        distancesFromCentroids.pop(); // Pop the first element which is the nearest cluster
+        return  distancesFromCentroids.top().second;
+    }
+
+    double silhouette(){
+        int i, j, k, l;
+
+        double tempdistance;
+        double silhouette = 0;
+
+        std::shared_ptr<Cluster> secondNearestCluster;
+
+        for(i = 0; i < (int)(this->Clusters).size(); i++){
+            double cluster_silhouette = 0;
+            double average_distance_on_same_cluster = 0;
+            double average_distance_on_other_cluster = 0;
+
+            for(j = 0; j < (int)(this->Clusters[i])->get_points().size(); j++){
+                double object_silhouette;
+                secondNearestCluster = get_second_nearest_cluster((this->Clusters[i])->get_points()[j]);
+
+                for(k = 0; k < j; k++){ // For this cluster
+                    tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), (this->Clusters[i])->get_points()[k]->get_coordinates());
+                    average_distance_on_same_cluster += tempdistance;
+                }
+                
+                for(l = 0; l < (int)(secondNearestCluster)->get_points().size(); l++){ // For the other cluster
+                    tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), (secondNearestCluster)->get_points()[l]->get_coordinates());
+                    average_distance_on_other_cluster += tempdistance;
+                }
+                average_distance_on_same_cluster = 2 * (average_distance_on_same_cluster / (double)(this->Clusters[i])->get_points().size()); // Taking advantage of the symmetry of the distance matrix
+                average_distance_on_other_cluster = average_distance_on_other_cluster / (double)(secondNearestCluster)->get_points().size();
+                
+                object_silhouette = (average_distance_on_other_cluster - average_distance_on_same_cluster) / std::max(average_distance_on_other_cluster, average_distance_on_same_cluster);
+                
+                cluster_silhouette += object_silhouette;
+            }
+            cluster_silhouette /= (double)(this->Clusters[i])->get_points().size();
+
+            silhouette += cluster_silhouette;
+        }
+        silhouette /= (double)(this->Clusters).size();
+        return silhouette;
+    }
 };
 
 int main(void){
@@ -550,6 +608,9 @@ int main(void){
     kmeans->mac_queen_with_reverse(lsh);
 
     // kmeans->mac_queen_with_reverse(lsh);
+
+    printf("Getting silhouette\n");
+    kmeans->silhouette();
 
     return 0;
 }
