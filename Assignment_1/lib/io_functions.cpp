@@ -79,10 +79,10 @@ void write_clustering(/*other input :)*/methods method, FILE* outputFile){
     fprintf(outputFile, "Algorithm: ");
     if(method == classic){
         fprintf(outputFile, "Lloyd's\n");    }
-    else if(method = lsh){
+    else if(method == lsh){
         fprintf(outputFile, "Range Search LSH\n");
     }
-    else if(method = hypercube){
+    else if(method == hypercube){
         fprintf(outputFile, "Range Search Hypercube\n");
     }
 
