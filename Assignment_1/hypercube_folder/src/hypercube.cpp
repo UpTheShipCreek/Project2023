@@ -1,5 +1,25 @@
 #include "hypercube.h"
 
+long double factorial(int n){
+    if(n < 0) return 0;
+
+    int i;
+    long double  result = 1; 
+
+    for(i = 1; i <= n; i++){
+        result *= i;
+    }
+    return result;
+}
+
+int calculate_number_of_probes_given_maximum_hamming_distance(int maximumHammingDistance, int dimensions){
+    int probes = 0;
+    for(int i = 1; i <= maximumHammingDistance; i++){
+        probes += factorial(dimensions)/(factorial(i)*factorial(dimensions-i));
+    }  
+    return probes;
+}
+
 int hamming_distance(int x, int y){ 
     int dist = 0;
 
@@ -25,28 +45,37 @@ std::vector<int> find_all_with_hamming_distance_one(int input, int dimensions){
     return result;
 }
 
-std::vector<int> get_probes(int number, int numberOfProbes, int dimensions){
-    std::unordered_set<int> uniqueProbes;  // So that we can ignore duplicates
+std::vector<int> get_probes(int number, int maxHammingDistance, int dimensions){ // Changed it to BFs cause with the probe changes I was getting bad results
+    int current, levelSize;
+
+    std::vector<int> hammingDistanceOne;
     std::vector<int> probes;
+    std::unordered_set<int> uniqueProbes; // So that we can ignore duplicates
+    std::queue<int> bfsQueue;
 
     probes.push_back(number);
+    bfsQueue.push(number);
 
-    if (numberOfProbes <= 0){
-        return probes;
-    } 
-    else{
-        std::vector<int> hammingDistanceOne = find_all_with_hamming_distance_one(number, dimensions);
-        std::vector<int> temp;
-        
-        for (int i = 0; i < (int)hammingDistanceOne.size(); i++){
-            temp = get_probes(hammingDistanceOne[i], numberOfProbes - 1, dimensions); // Recursive call cause it is easier to think of it that way
-            uniqueProbes.insert(temp.begin(), temp.end());  // Insert into the set to ensure uniqueness
+    while(maxHammingDistance > 0){
+        levelSize = bfsQueue.size();
+        while (levelSize > 0){
+            current = bfsQueue.front();
+            bfsQueue.pop();
+
+            hammingDistanceOne = find_all_with_hamming_distance_one(current, dimensions);
+
+            for(int i = 0; i < (int)hammingDistanceOne.size(); i++){
+                if(uniqueProbes.insert(hammingDistanceOne[i]).second){
+                    bfsQueue.push(hammingDistanceOne[i]);
+                    probes.push_back(hammingDistanceOne[i]);
+                }
+            }
+            levelSize--;
         }
-        probes.insert(probes.end(), uniqueProbes.begin(), uniqueProbes.end()); // Fill up the returning vector 
+        maxHammingDistance--;
     }
     return probes;
 }
-
 HypercubeHashFunction::HypercubeHashFunction(int k){ // Constructor 
     std::shared_ptr<hFunction> h;
     std::shared_ptr<fFunction> f;
@@ -70,17 +99,23 @@ int HypercubeHashFunction::evaluate_point(std::vector<double> p){
     return hashCode;
 }
 
-
 HyperCube::HyperCube(int dimensions, int probes, int numberOfElementsToCheck, Metric* metric){
     this->M = numberOfElementsToCheck;
     this->K = dimensions;
     this->Probes = probes;
     this->Hmetric = metric;
+    this->MaxHammingDistance = 0;
 
     std::shared_ptr<HashFunction> hashFunction = std::make_shared<HypercubeHashFunction>(this->K);
     int numberOfBuckets = 1 << K; // Essentially 2^K
 
     this->Table = std::make_shared<HashTable>(numberOfBuckets, hashFunction);
+
+    // Calculate the maximum hamming distance to look at given that we want to visit at most this->Probes vertices
+    // by finding the smallest maxHammingDistance that represents more vertices than this->Probes
+    while(calculate_number_of_probes_given_maximum_hamming_distance(this->MaxHammingDistance, this->K) < this->Probes){
+        this->MaxHammingDistance++;
+    }
 }
 void HyperCube::load_data(std::vector<std::shared_ptr<ImageVector>> images){
     printf("Loading data into the hypercube... ");
@@ -110,18 +145,16 @@ std::vector<std::pair<double, int>> HyperCube::approximate_k_nearest_neighbors(s
     // Get the bucket id
     int bucketId = Table->get_bucket_id_from_image_vector(image);
 
-    // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
-    probes = get_probes(bucketId, this->Probes, this->K);
+    probes = get_probes(bucketId, this->MaxHammingDistance, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
     // i = 0;
     // while(i < (int)(probes.size()) && visitedPointsCounter < (this->M)){
-    for(i = 0; i < (int)(probes.size()); i++){
+    for(i = 0; i < this->Probes; i++){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
         // Search the bucket for the nearest neighbors
-        //for(j = 0; j < (int)(bucket.size()); j++){
         j = 0;
         while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
             visitedPointsCounter++;
@@ -173,10 +206,10 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
     int bucketId = Table->get_bucket_id_from_image_vector(image);
 
     // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
-    probes = get_probes(bucketId, this->Probes, this->K);
+    probes = get_probes(bucketId, this->MaxHammingDistance, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-   for(i = 0; i < (int)(probes.size()); i++){
+   for(i = 0; i < this->Probes; i++){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 

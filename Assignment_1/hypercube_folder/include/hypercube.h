@@ -2,9 +2,14 @@
 #define HYPERCUBE_H
 
 #include <unordered_set>
+#include <queue>
+
 
 #include "hashtable.h"
 #include "approximate_methods.h"
+
+long double factorial(int n);
+int calculate_number_of_probes_given_maximum_hamming_distance(int maximumHammingDistance, int dimensions);
 
 int hamming_distance(int x, int y);
 std::vector<int> find_all_with_hamming_distance_one(int input, int dimensions);
@@ -21,9 +26,10 @@ class HypercubeHashFunction : public HashFunction{
 };
 
 class HyperCube : public ApproximateMethods{
-    int K, Probes, M;
+    int K, Probes, M, MaxHammingDistance;
     std::shared_ptr<HashTable> Table;
     Metric* Hmetric; // Raw pointer cause it doesn't matter
+    
 
     public:
     HyperCube(int dimensions, int probes, int numberOfElementsToCheck, Metric* metric);

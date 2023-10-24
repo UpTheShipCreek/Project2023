@@ -13,23 +13,11 @@
 
 #define QUERY_NUMBER 10
 
-long double factorial(int n){
-    if(n < 0) return 0;
-
-    int i;
-    long double  result = 1; 
-
-    for(i = 1; i <= n; i++){
-        result *= i;
-    }
-    return result;
-}
-
 int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
-    int k = 14, M = -1, probes = 2, N = 1;                              //Default values for hypercube projection, if not altered by user
+    int k = 14, M = 10, probes = 2, N = 1;                              //Default values for hypercube projection, if not altered by user
     double R = 1000.0;
     int opt;
     extern char *optarg; 
@@ -80,12 +68,7 @@ int main(int argc, char **argv){
         return -1;
     }
     else{
-        if(M != -1){
-            printf("Program will proceed with values: k = %d, M = %d, probes = %d, N = %d, R = %f\n", k, M, probes, N, R);
-        }
-        else{
-            printf("Program will proceed with values: k = %d, M = Default, probes = %d, N = %d, R = %f\n", k, probes, N, R);
-        }
+        printf("Program will proceed with values: k = %d, M = %d, probes = %d, N = %d, R = %f\n", k, M, probes, N, R);
     }
     // ------------------------------------------------------------------- //
     // -------------------------- INPUT PARSING -------------------------- //
@@ -133,14 +116,14 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // -------------- INITIALIZE HYPECUBE AND LOAD IMAGES----------------- //
     // ------------------------------------------------------------------- //
-    if(M == -1){ // M = (#_of_dataset_images / 2^k) * k!/probes!(k-probes)!
-        M = 0;
-        for(int i = 1; i <= probes; i++){
-            M += (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(i)*factorial(k-i))));
-        }  
-        // M = (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(probes)*factorial(k-probes))));
-        printf("Calculated minimum required value M = %d\n", M);
-    }
+    // if(M == -1){ // M = (#_of_dataset_images / 2^k) * k!/probes!(k-probes)!
+    //     M = 0;
+    //     for(int i = 1; i <= probes; i++){
+    //         M += (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(i)*factorial(k-i))));
+    //     }  
+    //     // M = (int)((images.size()/pow(2, k)) * (factorial(k)/(factorial(probes)*factorial(k-probes))));
+    //     printf("Calculated minimum required value M = %d\n", M);
+    // }
 
     HyperCube hypercube(k, probes, M, &metric);
     hypercube.load_data(images); // Load the data to the hypercube
