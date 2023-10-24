@@ -1,6 +1,6 @@
 # Compiler and compiler flags
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra
+CXXFLAGS = -std=c++11 -Wall -Wextra -O3
 
 # Directories
 LSH = ./lsh_folder
