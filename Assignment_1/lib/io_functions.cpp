@@ -74,3 +74,16 @@ void write_r_near(std::vector<std::pair<double, int>> inRange, int r, FILE* outp
         fprintf(outputFile,"Nearest neighbor-%d: %d\n", i+1, inRange[i].second);
     }
 }
+
+void write_clustering(/*other input :)*/methods method, FILE* outputFile){
+    fprintf(outputFile, "Algorithm: ");
+    if(method == classic){
+        fprintf(outputFile, "Lloyd's\n");    }
+    else if(method = lsh){
+        fprintf(outputFile, "Range Search LSH\n");
+    }
+    else if(method = hypercube){
+        fprintf(outputFile, "Range Search Hypercube\n");
+    }
+
+}
