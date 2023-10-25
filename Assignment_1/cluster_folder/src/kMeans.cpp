@@ -451,8 +451,8 @@ class kMeans{
             }
         }
 
-        // Start with radius = min(dist between centers)/2
-        radius = minimumCentroidDistance / 2;
+        // Start with radius = min(dist between centers) cause 1/2 doesn't work lol
+        radius = minimumCentroidDistance;
         
         do{
             printf("Epoch %d\n", epochs++);
@@ -491,7 +491,9 @@ class kMeans{
                 }
                 else if((int)prospectiveClusters.size() > 1){
                     auto nearestCluster = get_nearest_cluster(image);
-                    nearestCluster->add_point_and_set_centroid(image);
+                    nearestCluster->add_point(image);
+                    // Okay so we are not to move the centroid here? Cause it's too similar to Lloyd's? lol
+                    // nearestCluster->add_point_and_set_centroid(image);
                     imagesToErase.push_back(image);
                     countConflicts++;
                 }
@@ -506,6 +508,8 @@ class kMeans{
 
             for(i = 0; i < (int)(this->Clusters).size(); i++){
                 cluster = (this->Clusters)[i];
+                // We recalculate the centroid here. Why? Because we don't want to fall into Lloyd's, even though it would be more efficient at this point
+                cluster->recalculate_centroid();
                 if((int)cluster->get_points().size() == previousNumberOfPoints[i]){
                     convergedCounter++;
                 }
