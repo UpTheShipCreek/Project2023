@@ -306,6 +306,7 @@ class kMeans{
         while(!unassignedImages.empty() && radius < maxDistanceBetweenCentroids){ // Keep going until you have assigned all the points or the radius is bigger than the max distance between centroids
             // Assign imagevectors to clusters
             for(i = 0; i < (int)Clusters.size(); i++){
+                (this->Clusters)[i]->get_points().clear(); // Clear the points of the cluster
                 centroid = (this->Clusters)[i]->get_centroid();
                 inRangeImages = method->approximate_range_search_return_images(centroid, radius);
                 for(j = 0; j < (int)inRangeImages.size(); j++){
@@ -351,8 +352,15 @@ class kMeans{
             assignment(); // Assign the points to the clusters
             clustersConvergedCounter = 0;
             for(i = 0; i < (int)(this->Clusters).size(); i++){ // Recalculate the centroids
-                newCentroid = (this->Clusters)[i]->recalculate_centroid();
-                distanceOfNewCentroidFromThePrevious = Kmetric->calculate_distance(newCentroid->get_coordinates(), (this->Clusters)[i]->get_centroid()->get_coordinates());
+
+                std::vector<double> previousCentroidCoordinates = (this->Clusters)[i]->get_centroid()->get_coordinates();
+                newCentroid = (this->Clusters)[i]->recalculate_centroid(); 
+                distanceOfNewCentroidFromThePrevious = Kmetric->calculate_distance(newCentroid->get_coordinates(), previousCentroidCoordinates);
+
+                // The next two lines don't work anymore cause I am returning the actual reference to the cluster instead of a copy, 
+                // so they will always have the coordinates
+                // newCentroid = (this->Clusters)[i]->recalculate_centroid(); 
+                // distanceOfNewCentroidFromThePrevious = Kmetric->calculate_distance(newCentroid->get_coordinates(), (this->Clusters)[i]->get_centroid()->get_coordinates());
 
                 changeOfDistanceDifferencePercentage = (oldDistanceDifferenceVector[i] - distanceOfNewCentroidFromThePrevious) / oldDistanceDifferenceVector[i];
                 
