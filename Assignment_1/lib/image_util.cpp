@@ -53,7 +53,7 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
     return reversed;
 }
 
-std::vector<std::pair<double, int>> exhaustive_range_search(
+std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustive_range_search(
     std::vector<std::shared_ptr<ImageVector>> images, 
     std::shared_ptr<ImageVector> image, 
     double r,
@@ -62,13 +62,13 @@ std::vector<std::pair<double, int>> exhaustive_range_search(
         double distance;
 
         // The returned vector
-        std::vector<std::pair<double, int>> inRangeImages;
+        std::vector<std::pair<double, std::shared_ptr<ImageVector>>> inRangeImages;
 
         for(i = 0; i < (int)(images.size()); i++){
             if(images[i]->get_number() != image->get_number()){ // Ignore comparing to itself
                 distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
                 if(distance <= r){
-                    inRangeImages.push_back(std::make_pair(distance, images[i]->get_number()));
+                    inRangeImages.push_back(std::make_pair(distance, images[i]));
                 }
             }
         }

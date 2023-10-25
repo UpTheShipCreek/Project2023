@@ -245,7 +245,6 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approximate_range_search_return_images(std::shared_ptr<ImageVector> image, double r){
     int i, j, prospectImageNumber;
     double distance;
-    int visitedPointsCounter = 0;
     int queryImageNumber = image->get_number();
 
     std::pair<int, int> imageBucketIdAndId;
@@ -254,15 +253,12 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     std::vector<int> probes;
     std::vector<std::shared_ptr<ImageVector>> bucket;
 
-    // I will be using a priority queue to keep the k nearest neighbors
-    std::priority_queue<std::pair<double, std::shared_ptr<ImageVector>>, std::vector<std::pair<double, std::shared_ptr<ImageVector>>>, std::less<std::pair<double, std::shared_ptr<ImageVector>>>> nearest;
-
     // Let b ← Null; db ← ∞; initialize k best candidates and distances;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
 
     // Get the bucket id and the image id
     imageBucketIdAndId = Table->virtual_insert(image);
-    printf("Virtual Insert: BucketId: %d, ImageId: %d\n", imageBucketIdAndId.first, imageBucketIdAndId.second);
+    // printf("Virtual Insert: BucketId: %d, ImageId: %d\n", imageBucketIdAndId.first, imageBucketIdAndId.second);
 
     // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
     probes = get_probes(imageBucketIdAndId.first, this->Probes, this->K);
@@ -270,7 +266,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
     for(i = 0; i < (int)(probes.size()); i++){
 
-        printf("Probe: %d\n", probes[i]);
+        // printf("Probe: %d\n", probes[i]);
 
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
@@ -278,8 +274,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
         // Search the bucket for the nearest neighbors
         //for(j = 0; j < (int)(bucket.size()); j++){
         j = 0;
-        while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
-            visitedPointsCounter++;
+        while(j < (int)(bucket.size())){
 
             prospectImageNumber = bucket[j]->get_number();
 
@@ -289,18 +284,12 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
                 distance = Hmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
 
                 if(distance <= r){
-                    nearest.push(std::make_pair(distance, bucket[j]));
+                    nearestImages.push_back(std::make_pair(distance, bucket[j]));
                 }
             }
             j++;
         }
     }
-    // Fill up the a structure that we can return
-    while (!nearest.empty()){
-        nearestImages.push_back(nearest.top());
-        nearest.pop();
-    }
-    std::vector<std::pair<double,std::shared_ptr<ImageVector>>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
-    return reversed;
+    return nearestImages;
 }
 

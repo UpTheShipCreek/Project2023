@@ -166,8 +166,6 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> LSH::approximate_ra
                     inRangeImages.push_back(std::make_pair(distance, bucket[j])); // maybe add bucket[j] also
                 }
             }
-            // if large number of retrieved items (e.g. > 20L) then return
-            if((int)inRangeImages.size() > 20*(this->L)) return inRangeImages;
         }
     }
     return inRangeImages;
