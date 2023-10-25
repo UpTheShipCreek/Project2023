@@ -16,7 +16,7 @@
 #include "lsh.h"
 #include "hypercube.h"
 
-#define NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE 0.9 // If at 90% of the clusters are converged then we have converged
+#define NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE 1 // If at 90% of the clusters are converged then we have converged
 #define DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE 0.01 // If the change in the distance is less than 1% of the max distance between two points in our dataset then we have converged
 #define CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE 0.95 // Taking into account the percentage of the change of the change of distance between two epochs
 
@@ -693,7 +693,7 @@ int main(void){
     lsh->load_data(dataset);
 
     // std::shared_ptr<HyperCube> cube;
-    // cube = std::make_shared<HyperCube>(14, 500, 2000,&metric);
+    // cube = std::make_shared<HyperCube>(14, 1000, 6000,&metric);
     // cube->load_data(dataset);
 
 
