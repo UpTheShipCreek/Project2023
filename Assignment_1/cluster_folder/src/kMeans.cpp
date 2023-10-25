@@ -85,8 +85,9 @@ class Cluster{
     std::shared_ptr<ImageVector> recalculate_centroid(){
         int j;
         int clusterSize = (int)(this->Points).size();
+
         if(clusterSize == 0){
-            return std::make_shared<ImageVector>(-1, std::vector<double>(0)); // Return a virtual point
+            return this->Centroid;
         }
         std::vector<double> sum = (this->Points[0])->get_coordinates(); // Get the first point as initialization
         for(int i = 1; i < clusterSize; i++){ // Sum the vectors
@@ -97,11 +98,14 @@ class Cluster{
         for(j = 0; j < (int)sum.size(); j++){ // Divide each coordinate by the number of points
             sum[j] /= clusterSize;
         }
-        return std::make_shared<ImageVector>(-1, sum); // The fact that it is a virtual point is denoted by the -1 value of the number
-    }
-
-    void calculate_and_set_centroid(){
-        this->Centroid = recalculate_centroid();
+        if(this->Centroid->get_number() != -1){ // If the centroid is not virtual we need to create another one in order not to change the coordinates of the actual dataset image
+            std::shared_ptr<ImageVector> centroidCopy = std::make_shared<ImageVector>(-1, sum);
+            this->Centroid = centroidCopy;
+        } 
+        else{
+            this->Centroid->get_coordinates() = sum;
+        }
+        return this->Centroid;
     }
 };
 
@@ -184,43 +188,40 @@ class kMeans{
         fflush(stdout);
 
         // Assign the rest of the centroids
-        while((int)(this->Clusters).size() < K){   
-            // Resets
-            sumOfSquaredDistances = 0; // Reset the sum of squared distances
-            minDistances.clear(); // Reset the vector of minimum distances
-            distancesFromCentroids = std::priority_queue<double, std::vector<double>, std::greater<double>>(); // Reset the priority queue of distances from centroids
+        while ((int)(this->Clusters).size() < K) {
+            sumOfSquaredDistances = 0;  // Reset the sum of squared distances
+            minDistances.clear();       // Reset the vector of minimum distances
+            minDistances.push_back(std::make_pair(0.0, 0));  // Initialize the first element of the vector
 
-            // Creating the biased probabilities
-            for(i = 0; i < (int)(this->Points).size(); i++){ // For each point, calculate the distance from the nearest centroid
-                for(j = 0; j < (int)(this->Clusters).size(); j++){
+            for (i = 0; i < (int)(this->Points).size(); i++) {
+                minDistance = std::numeric_limits<double>::max();  // Start with a large value
 
-                    centroid = (this->Clusters)[j]->get_centroid(); // Get the centroid of the cluster
-
-                    if((this->Points)[i] != centroid){ // If the point is a centroid, ignore it
-                        distancesFromCentroids.push(Kmetric->calculate_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates()));
+                centroid = this->Clusters[0]->get_centroid();  // Assume first centroid is the closest
+                double distance = Kmetric->calculate_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates());
+                
+                // Find the closest centroid
+                for (j = 1; j < (int)(this->Clusters).size(); j++) {
+                    centroid = this->Clusters[j]->get_centroid();
+                    double tempDistance = Kmetric->calculate_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates());
+                    if (tempDistance < distance) {
+                        distance = tempDistance;
                     }
                 }
-                minDistance = distancesFromCentroids.top(); // Get the first element, which least distance from a centroid
-                minDistance /= maxDistance; // Normalize the distance
-                minDistanceSquared = minDistance * minDistance; // Get the square of the distance
-                sumOfSquaredDistances += minDistanceSquared ; // Add the square of the distance to the sum of squared distances
 
-                minDistances.push_back(std::make_pair(sumOfSquaredDistances, (this->Points)[i]->get_number())); // Add the distance to the vector of minimum distances
+                // minDistance = distance / maxDistance;  // Normalize
+                minDistance = distance;  // Dont  Normalize
+                minDistanceSquared = minDistance * minDistance; 
+                sumOfSquaredDistances += minDistanceSquared;
+                minDistances.push_back(std::make_pair(sumOfSquaredDistances, (this->Points)[i]->get_number()));
             }
 
-            // Finding the cetroid
-            randomDistance = R.generate_double_uniform(0, sumOfSquaredDistances); // Generate a random number between 0 and the sum of squared distances
-            if(randomDistance >= 0 && randomDistance < minDistances[1].first){ // If the random number is 0, then the point is the centroid
-                pointsNumber = minDistances[0].second; // Get the number of the point
-                cluster = std::make_shared<Cluster>(this->Points[pointsNumber]); // Make a cluster with the point as a centroid MAYBE ADD A FUNCTION THAT RETURNS A POINT GIVEN A NUMBER AND PUSH BACK THAT?
-                this->Clusters.push_back(cluster); // Save it in our clusters vector
-                continue;
-            }
-            for(i = 1; i < (int)(minDistances).size() - 1; i++){ // Find the point that corresponds to the random number
-                if(randomDistance <= minDistances[i + 1].first && randomDistance > minDistances[i].first ){
-                    pointsNumber = minDistances[i + 1].second;
-                    cluster = std::make_shared<Cluster>(this->Points[pointsNumber]); // Make a cluster with the point as a centroid
-                    this->Clusters.push_back(cluster); // Save it in our clusters vector
+            // Select the next centroid
+            randomDistance = R.generate_double_uniform(0, sumOfSquaredDistances);
+            for (i = 0; i < (int)(minDistances).size() - 1; i++) { // Minus 1 cause the random number can't be bigger than sumOfSquaredDistances, i.e. the last element
+                if (randomDistance > minDistances[i].first && randomDistance < minDistances[i + 1].first) {
+                    pointsNumber = minDistances[i].second;
+                    cluster = std::make_shared<Cluster>(this->Points[pointsNumber]);
+                    this->Clusters.push_back(cluster);
                     break;
                 }
             }
@@ -405,118 +406,122 @@ class kMeans{
             converged = true;
             for(i = 0; i < (int)(this->Clusters.size()); i++){
                 double centroidDistance = Kmetric->calculate_distance(previousCentroids[i]->get_coordinates(), this->Clusters[i]->get_centroid()->get_coordinates());
-                printf("Centroid %d distance: %f\n", i, centroidDistance);
+                // printf("Centroid %d distance: %f\n", i, centroidDistance);
                 converged = converged && (centroidDistance < DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE * (this->MaxDist));
             }
         }while(!converged);
     }
 
     void mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
-        bool converged = false;
-        int i, j; 
+
+        int  countRange, countConflicts;
+
+        bool converged = false; // Initialize the convergence flag
+
+        int i, j, convergedCounter;
         int epochs = 0;
 
-        double dinstaceBetweenCentroids, radius;
-        double minDistanceBetweenCentroids = DBL_MAX;
-        double maxDistanceBetweenCentroids = DBL_MIN;
+        double radius;
 
-        double distanceDifferenceTolerance = this->MaxDist * DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE;
+        int clusterNumberConvergenceTolerance = int((double)(this->Clusters).size() * NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE); // If at 80% of the clusters are converged then we have converged
 
+        std::vector<int> previousNumberOfPoints;
 
-        std::shared_ptr<ImageVector> centroid;
-        std::shared_ptr<Cluster> nearestCluster;
-        // std::shared_ptr<Cluster> cluster;
-        std::vector<std::pair<double, std::shared_ptr<ImageVector>>> inRangeImages;
-
-        
-        // Create a new structure that keeps track of the assigned images
-        std::shared_ptr<ImageVector> tempImageVector;
+        std::shared_ptr<ImageVector> image;
+        std::shared_ptr<Cluster> cluster;
         std::unordered_set<std::shared_ptr<ImageVector>> unassignedImages;
-        std::map<std::shared_ptr<ImageVector>, std::vector<std::shared_ptr<Cluster>>> imageProspectiveClusters; // This is to keep track of all the suitor centroids given a specific image in order to resolve the conflicts
+        std::vector<std::shared_ptr<ImageVector>> imagesToErase;
 
+        std::vector<std::shared_ptr<Cluster>> prospectiveClusters;
+
+        for(auto& image : this->Points){
+            unassignedImages.insert(image);
+        }
+
+        // Find the minimum distance between centroids
+        double minimumCentroidDistance = DBL_MAX;
+        double tempDistance;
+        for(i = 0; i < (int)this->Clusters.size(); i++){
+            for(j = 0; j < i; j++){
+                tempDistance  = Kmetric->calculate_distance(this->Clusters[i]->get_centroid()->get_coordinates(), this->Clusters[j]->get_centroid()->get_coordinates());
+                if(tempDistance < minimumCentroidDistance){
+                    minimumCentroidDistance = tempDistance;
+                }
+            }
+        }
+
+        // start with radius = min(dist between centers)/2
+        radius = minimumCentroidDistance * 2/ 3;
+        
         do{
-            // -------------- Start Set up --------------- //
-            printf("Epoch: %d\n", epochs++);
+            printf("Epoch %d\n", epochs++);
+            countConflicts = 0;
+            countRange = 0;
+
+            imagesToErase.clear();
+            previousNumberOfPoints.clear();
+            convergedCounter = 0;
+            // Matching each image with its prospective clusters in every iteration
+            std::map<std::shared_ptr<ImageVector>, std::vector<std::shared_ptr<Cluster>>> imagesToProspectiveClusters;
             
-            // Get the previous centroids
-            std::vector<std::shared_ptr<ImageVector>> previousCentroids;
-            for(const auto& cluster : this->Clusters){
-                previousCentroids.push_back(std::make_shared<ImageVector>(cluster->get_centroid()->get_number(), cluster->get_centroid()->get_coordinates()));
-            }
-            printf("Got the previuos centroids\n");
-            
-            // Initialize the map with the images as keys and the vector of prospective centroids
-            for(i = 0; i < (int)(this->Points).size(); i++){
-                unassignedImages.insert((this->Points)[i]);
-                imageProspectiveClusters[(this->Points)[i]] = std::vector<std::shared_ptr<Cluster>>();
-            }
-            printf("Initialized the map\n");
+            // Mark the images that are inside the ranges
+            for(i = 0; i < (int)(this->Clusters).size(); i++){
+                cluster = (this->Clusters)[i];
+                previousNumberOfPoints.push_back((int)cluster->get_points().size());
 
-            // Find the minimum and the maximum distance between centroids
-            for(i = 0; i < (int)Clusters.size(); i++){
-                for(j = 0; j < (int)Clusters.size(); j++){
-                    if(i != j){
-                        dinstaceBetweenCentroids = Kmetric->calculate_distance((this->Clusters)[i]->get_centroid()->get_coordinates(), (this->Clusters)[j]->get_centroid()->get_coordinates());
-                        if(dinstaceBetweenCentroids < minDistanceBetweenCentroids){
-                            minDistanceBetweenCentroids = dinstaceBetweenCentroids;
-                        }
-                        if(dinstaceBetweenCentroids > maxDistanceBetweenCentroids){
-                            maxDistanceBetweenCentroids = dinstaceBetweenCentroids;
-                        }
-                    }
+                // Get the in range images (which come in the form of pair<double, ImageVector>)
+                auto distanceImagePairs = method->approximate_range_search_return_images(cluster->get_centroid(), radius);
+        
+                for(auto& distanceImagePair : distanceImagePairs){
+                    // Get the image from the pair
+                    image = distanceImagePair.second;
+                    // Mark assigned points: Push the cluster into the images prospective clusters
+                    // If an image has no prospective clusters then it is not assigned
+                    imagesToProspectiveClusters[image].push_back(cluster);
                 }
             }
-            printf("Min = %f and Max = %f\n", minDistanceBetweenCentroids, maxDistanceBetweenCentroids);
-            // ---------------- End Set up --------------- //
-
-            // ---------------- Start The Assignation ------------- //
-
-            radius = minDistanceBetweenCentroids / 2;
-
-            while(!unassignedImages.empty() && radius < maxDistanceBetweenCentroids){ // Keep going until you have assigned all the points or the radius is bigger than the max distance between centroids
-                // Assign imagevectors to clusters
-                for(i = 0; i < (int)Clusters.size(); i++){
-                    centroid = (this->Clusters)[i]->get_centroid();
-                    inRangeImages = method->approximate_range_search_return_images(centroid, radius); // It returns pairs of <double [distance], shared_ptr<ImageVector> [image]>
-                    for(j = 0; j < (int)inRangeImages.size(); j++){
-                        imageProspectiveClusters[inRangeImages[j].second].push_back((this->Clusters)[i]); // Add the centroid to the prospective centroids of the image
-                        if(unassignedImages.find((inRangeImages[j].second)) != unassignedImages.end()){ // If the point is unassingned
-                            unassignedImages.erase((inRangeImages[j].second));  // Delete the image from the unassigned images
-                        }
-                    }
-                }
-                radius *= 2; // Increase the radius
-                printf("Radius is %f < %f\n", radius, maxDistanceBetweenCentroids);
-            }
-            printf("Assigned the images to the prospective clusters\n");
-
-            // Assign the remaining points to the nearest centroid and resolve conflicts
-            for(const auto& pair : imageProspectiveClusters){
-                const std::shared_ptr<ImageVector>& image = pair.first;
-                std::vector<std::shared_ptr<Cluster>> prospectiveClusters = pair.second;
-
-                // If there are multiple prospective centroids or none at all then we need to find them with brute force
-                if(prospectiveClusters.size() != 1){
-                    nearestCluster = get_nearest_cluster(image);
-                    nearestCluster->add_point_and_set_centroid(image);
-                }
-                else{
+            // For a given radius, if a point lies in ≥ 2 balls, compare its distances to the respective centroids, assign to closest centroid.
+            for(auto& image : unassignedImages){
+                prospectiveClusters = imagesToProspectiveClusters[image];
+                if((int)prospectiveClusters.size() == 1){
                     prospectiveClusters[0]->add_point_and_set_centroid(image);
+                    imagesToErase.push_back(image);
+                    countRange++;
+                }
+                else if((int)prospectiveClusters.size() > 1){
+                    auto nearestCluster = get_nearest_cluster(image);
+                    nearestCluster->add_point_and_set_centroid(image);
+                    imagesToErase.push_back(image);
+                    countConflicts++;
                 }
             }
-            printf("Assigned the rest and resolved conflicts\n");
 
-            // Check for convergence by comparing the new centroids with the previous centroids
-            converged = true; //  Need to reset this, otherwise we will never converge
-            for(i = 0; i < (int)(this->Clusters.size()); i++){
-                double centroidDistance = Kmetric->calculate_distance(previousCentroids[i]->get_coordinates(), this->Clusters[i]->get_centroid()->get_coordinates());
-                printf("%d Id: %d -> %d and distance: %f\n", i, previousCentroids[i]->get_number(), this->Clusters[i]->get_centroid()->get_number(),centroidDistance);
-                converged = converged && (centroidDistance < distanceDifferenceTolerance);
+            printf("Range: %d Conflicts: %d\n", countRange, countConflicts);
+
+            //Erase the flagged images
+            for(auto& image : imagesToErase){
+                unassignedImages.erase(image);
             }
 
-            // ---------------- End The Assignation --------------- //
+            for(i = 0; i < (int)(this->Clusters).size(); i++){
+                cluster = (this->Clusters)[i];
+                if((int)cluster->get_points().size() == previousNumberOfPoints[i]){
+                    convergedCounter++;
+                }
+            }
+            // Until most balls get no new point.
+            if(convergedCounter >= clusterNumberConvergenceTolerance){
+                converged = true;
+            }
+            // Multiply radii by 2
+            radius *= 2;
+        }while(!converged); // Until most balls get no new point.
 
-        }while(!converged);
+        // For every unassigned point, compare its distances to all centroids
+        for(auto& image : unassignedImages){
+            auto nearestCluster = get_nearest_cluster(image);
+            nearestCluster->add_point(image);
+        }
     }
 
     std::shared_ptr<Cluster> get_second_nearest_cluster(std::shared_ptr<ImageVector> point){
@@ -607,7 +612,7 @@ class kMeans{
 
 int main(void){
     Eucledean metric;
-    std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("./in/query.dat", 0);
+    std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("./in/input.dat", 0);
 
     std::shared_ptr<kMeans> kmeans;
     kmeans = std::make_shared<kMeans>(10, dataset, &metric);
@@ -619,36 +624,48 @@ int main(void){
     }
 
     for(int i = 0; i < (int)kmeans->get_centroids().size(); i++){ 
-        for(int j = 0; j < (int)kmeans->get_centroids().size(); j++){ 
+        for(int j = 0; j < i; j++){ 
             sumOfDistances += metric.calculate_distance(kmeans->get_centroids()[i]->get_coordinates(), kmeans->get_centroids()[j]->get_coordinates());
         }
     }
-    printf("Metric: %f\n", sumOfDistances);
-
-    std::shared_ptr<LSH> lsh;
-    lsh = std::make_shared<LSH>(4,5,MODULO,LSH_TABLE_SIZE, &metric);
-    lsh->load_data(dataset);
-
-
-    // kmeansInstance.mac_queen([&kmeansInstance](){ kmeansInstance.lloyds_assignment(); });
-    // kmeans->traditional_convergence_algorithm([kmeans](){kmeans->lloyds_assigment();});
-    
-    // kmeansInstance.mac_queen(std::bind(&kMeans::reverse_assignment, &kmeansInstance, method));
-    // kmeans->traditional_convergence_algorithm(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
+    printf("Average Distance Between centroids: %f\n", sumOfDistances/10);
 
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
+    // kmeansInstance.mac_queen([&kmeansInstance](){ kmeansInstance.lloyds_assignment(); });
+    // kmeans->traditional_convergence_algorithm([kmeans](){kmeans->lloyds_assigment();});
+    
+    // kmeansInstance.mac_queen(std::bind(&kMeans::reverse_assignment, &kmeansInstance, method));
+    
+
+    // Lloyd's
     // start = std::chrono::high_resolution_clock::now(); // Start the timer
     // kmeans->mac_queen_with_lloyds();
     // end  = std::chrono::high_resolution_clock::now(); // End the timer 
 
+
+    std::shared_ptr<LSH> lsh;
+    lsh = std::make_shared<LSH>(5,8, MODULO, LSH_TABLE_SIZE, &metric);
+    lsh->load_data(dataset);
+
+    // std::shared_ptr<HyperCube> cube;
+    // cube = std::make_shared<HyperCube>(14, 500, 2000,&metric);
+    // cube->load_data(dataset);
+
+
+    // original one
+    // start = std::chrono::high_resolution_clock::now(); // Start the timer
+    // kmeans->traditional_convergence_algorithm(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
+    // end  = std::chrono::high_resolution_clock::now(); // End the timer 
+
+    // The "correct" one that tries to resolve conflicts
     start = std::chrono::high_resolution_clock::now(); // Start the timer
     kmeans->mac_queen_with_reverse(lsh);
     end  = std::chrono::high_resolution_clock::now(); // End the timer 
 
-    duration= std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
     printf("Time: %ld\n",  duration);
 
