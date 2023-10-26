@@ -243,18 +243,20 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
 }
 
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approximate_range_search_return_images(std::shared_ptr<ImageVector> image, double r){
-    int i, j, prospectImageNumber;
+    int i, j;
     double distance;
-    int queryImageNumber = image->get_number();
+    int visitedPointsCounter = 0;
 
     std::pair<int, int> imageBucketIdAndId;
 
     // This will be saving all the bucket_ids/hypercube vertices that we will be visiting
     std::vector<int> probes;
-    std::vector<std::shared_ptr<ImageVector>> bucket;
 
-    // Let b ← Null; db ← ∞; initialize k best candidates and distances;
-    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
+    // The returned vector
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> inRangeImages;
+
+    // The pointer of each bucket
+    std::vector<std::shared_ptr<ImageVector>> bucket;
 
     // Get the bucket id and the image id
     imageBucketIdAndId = Table->virtual_insert(image);
@@ -264,7 +266,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     probes = get_probes(imageBucketIdAndId.first, this->Probes, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-    for(i = 0; i < (int)(probes.size()); i++){
+    for(i = 0; i < this->Probes; i++){
 
         // printf("Probe: %d\n", probes[i]);
 
@@ -272,29 +274,81 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
         // Search the bucket for the nearest neighbors
-        //for(j = 0; j < (int)(bucket.size()); j++){
         j = 0;
-        while(j < (int)(bucket.size())){
-
-            prospectImageNumber = bucket[j]->get_number();
-
+        while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
+            visitedPointsCounter++;
             // Ignore comparing with itself
-            if(prospectImageNumber != queryImageNumber){
+            if(image != bucket[j]){
+
                 // dist(p,q)
                 distance = Hmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
 
                 if(distance <= r){
-                    nearestImages.push_back(std::make_pair(distance, bucket[j]));
+                    inRangeImages.push_back(std::make_pair(distance, bucket[j]));
                 }
             }
             j++;
         }
     }
-    return nearestImages;
+    return inRangeImages;
 }
 
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approximate_k_nearest_neighbors_return_images(std::shared_ptr<ImageVector> image, int numberOfNearest){
+    int i, j;
+    double distance;
+    int visitedPointsCounter = 0;
+
+    std::pair<int,int> imageBucketIdAndId;
+
+    // This will be saving all the bucket_ids/hypercube vertices that we will be visiting
+    std::vector<int> probes;
+
+    // I will be using a priority queue to keep the k nearest neighbors
+    std::priority_queue<std::pair<double, std::shared_ptr<ImageVector>>, std::vector<std::pair<double, std::shared_ptr<ImageVector>>>, std::less<std::pair<double, std::shared_ptr<ImageVector>>>> nearest;
+
+    // Let b ← Null; db ← ∞; initialize k best candidates and distances;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
-    return nearestImages;
+
+    // The pointer of each bucket
+    std::vector<std::shared_ptr<ImageVector>> bucket;
+
+    // Get the bucket id and the image id
+    imageBucketIdAndId = Table->virtual_insert(image);
+
+    // Get all the (this->Probes)# of probes of a (this->K)-dimensional hypercube
+    probes = get_probes(imageBucketIdAndId.first, this->Probes, this->K);
+
+     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
+    for(i = 0; i < this->Probes; i++){
+        // Get the bucket
+        bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
+
+        // Search the bucket for the nearest neighbors
+        j = 0;
+        while(j < (int)(bucket.size()) && visitedPointsCounter < (this->M)){
+            visitedPointsCounter++;
+            // Ignore comparing with itself
+            if(image != bucket[j]){
+                // dist(p,q)
+                distance = Hmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
+
+                // if dist(q, p) < db = k-th best distance then b ← p; db ← dist(q, p), implemented with a priority queue
+                nearest.push(std::make_pair(distance, bucket[j]));    
+
+                if ((int)(nearest.size()) > numberOfNearest){
+                    nearest.pop(); // Remove the largest image if we are out of space
+                }
+            }
+            j++;
+        }
+    }
+    // Fill up the a structure that we can return
+    while (!nearest.empty()){
+        nearestImages.push_back(nearest.top());
+        nearest.pop();
+    }
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+    return reversed;
+
 }
 

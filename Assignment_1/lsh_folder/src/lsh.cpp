@@ -160,7 +160,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> LSH::approximate_ra
 
                 // if dist(q, p) < r then output p
                 distance = Lmetric->calculate_distance(image->get_coordinates(), bucket[j]->get_coordinates());
-                if(distance < r){
+                if(distance <= r){
                     inRangeImages.push_back(std::make_pair(distance, bucket[j])); // maybe add bucket[j] also
                 }
             }
