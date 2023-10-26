@@ -19,7 +19,7 @@ int main(int argc, char **argv){
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
     int k = 14, M = 2000, probes = 500, N = 1; // Defaults                 
-    double R = 1000.0;
+    double R = 10000.0;
     int opt;
     extern char *optarg; 
     std::string inputFile, queryFile; 
@@ -90,7 +90,7 @@ int main(int argc, char **argv){
             }
         }
         if(cmdNecessary != 3){
-            printf("Program execution requires an input file, output file and a query file.");
+            printf("Program execution requires an input file, output file and a query file.\n");
             return -1;
         }
         else{
@@ -220,11 +220,16 @@ int main(int argc, char **argv){
         printf("Give a path for the dataset file: ");
         std::cin >> inputFile;
         std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, 0);
+        if(images.empty()){
+            return -1;
+        }
+
         HyperCube hypercube(k, probes, M, &metric);
         hypercube.load_data(images);
 
         bool wantMoreQueries = true;
         std::string answer;
+
         outputFile = fopen(outputFileName.c_str(), "w");
         if(outputFile == NULL){
             perror("Error opening output file");
@@ -289,7 +294,9 @@ int main(int argc, char **argv){
                 // ------------------------------------------------------------------- //
                 i++;
             }
-            printf("Results have been written in ./out/cube.out\n");
+            if(!queries.empty()){ // If you managed to read the query file inform of the results
+                printf("Results have been written in ./out/cube.out\n");
+            }
             printf("Type 'yes' if you want to try another query file: \n");
             std::cin >> answer;
             if(answer == "y" || answer == "Y" || answer == "yes" || answer == "Yes"){

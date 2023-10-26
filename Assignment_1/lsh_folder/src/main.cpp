@@ -88,7 +88,7 @@ int main(int argc, char **argv){
         }
 
         if(cmdNecessary != 3){
-            printf("Program execution requires an input file, output file and a query file.");
+            printf("Program execution requires an input file, output file and a query file.\n");
             return -1;
         }
         else{
@@ -197,7 +197,6 @@ int main(int argc, char **argv){
         std::cin >> inputFile;
         std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, 0);
         if(images.empty()){
-            printf("Error reading dataset file\n");
             return -1;
         }
 
@@ -270,7 +269,7 @@ int main(int argc, char **argv){
                 // ------------------------------------------------------------------- //
                 i++;
             }
-            if(!queryFile.empty()){ // If you managed to read the query file inform of the results
+            if(!queries.empty()){ // If you managed to read the query file inform of the results
                 printf("Results have been written in ./out/lsh.out\n");
             }
 
