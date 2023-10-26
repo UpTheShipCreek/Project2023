@@ -201,7 +201,7 @@ int main(int argc, char **argv){
                 range_approx_num.push_back(temp);
             }
         
-            write_approx_lsh(queries[i], nearest_approx_num, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
+            write_approx_cube(queries[i], nearest_approx_num, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
             write_r_near(range_approx_num, R, outputFile);
             // ------------------------------------------------------------------- //
             // ---------------------------- WRITES ------------------------------- //
