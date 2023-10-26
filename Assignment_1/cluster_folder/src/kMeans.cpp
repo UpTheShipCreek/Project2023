@@ -538,7 +538,6 @@ class kMeans{
             auto nearestCluster = get_nearest_cluster(image);
             nearestCluster->add_point(image);   // Don't set its centroid, we are done 
 
-
             this->PointToClusterMap[image] =  nearestCluster;
         }
     }

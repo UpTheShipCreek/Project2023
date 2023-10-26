@@ -91,9 +91,11 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     // ---------------------- METHOD INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
-    std::vector<std::pair<double, int>> nearest_approx;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> range_approx;
+    std::vector<std::pair<double, int>> nearest_approx_num;
+    std::vector<std::pair<double, int>> range_approx_num;
     std::vector<std::pair<double, int>> nearest_exhaust;
-    std::vector<std::pair<double, int>> range_approx;
     // ------------------------------------------------------------------- //
     // ---------------------- METHOD INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
@@ -113,19 +115,21 @@ int main(int argc, char **argv){
     // ------------------------ OPEN AND LOAD INPUT ---------------------- //
     // ------------------------------------------------------------------- //
     std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images(queryFile, 0);
-    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, (int)queries.size());
-    images.insert(images.end(), queries.begin(), queries.end()); // Merge the two vectors of images so you can load them all at once
+    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images(inputFile, 0);
+    // images.insert(images.end(), queries.begin(), queries.end()); // Merge the two vectors of images so you can load them all at once
     lsh.load_data(images); // Load the data to the LSH
     // ------------------------------------------------------------------- //
     // ------------------------ OPEN AND LOAD INPUT ---------------------- //
     // ------------------------------------------------------------------- //
     int i = 0;
     while(i < QUERY_NUMBER  && i < (int)(queries.size())){
+        nearest_approx_num.clear();
+        range_approx_num.clear();
         // ------------------------------------------------------------------- //
         // ----------------------- APPROXIMATE NEAREST ----------------------- //
         // ------------------------------------------------------------------- //
         start = std::chrono::high_resolution_clock::now(); // Start the timer
-        nearest_approx = lsh.approximate_k_nearest_neighbors(queries[i], N); // Get the k approximate nearest vectors to the query
+        nearest_approx = lsh.approximate_k_nearest_neighbors_return_images(queries[i], N); // Get the k approximate nearest vectors to the query
         end  = std::chrono::high_resolution_clock::now(); // End the timer 
         duration_approx = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); // Calculate the duration
         // ------------------------------------------------------------------- //
@@ -146,7 +150,7 @@ int main(int argc, char **argv){
         // ------------------------------------------------------------------- //
         // ------------------------ APPROXIMATE RANGE ------------------------ //
         // ------------------------------------------------------------------- //
-        range_approx = lsh.approximate_range_search(queries[i], R); // Get all the images that are in range R from the query
+        range_approx = lsh.approximate_range_search_return_images(queries[i], R); // Get all the images that are in range R from the query
         // ------------------------------------------------------------------- //
         // ------------------------ APPROXIMATE RANGE ------------------------ //
         // ------------------------------------------------------------------- //
@@ -154,8 +158,19 @@ int main(int argc, char **argv){
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //
-        write_approx_lsh(queries[i], nearest_approx, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
-        write_r_near(range_approx, R, outputFile);
+        for(int j = 0; j < (int)nearest_approx.size(); j++){
+            auto temp = std::make_pair(nearest_approx[j].first, nearest_approx[j].second->get_number());
+            nearest_approx_num.push_back(temp);
+        }
+
+        for(int j = 0; j < (int)range_approx.size(); j++){
+            auto temp = std::make_pair(range_approx[j].first, range_approx[j].second->get_number());
+            range_approx_num.push_back(temp);
+        }
+
+
+        write_approx_lsh(queries[i], nearest_approx_num, nearest_exhaust, duration_approx, duration_exhaust, outputFile); 
+        write_r_near(range_approx_num, R, outputFile);
         // ------------------------------------------------------------------- //
         // ---------------------------- WRITES ------------------------------- //
         // ------------------------------------------------------------------- //

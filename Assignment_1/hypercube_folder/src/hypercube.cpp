@@ -293,3 +293,8 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     return nearestImages;
 }
 
+std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approximate_k_nearest_neighbors_return_images(std::shared_ptr<ImageVector> image, int numberOfNearest){
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
+    return nearestImages;
+}
+
