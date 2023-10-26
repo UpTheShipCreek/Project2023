@@ -16,7 +16,7 @@
 #include "lsh.h"
 #include "hypercube.h"
 
-#define NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE 1 // If at 90% of the clusters are converged then we have converged
+#define NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE 1 // If at 100% of the clusters are converged then we have converged
 #define DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE 0.01 // If the change in the distance is less than 1% of the max distance between two points in our dataset then we have converged
 #define CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE 0.95 // Taking into account the percentage of the change of the change of distance between two epochs
 
@@ -112,6 +112,7 @@ class Cluster{
 class kMeans{
     int K; // Number of clusters
     std::vector<std::shared_ptr<ImageVector>> Points;
+    std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Cluster>> PointToClusterMap; // Usuful information to have handy
     std::vector<std::shared_ptr<Cluster>> Clusters;
     std::vector<double> CenterMass;
 
@@ -302,7 +303,7 @@ class kMeans{
 
         
         // Start the assignation 
-        radius = minDistanceBetweenCentroids / 2;
+        radius = minDistanceBetweenCentroids;
         while(!unassignedImages.empty() && radius < maxDistanceBetweenCentroids){ // Keep going until you have assigned all the points or the radius is bigger than the max distance between centroids
             // Assign imagevectors to clusters
             for(i = 0; i < (int)Clusters.size(); i++){
@@ -407,6 +408,7 @@ class kMeans{
             for (i = 0; i < (int)(this->Points.size()); i++){
                 nearestCluster = get_nearest_cluster(this->Points[i]); 
                 nearestCluster->add_point_and_set_centroid(this->Points[i]);
+                this->PointToClusterMap[this->Points[i]] = nearestCluster; // This should end up saving the assigned cluster of each point
             }
 
             // printf("Assigned each point to the nearest cluster\n");
@@ -496,14 +498,17 @@ class kMeans{
                     prospectiveClusters[0]->add_point_and_set_centroid(image);
                     imagesToErase.push_back(image);
                     countRange++;
+
+                    this->PointToClusterMap[image] =  prospectiveClusters[0]; // Again creating the map
                 }
                 else if((int)prospectiveClusters.size() > 1){
                     auto nearestCluster = get_nearest_cluster(image);
-                    nearestCluster->add_point(image);
-                    // Okay so we are not to move the centroid here? Cause it's too similar to Lloyd's? lol
-                    // nearestCluster->add_point_and_set_centroid(image);
+                    // Okay I am moving the centroid here, it's fine since the prospective point list is set and just saves us from another loop
+                    nearestCluster->add_point_and_set_centroid(image);
                     imagesToErase.push_back(image);
                     countConflicts++;
+
+                    this->PointToClusterMap[image] =  nearestCluster;
                 }
             }
 
@@ -516,8 +521,6 @@ class kMeans{
 
             for(i = 0; i < (int)(this->Clusters).size(); i++){
                 cluster = (this->Clusters)[i];
-                // We recalculate the centroid here. Why? Because we don't want to fall into Lloyd's, even though it would be more efficient at this point
-                cluster->recalculate_centroid();
                 if((int)cluster->get_points().size() == previousNumberOfPoints[i]){
                     convergedCounter++;
                 }
@@ -534,24 +537,31 @@ class kMeans{
         for(auto& image : unassignedImages){
             auto nearestCluster = get_nearest_cluster(image);
             nearestCluster->add_point(image);   // Don't set its centroid, we are done 
+
+
+            this->PointToClusterMap[image] =  nearestCluster;
         }
     }
 
-    std::shared_ptr<Cluster> get_second_nearest_cluster(std::shared_ptr<ImageVector> point){
+    std::shared_ptr<Cluster> get_nearest_cluster_excluding_the_assigned_one(std::shared_ptr<ImageVector> point){
         int j;
         double distance;
+        double minDistance = DBL_MAX;
         std::shared_ptr<ImageVector> tempCentroid;
         std::shared_ptr<Cluster> nearestCluster;
-        std::shared_ptr<Cluster> secondNearestCluster;
-        std::priority_queue<std::pair<double, std::shared_ptr<Cluster>>, std::vector<std::pair<double, std::shared_ptr<Cluster>>>, std::greater<std::pair<double, std::shared_ptr<Cluster>>>> distancesFromCentroids;
+
+        std::shared_ptr<ImageVector> alreadyAssignedClusterCentroid = PointToClusterMap[point]->get_centroid();
 
         for(j = 0; j < (int)(this->Clusters).size(); j++){
+            if(alreadyAssignedClusterCentroid == (this->Clusters)[j]->get_centroid()) continue; // If the cluster is the one that the point is already assigned to, skip it
             tempCentroid = (this->Clusters)[j]->get_centroid();
             distance = Kmetric->calculate_distance(point->get_coordinates(), tempCentroid->get_coordinates()); // Calculate the distance from each centroid
-            distancesFromCentroids.push(make_pair(distance, (this->Clusters)[j]));
+            if(distance < minDistance){
+                minDistance = distance; // Get the minimum distance
+                nearestCluster = (this->Clusters)[j]; // Get the nearest cluster
+            }
         }
-        distancesFromCentroids.pop(); // Pop the first element which is the nearest cluster
-        return  distancesFromCentroids.top().second;
+        return nearestCluster;
     }
 
     double silhouette(){
@@ -573,7 +583,7 @@ class kMeans{
 
             for(int j = 0; j < clusterSize; j++){
                 double object_silhouette;
-                auto secondNearestCluster = get_second_nearest_cluster((this->Clusters[i])->get_points()[j]);
+                auto secondNearestCluster = get_nearest_cluster_excluding_the_assigned_one((this->Clusters[i])->get_points()[j]);
 
                 double average_distance_on_same_cluster = 0;
                 double average_distance_on_other_cluster = 0;
@@ -641,16 +651,14 @@ class kMeans{
                 // printf("Object %d silhouette: %f\n", j, object_silhouette);
                     
                 cluster_silhouette += object_silhouette;
+                silhouette += object_silhouette;
             }
             cluster_silhouette /= (double)clusterSize;
 
             printf("Cluster %d silhouette: %f\n", i, cluster_silhouette);
             fflush(stdout);
-
-            silhouette += cluster_silhouette;
         }
-
-        silhouette /= (double)numClusters;
+        silhouette /= numPoints;
         return silhouette;
     }
 
