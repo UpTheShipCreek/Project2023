@@ -11,9 +11,9 @@ OUT = ./out
 
 # Source files
 SRC_COMMON = $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp $(INC)/image_util.cpp $(INC)/hashtable.cpp
-SRC_LSH = $(LSH)/src/main.cpp $(LSH)/src/lsh.cpp
-SRC_HYPERCUBE = $(HYPERCUBE)/src/main.cpp $(HYPERCUBE)/src/hypercube.cpp
-SRC_CLUSTER = $(CLUSTER)/src/kMeans.cpp $(CLUSTER)/src/cluster.cpp $(LSH)/src/lsh.cpp $(HYPERCUBE)/src/hypercube.cpp
+SRC_LSH = $(LSH)/src/main.cpp $(LSH)/src/lsh.cpp $(CLUSTER)/src/cluster.cpp
+SRC_HYPERCUBE = $(HYPERCUBE)/src/main.cpp $(HYPERCUBE)/src/hypercube.cpp $(CLUSTER)/src/cluster.cpp
+SRC_CLUSTER = $(CLUSTER)/src/main.cpp $(CLUSTER)/src/kMeans.cpp $(CLUSTER)/src/cluster.cpp $(LSH)/src/lsh.cpp $(HYPERCUBE)/src/hypercube.cpp
 
 # Object files
 OBJS_COMMON = $(SRC_COMMON:.cpp=.o)

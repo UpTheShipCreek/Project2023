@@ -4,6 +4,9 @@ lsh call:
 cube call:
     ./cube -d ./in/input.dat -q ./in/query.dat -k 14 -M 2000 -p 500 -o ./out/cube.out -N 10 -R 1000.0
 
+cluster call:
+    ./cluster -i ./in/query.dat -c ./cluster_folder/config/cluster.conf -o ./out/cluster.out -m LSH -complete 
+
 
 Approximate Methods notes:
     1. Initially I had implemented the approximate searches assuming that it was okay to treat the queries as part of the dataset itself,

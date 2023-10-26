@@ -78,15 +78,61 @@ void write_r_near(std::vector<std::pair<double, int>> inRange, int r, FILE* outp
     fflush(outputFile);
 }
 
-void write_clustering(/*other input :)*/methods method, FILE* outputFile){
+void write_clustering(int method, std::vector<std::shared_ptr<Cluster>> clusters, double clusteringTime, std::vector<double> silhouettes, FILE* outputFile){
     fprintf(outputFile, "Algorithm: ");
-    if(method == classic){
-        fprintf(outputFile, "Lloyd's\n");    }
-    else if(method == lsh){
+    if(method == 0){
+        fprintf(outputFile, "Lloyd's\n");    
+    }
+    else if(method == 1){
         fprintf(outputFile, "Range Search LSH\n");
     }
-    else if(method == hypercube){
+    else if(method == 2){
         fprintf(outputFile, "Range Search Hypercube\n");
     }
 
+    //CLUSTER-1 {size: <int>, centroid: πίνακας με τις συντεταγμένες του centroid}
+    for(int i = 0; i < (int)clusters.size(); i++){
+        fprintf(outputFile, "CLUSTER-%d {size: %d, centroid: ", i+1, (int)clusters[i]->get_points().size());
+        std::shared_ptr<ImageVector> centroid = clusters[i]->get_centroid();
+        for(int j = 0; j < (int)centroid->get_coordinates().size(); j++){
+            fprintf(outputFile, "%f", centroid->get_coordinates()[j]);
+            if(j != (int)centroid->get_coordinates().size() - 1){
+                fprintf(outputFile, ", ");
+            }
+        }
+        fprintf(outputFile, "}\n");
+    }
+    fprintf(outputFile, "clustering_time: %f\n", clusteringTime);
+    fprintf(outputFile, "Silhouette: [");
+    for(int i = 0; i < (int)silhouettes.size(); i++){
+        fprintf(outputFile, "%f", silhouettes[i]);
+        if(i != (int)silhouettes.size() - 1){
+            fprintf(outputFile, ", ");
+        }
+    }
+    fprintf(outputFile, "]\n");
+    fflush(outputFile);
+}
+
+// CLUSTER-1 {centroid, image_numberA, ..., image_numberX
+void write_clustering_complete(std::vector<std::shared_ptr<Cluster>> clusters, FILE* outputFile){
+    int i, j;
+    for(i = 0; i < (int)clusters.size(); i++){
+        fprintf(outputFile, "CLUSTER-%d {centroid: ", i+1);
+        if(clusters[i]->get_centroid()->get_number() == -1){
+            fprintf(outputFile, "Virtual, ");
+        }
+        else{
+            fprintf(outputFile, "%d", clusters[i]->get_centroid()->get_number());
+        }
+        int clusterSize = (int)clusters[i]->get_points().size();
+        for(j = 0; j < clusterSize; j++){
+            fprintf(outputFile, "%d", clusters[i]->get_points()[j]->get_number());
+            if(i != clusterSize - 1){
+                fprintf(outputFile, ", ");
+            }
+        }
+        fprintf(outputFile, "}\n");
+    }
+        
 }
