@@ -8,7 +8,7 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
     std::ifstream file(filename, std::ios::binary);
     std::vector<std::shared_ptr<ImageVector>> allImages;
 
-    if (!file.is_open()){
+    if(!file.is_open()){
         perror("Error while opening file");
         return allImages; // Return an empty vector in case of an error
     }
@@ -54,6 +54,7 @@ void write_approx_lsh(std::shared_ptr<ImageVector> query, std::vector<std::pair<
     }
     fprintf(outputFile,"tLSH: %f\n", tLSH);
     fprintf(outputFile,"tTrue: %f\n", tTrue);
+    fflush(outputFile);
 }
 
 void write_approx_cube(std::shared_ptr<ImageVector> query, std::vector<std::pair<double, int>> approx, std::vector<std::pair<double, int>> exhaust, double tCube, double tTrue, FILE* outputFile){
@@ -65,6 +66,7 @@ void write_approx_cube(std::shared_ptr<ImageVector> query, std::vector<std::pair
     }
     fprintf(outputFile,"tHypercube: %f\n", tCube);
     fprintf(outputFile,"tTrue: %f\n", tTrue);
+    fflush(outputFile);
 }
 
 // Write the results of the range search
@@ -73,6 +75,7 @@ void write_r_near(std::vector<std::pair<double, int>> inRange, int r, FILE* outp
     for(int i = 0; i < (int)inRange.size(); i++){
         fprintf(outputFile,"Nearest neighbor-%d: %d\n", i+1, inRange[i].second);
     }
+    fflush(outputFile);
 }
 
 void write_clustering(/*other input :)*/methods method, FILE* outputFile){
