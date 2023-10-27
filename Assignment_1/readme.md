@@ -104,8 +104,6 @@ Additionally the user can simply call the **LSH** and **Hypercube** without any 
 The results are saved in the ```*.out``` files with the respective names. The ```*.out``` files are located in the 
 ```./out``` folder, but the user is free to specify a path for the output, so long as it is valid. 
 
-Include examples and usage instructions.
-
 ## Programs
 ### Parameters
 #### Approximate Methods
