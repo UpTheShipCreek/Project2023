@@ -19,7 +19,7 @@ int main(int argc, char **argv){
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
     int k = 4, L = 5, N = 1; // Default values  
-    double R = 1000.0;                           
+    double R = 10000.0;                           
     int opt;
     extern char *optarg; 
     std::string inputFile, queryFile;
@@ -59,7 +59,7 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     if(argc > 1){
         while ((opt = getopt(argc, argv, "d:q:k:L:o:N:R:")) != -1){                   //Parse through (potential) command line arguments
-            switch (opt) {
+            switch (opt){
                 case 'd':                                                               //Files
                     inputFile = optarg;
                     cmdNecessary++;

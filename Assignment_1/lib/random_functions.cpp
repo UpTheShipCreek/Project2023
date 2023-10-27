@@ -37,7 +37,7 @@ double Random::generate_double_normal(const double mean, const double standardDe
 std::vector<double> Random::generate_vector_normal(int size, const double mean, const double standardDeviation){ // Size is the dimension of the vector
     std::vector<double> vec;
 
-    for (int i = 0; i < size; i++) { // Fill the vector with values up to its dimensions
+    for (int i = 0; i < size; i++){ // Fill the vector with values up to its dimensions
         double randomValue = generate_double_normal(mean, standardDeviation); // d-vector ~ N(0,1)^d from the notes
         vec.push_back(randomValue); 
     }
@@ -48,7 +48,7 @@ std::vector<double> Random::generate_vector_normal(int size, const double mean, 
 std::vector<double> Random::generate_vector_uniform(int size, const double min, const double max){ // Size is the dimension of the vector
     std::vector<double> vec;
 
-    for (int i = 0; i < size; i++) { // Fill the vector with values up to its dimensions
+    for (int i = 0; i < size; i++){ // Fill the vector with values up to its dimensions
         double randomValue = generate_double_uniform(min, max); 
         vec.push_back(randomValue); 
     }

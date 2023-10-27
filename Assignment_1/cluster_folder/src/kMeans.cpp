@@ -71,22 +71,22 @@ kMeans::kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* 
     fflush(stdout);
 
     // Assign the rest of the centroids
-    while ((int)(this->Clusters).size() < K) {
+    while ((int)(this->Clusters).size() < K){
         sumOfSquaredDistances = 0;  // Reset the sum of squared distances
         minDistances.clear();       // Reset the vector of minimum distances
         minDistances.push_back(std::make_pair(0.0, 0));  // Initialize the first element of the vector
 
-        for (i = 0; i < (int)(this->Points).size(); i++) {
+        for (i = 0; i < (int)(this->Points).size(); i++){
             minDistance = std::numeric_limits<double>::max();  // Start with a large value
 
             centroid = this->Clusters[0]->get_centroid();  // Assume first centroid is the closest
             double distance = Kmetric->calculate_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates());
             
             // Find the closest centroid
-            for (j = 1; j < (int)(this->Clusters).size(); j++) {
+            for (j = 1; j < (int)(this->Clusters).size(); j++){
                 centroid = this->Clusters[j]->get_centroid();
                 double tempDistance = Kmetric->calculate_distance((this->Points)[i]->get_coordinates(), centroid->get_coordinates());
-                if (tempDistance < distance) {
+                if (tempDistance < distance){
                     distance = tempDistance;
                 }
             }
@@ -100,8 +100,8 @@ kMeans::kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* 
 
         // Select the next centroid
         randomDistance = R.generate_double_uniform(0, sumOfSquaredDistances);
-        for (i = 0; i < (int)(minDistances).size() - 1; i++) { // Minus 1 cause the random number can't be bigger than sumOfSquaredDistances, i.e. the last element
-            if (randomDistance > minDistances[i].first && randomDistance < minDistances[i + 1].first) {
+        for (i = 0; i < (int)(minDistances).size() - 1; i++){ // Minus 1 cause the random number can't be bigger than sumOfSquaredDistances, i.e. the last element
+            if (randomDistance > minDistances[i].first && randomDistance < minDistances[i + 1].first){
                 pointsNumber = minDistances[i].second;
                 cluster = std::make_shared<Cluster>(this->Points[pointsNumber]);
                 this->Clusters.push_back(cluster);

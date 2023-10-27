@@ -8,7 +8,7 @@ LSH::LSH(int l, int k, int modulo, int tableSize, Metric* metric){
 
         Tables.reserve(L);
 
-        for (int i = 0; i < L; i++) {
+        for (int i = 0; i < L; i++){
             std::shared_ptr<HashFunction> hashFunction = std::make_shared<gFunction>(this->K, this->M);
             Tables.push_back(std::make_shared<HashTable>(tableSize, hashFunction));
         }

@@ -82,35 +82,35 @@ int main(int argc, char **argv){
      for (int i = 1; i < argc; i++){ // Start from 1 to skip the program name (argv[0])
         std::string arg = argv[i];
 
-        if(arg == "-i") {
-            if (i + 1 < argc) {
+        if(arg == "-i"){
+            if (i + 1 < argc){
                 inputFile = argv[i + 1];
                 i++; // Skip the next argument
             }
             cmdNecessary++;
         } 
-        else if (arg == "-c") {
-            if (i + 1 < argc) {
+        else if (arg == "-c"){
+            if (i + 1 < argc){
                 configFile = argv[i + 1];
                 i++;
             }
             cmdNecessary++;
         } 
-        else if (arg == "-o") {
-            if (i + 1 < argc) {
+        else if (arg == "-o"){
+            if (i + 1 < argc){
                 outputFileName = argv[i + 1];
                 i++;
             }
             cmdNecessary++;
         } 
-        else if (arg == "-m") {
-            if (i + 1 < argc) {
+        else if (arg == "-m"){
+            if (i + 1 < argc){
                 methodChoice = argv[i + 1];
                 i++;
             }
             cmdNecessary++;
         } 
-        else if (arg == "-complete") {
+        else if (arg == "-complete"){
             complete = true;
         }
     }
