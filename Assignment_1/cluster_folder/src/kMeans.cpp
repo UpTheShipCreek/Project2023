@@ -35,9 +35,6 @@ kMeans::kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* 
 
     // Find a good approximate of the max distance between two points for normalization
 
-    printf("Approximating max distance\n");
-    fflush(stdout);
-
     std::vector<double> coordinates1, coordinates2;
     int numberOfPointsToCheck = (int)std::sqrt(Points.size()); // Get the distances of some points we don't need many since we are rounding up anyhow
 
@@ -52,13 +49,9 @@ kMeans::kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* 
             this->CenterMass[j] += (coordinates1[j] + coordinates2[j]) / numberOfPointsToCheck;
         }
     }
-    
 
     maxDistance = round_up_to_nearest_order_of_magnitude(allDistances.top()); // Get the max distance
     this->MaxDist = maxDistance;
-
-    printf("Max distance approximation: %f\n", maxDistance);
-    fflush(stdout);
 
     // Assign the first centroid at random
     int firstCentroidIndex = R.generate_int_uniform(0, (int)(this->Points).size() - 1); // Get a random index for the first centroid
@@ -91,8 +84,8 @@ kMeans::kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* 
                 }
             }
 
-            // minDistance = distance / maxDistance;  // Normalize
-            minDistance = distance;  // Dont  Normalize
+            minDistance = distance / maxDistance;  // Normalize
+            // minDistance = distance;  // Dont  Normalize
             minDistanceSquared = minDistance * minDistance; 
             sumOfSquaredDistances += minDistanceSquared;
             minDistances.push_back(std::make_pair(sumOfSquaredDistances, (this->Points)[i]->get_number()));
@@ -268,7 +261,6 @@ void kMeans::traditional_convergence_algorithm(AssignmentFunction assignment){
 
 void kMeans::mac_queen_with_lloyds(){
     int i; 
-    int epochs = 0;
     bool converged = false; // Initialize the convergence flag
 
     std::shared_ptr<Cluster> nearestCluster;
@@ -276,7 +268,7 @@ void kMeans::mac_queen_with_lloyds(){
     std::shared_ptr<ImageVector> centroid;
 
     do{
-        printf("Epoch: %d\n", epochs++);
+        // printf("Epoch: %d\n", epochs++);
         // Save the previous centroids
         std::vector<std::shared_ptr<ImageVector>> previousCentroids;
         for(auto& cluster : this->Clusters){
@@ -311,7 +303,6 @@ void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
     bool converged = false; // Initialize the convergence flag
 
     int i, j, convergedCounter;
-    int epochs = 0;
 
     double radius;
 
@@ -346,7 +337,7 @@ void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
     radius = minimumCentroidDistance;
     
     do{
-        printf("Epoch %d\n", epochs++);
+        // printf("Epoch %d\n", epochs++);
         countConflicts = 0;
         countRange = 0;
 
@@ -393,7 +384,7 @@ void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
             }
         }
 
-        printf("Range: %d Conflicts: %d\n", countRange, countConflicts);
+        // printf("Range: %d Conflicts: %d\n", countRange, countConflicts);
 
         //Erase the flagged images
         for(auto& image : imagesToErase){
@@ -444,173 +435,71 @@ std::shared_ptr<Cluster> kMeans::get_nearest_cluster_excluding_the_assigned_one(
     return nearestCluster;
 }
 std::vector<double> kMeans::silhouette(){
-        int numPoints = (int)this->Points.size();
-        int numClusters = (int)(this->Clusters).size();
+    int numPoints = (int)this->Points.size();
+    int numClusters = (int)(this->Clusters).size();
 
-        // Since I've indexed the images beginning from 1, I need to add one more row and column to the matrix in order to not just -1 every single index
-        std::vector<std::vector<double>> distancesMatrix(numPoints+1, std::vector<double>(numPoints+1, -1.0)); 
+    // Since I've indexed the images beginning from 1, I need to add one more row and column to the matrix in order to not just -1 every single index
+    std::vector<std::vector<double>> distancesMatrix(numPoints+1, std::vector<double>(numPoints+1, -1.0)); 
 
-        double silhouette = 0;
-        std::vector<double> silhouetteVector;
+    double silhouette = 0;
+    std::vector<double> silhouetteVector;
 
-        for(int i = 0; i < numClusters; i++){
+    for(int i = 0; i < numClusters; i++){
 
-            double cluster_silhouette = 0;
+        double cluster_silhouette = 0;
 
-            int clusterSize = (int)(this->Clusters[i])->get_points().size();
-            printf("Cluster %d size %d\n", i, clusterSize);
-            fflush(stdout);
+        int clusterSize = (int)(this->Clusters[i])->get_points().size();
 
-            for(int j = 0; j < clusterSize; j++){
-                double object_silhouette;
-                auto secondNearestCluster = get_nearest_cluster_excluding_the_assigned_one((this->Clusters[i])->get_points()[j]);
+        for(int j = 0; j < clusterSize; j++){
+            double object_silhouette;
+            auto secondNearestCluster = get_nearest_cluster_excluding_the_assigned_one((this->Clusters[i])->get_points()[j]);
 
-                double average_distance_on_same_cluster = 0;
-                double average_distance_on_other_cluster = 0;
+            double average_distance_on_same_cluster = 0;
+            double average_distance_on_other_cluster = 0;
 
-                int pointJNumber = (this->Clusters[i])->get_points()[j]->get_number();
+            int pointJNumber = (this->Clusters[i])->get_points()[j]->get_number();
 
-                // printf("Got pointJNumber = %d\n", pointJNumber);
+            for(int k = 0; k < clusterSize; k++){ // For this cluster
+                int pointKNumber = (this->Clusters[i])->get_points()[k]->get_number();
 
-                // if(pointJNumber == -1){
-                //     printf("You are doing something terribly wrong mate, check out the Clustering functions agian\n");
-                //     return -1;
-                // }
-
-                for(int k = 0; k < clusterSize; k++){ // For this cluster
-                    int pointKNumber = (this->Clusters[i])->get_points()[k]->get_number();
-
-                    // printf("Got pointKNumber = %d\n", pointKNumber);
-
-                    // if(pointKNumber == -1){
-                    //     printf("You are doing something terribly wrong mate, check out the Clustering functions agian\n");
-                    //     return -1;
-                    // }
-
-                    if(distancesMatrix[pointJNumber][pointKNumber] == -1){ 
-                        double tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), 
-                                                                        (this->Clusters[i])->get_points()[k]->get_coordinates());
-                        distancesMatrix[pointJNumber][pointKNumber] = tempdistance;
-                        distancesMatrix[pointKNumber][pointJNumber] = tempdistance;
-                        // printf("Save new value distances[%d][%d] =  %f\n",pointJNumber, pointKNumber,  tempdistance);
-                    }
-                    average_distance_on_same_cluster += distancesMatrix[pointJNumber][pointKNumber];
+                if(distancesMatrix[pointJNumber][pointKNumber] == -1){ 
+                    double tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), 
+                                                                    (this->Clusters[i])->get_points()[k]->get_coordinates());
+                    distancesMatrix[pointJNumber][pointKNumber] = tempdistance;
+                    distancesMatrix[pointKNumber][pointJNumber] = tempdistance;
                 }
-
-                int secondClusterSize = (int)(secondNearestCluster)->get_points().size();
-
-                for(int l = 0; l < secondClusterSize; l++){ // For the other cluster
-                    int pointLNumber = (secondNearestCluster)->get_points()[l]->get_number();
-                    // printf("Got pointLNumber = %d\n", pointLNumber);
-
-                    // if(pointLNumber == -1){
-                    //     printf("You are doing something terribly wrong mate, check out the Clustering functions agian\n");
-                    //     return -1;
-                    // }
-
-                    if(distancesMatrix[pointJNumber][pointLNumber] == -1){
-                        double tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), 
-                                                                        (secondNearestCluster)->get_points()[l]->get_coordinates());
-                        distancesMatrix[pointJNumber][pointLNumber] = tempdistance;
-                        distancesMatrix[pointLNumber][pointJNumber] = tempdistance;
-                        // printf("Save new value distances[%d][%d] =  %f\n",pointJNumber, pointLNumber,  tempdistance);
-                    }
-                    average_distance_on_other_cluster += distancesMatrix[pointJNumber][pointLNumber];
-                }
-
-                // printf("Entering two divisions...");
-                average_distance_on_same_cluster /= (double)clusterSize;
-                average_distance_on_other_cluster /= (double)secondClusterSize;
-                // printf("Done, okay\n");
-
-                // printf("Calculating object silhouette\n");
-                
-                object_silhouette = (average_distance_on_other_cluster - average_distance_on_same_cluster) / 
-                                    std::max(average_distance_on_other_cluster, average_distance_on_same_cluster);
-
-                // printf("Object %d silhouette: %f\n", j, object_silhouette);
-                    
-                cluster_silhouette += object_silhouette;
-                silhouette += object_silhouette;
+                average_distance_on_same_cluster += distancesMatrix[pointJNumber][pointKNumber];
             }
-            cluster_silhouette /= (double)clusterSize;
-            silhouetteVector.push_back(cluster_silhouette);
 
-            printf("Cluster %d silhouette: %f\n", i, cluster_silhouette);
-            fflush(stdout);
+            int secondClusterSize = (int)(secondNearestCluster)->get_points().size();
+
+            for(int l = 0; l < secondClusterSize; l++){ // For the other cluster
+                int pointLNumber = (secondNearestCluster)->get_points()[l]->get_number();
+
+                if(distancesMatrix[pointJNumber][pointLNumber] == -1){
+                    double tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), 
+                                                                    (secondNearestCluster)->get_points()[l]->get_coordinates());
+                    distancesMatrix[pointJNumber][pointLNumber] = tempdistance;
+                    distancesMatrix[pointLNumber][pointJNumber] = tempdistance;
+                }
+                average_distance_on_other_cluster += distancesMatrix[pointJNumber][pointLNumber];
+            }
+
+            average_distance_on_same_cluster /= (double)clusterSize;
+            average_distance_on_other_cluster /= (double)secondClusterSize;
+            
+            object_silhouette = (average_distance_on_other_cluster - average_distance_on_same_cluster) / 
+                                std::max(average_distance_on_other_cluster, average_distance_on_same_cluster);
+                
+            cluster_silhouette += object_silhouette;
+            silhouette += object_silhouette;
         }
-        silhouette /= numPoints;
-        silhouetteVector.push_back(silhouette);
+        cluster_silhouette /= (double)clusterSize;
+        silhouetteVector.push_back(cluster_silhouette);
 
-        printf("Silhouette: %f\n", silhouette);
-
-        return  silhouetteVector;
     }
+    silhouette /= numPoints;
+    silhouetteVector.push_back(silhouette);
 
-// int main(void){
-//     Eucledean metric;
-//     std::vector<std::shared_ptr<ImageVector>> dataset = read_mnist_images("./in/query.dat", 0);
-
-//     std::shared_ptr<kMeans> kmeans;
-//     kmeans = std::make_shared<kMeans>(10, dataset, &metric);
-
-//     double sumOfDistances = 0;
-//     double d = 0;
-
-//     printf("Number of centroids: %d\n", (int)kmeans->get_centroids().size());
-//     for(int i = 0; i < (int)kmeans->get_centroids().size(); i++){
-//         printf("Centroid %d: %d\n", i, kmeans->get_centroids()[i]->get_number());
-//     }
-
-//     for(int i = 0; i < (int)kmeans->get_centroids().size(); i++){ 
-//         sumOfDistances = 0;
-//         for(int j = 0; j < (int)kmeans->get_centroids().size(); j++){ 
-//             sumOfDistances += metric.calculate_distance(kmeans->get_centroids()[i]->get_coordinates(), kmeans->get_centroids()[j]->get_coordinates());
-//         }
-//         d += (sumOfDistances/(int)kmeans->get_centroids().size());
-//     }
-//     printf("Average Distance Between centroids: %f\n", d/10);
-
-//     auto start = std::chrono::high_resolution_clock::now();
-//     auto end = std::chrono::high_resolution_clock::now();
-//     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-
-//     // kmeansInstance.mac_queen([&kmeansInstance](){ kmeansInstance.lloyds_assignment(); });
-//     // kmeans->traditional_convergence_algorithm([kmeans](){kmeans->lloyds_assigment();});
-    
-//     // kmeansInstance.mac_queen(std::bind(&kMeans::reverse_assignment, &kmeansInstance, method));
-    
-
-//     // Lloyd's
-//     // start = std::chrono::high_resolution_clock::now(); // Start the timer
-//     // kmeans->mac_queen_with_lloyds();
-//     // end  = std::chrono::high_resolution_clock::now(); // End the timer 
-
-
-//     std::shared_ptr<LSH> lsh;
-//     lsh = std::make_shared<LSH>(5,8, MODULO, LSH_TABLE_SIZE, &metric);
-//     lsh->load_data(dataset);
-
-//     // std::shared_ptr<HyperCube> cube;
-//     // cube = std::make_shared<HyperCube>(14, 1000, 6000,&metric);
-//     // cube->load_data(dataset);
-
-
-//     // original one
-//     // start = std::chrono::high_resolution_clock::now(); // Start the timer
-//     // kmeans->traditional_convergence_algorithm(std::bind(&kMeans::reverse_assignment, kmeans, lsh));
-//     // end  = std::chrono::high_resolution_clock::now(); // End the timer 
-
-//     // The "correct" one that tries to resolve conflicts
-//     start = std::chrono::high_resolution_clock::now(); // Start the timer
-//     kmeans->mac_queen_with_reverse(lsh);
-//     end  = std::chrono::high_resolution_clock::now(); // End the timer 
-
-//     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-
-//     printf("Time: %ld\nCalculating silhouette...\n",  duration);
-
-//     printf("%f\n", kmeans->silhouette());
-
-//     return 0;
-// }
+    return  silhouetteVector;
+}

@@ -89,11 +89,11 @@ The user is free to provide his own dataset as he pleases, assuming he gives the
 
 - **Classic** (Lloyd's)
     
-   ```./cluster -i ./in/query.dat -c ./cluster_folder/config  cluster.conf -o ./out/cluster.out -m Classic -complete```
+   ```./cluster -i ./in/query.dat -c ./cluster_folder/config/cluster.conf -o ./out/cluster.out -m Classic -complete```
 
 - **LSH**
     
-    ```./cluster -i ./in/query.dat -c ./cluster_folder/config cluster.conf -o ./out/cluster.out -m LSH -complete```
+    ```./cluster -i ./in/query.dat -c ./cluster_folder/config/cluster.conf -o ./out/cluster.out -m LSH -complete```
 - **Hypercube**
     
     ```./cluster -i ./in/query.dat -c ./cluster_folder/config/cluster.conf -o ./out/cluster.out -m Hypercube -complete```
