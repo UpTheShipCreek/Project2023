@@ -22,11 +22,11 @@ The dataset being used is the Mnist dataset
     - [Parameters](#parameters)
         - [Approximate Methods](#approximate-methods)
         - [Clustering](#clustering)
-    -[Implementation Details](#implementation-details)
-        -[General](#general)
-        -[LSH](#lsh)
-        -[Hypercube](#hypercube)
-        -[Cluster](#cluster)
+    - [Implementation Details](#implementation-details)
+        - [General](#general)
+        - [LSH](#lsh)
+        - [Hypercube](#hypercube)
+        - [Cluster](#cluster)
 
 ## Structure
 - **cluster_folder**
