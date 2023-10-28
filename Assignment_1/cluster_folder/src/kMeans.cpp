@@ -437,6 +437,7 @@ std::shared_ptr<Cluster> kMeans::get_nearest_cluster_excluding_the_assigned_one(
 std::vector<double> kMeans::silhouette(){
     int numPoints = (int)this->Points.size();
     int numClusters = (int)(this->Clusters).size();
+    double maxAB;
 
     // Since I've indexed the images beginning from 1, I need to add one more row and column to the matrix in order to not just -1 every single index
     std::vector<std::vector<double>> distancesMatrix(numPoints+1, std::vector<double>(numPoints+1, -1.0)); 
@@ -488,8 +489,10 @@ std::vector<double> kMeans::silhouette(){
             average_distance_on_same_cluster /= (double)clusterSize;
             average_distance_on_other_cluster /= (double)secondClusterSize;
             
-            object_silhouette = (average_distance_on_other_cluster - average_distance_on_same_cluster) / 
-                                std::max(average_distance_on_other_cluster, average_distance_on_same_cluster);
+            maxAB = std::max(average_distance_on_other_cluster, average_distance_on_same_cluster);
+
+            if(maxAB == 0.0) object_silhouette = 0.0;
+            else object_silhouette = (average_distance_on_other_cluster - average_distance_on_same_cluster) / maxAB;
                 
             cluster_silhouette += object_silhouette;
             silhouette += object_silhouette;
