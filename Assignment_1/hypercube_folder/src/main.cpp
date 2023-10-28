@@ -90,7 +90,7 @@ int main(int argc, char **argv){
             }
         }
         if(cmdNecessary != 3){
-            printf("Program execution requires an input file, output file and a query file.\n");
+            printf("Program execution requires an input file, output file and a query file.\nInput example: ./cube –d <input file> –q <query file> –k <int> -M <int> -probes <int> -ο <output file> -Ν <number of nearest> -R <radius>\n");
             return -1;
         }
         else{
