@@ -116,7 +116,7 @@ int main(int argc, char **argv){
     }
 
     if(cmdNecessary != 4){
-        printf("Program execution requires an input file, output file, a cluster config file and a method selection.\n");
+        printf("Program execution requires an input file, output file, a cluster config file and a method selection.\nInput example: ./cluster –i <input file> –c <configuration file> -o <output file> -complete <optional> -m <method: Classic OR LSH or Hypercube>");
         return -1;
     }
     else{
