@@ -133,7 +133,6 @@ std::vector<std::shared_ptr<Cluster>>& kMeans::get_clusters(){
     return this->Clusters;
 }
 
-
 void kMeans::lloyds_assigment(){ // Lloyds-type assignment
     int i;
     std::shared_ptr<Cluster> nearestCluster;
@@ -266,21 +265,22 @@ void kMeans::mac_queen_with_lloyds(){
     std::shared_ptr<Cluster> nearestCluster;
     // std::shared_ptr<Cluster> cluster;
     std::shared_ptr<ImageVector> centroid;
-
     do{
-        // printf("Epoch: %d\n", epochs++);
         // Save the previous centroids
         std::vector<std::shared_ptr<ImageVector>> previousCentroids;
         for(auto& cluster : this->Clusters){
             previousCentroids.push_back(std::make_shared<ImageVector>(-1, cluster->get_centroid()->get_coordinates()));
-            cluster->get_points().clear(); // Clear the points of the cluster
-            // printf("Image centroid has a positive number: %d\n", cluster->get_centroid()->get_number());
         }
 
         // printf("Got previous centroids\n");
 
         for (i = 0; i < (int)(this->Points.size()); i++){
             nearestCluster = get_nearest_cluster(this->Points[i]); 
+
+            if(this->PointToClusterMap.find(this->Points[i]) != this->PointToClusterMap.end()){ // If the point is already assigned to a cluster
+                this->PointToClusterMap[this->Points[i]]->remove_point_and_set_centroid(this->Points[i]); // Remove it from the cluster
+            }
+
             nearestCluster->add_point_and_set_centroid(this->Points[i]);
             this->PointToClusterMap[this->Points[i]] = nearestCluster; // This should end up saving the assigned cluster of each point
         }
@@ -450,7 +450,6 @@ std::vector<double> kMeans::silhouette(){
         double cluster_silhouette = 0;
 
         int clusterSize = (int)(this->Clusters[i])->get_points().size();
-
         for(int j = 0; j < clusterSize; j++){
             double object_silhouette;
             auto secondNearestCluster = get_nearest_cluster_excluding_the_assigned_one((this->Clusters[i])->get_points()[j]);

@@ -16,6 +16,7 @@ class Cluster{
     void add_point(std::shared_ptr<ImageVector> point);
     // Centroid_[n+1] = (N/N+1) Centroid_[n] + newPoint/N+1
     void add_point_and_set_centroid(std::shared_ptr<ImageVector> point);
+    void remove_point_and_set_centroid(std::shared_ptr<ImageVector> point);
     std::shared_ptr<ImageVector>& get_centroid();
     std::vector<std::shared_ptr<ImageVector>>& get_points();
     std::shared_ptr<ImageVector> recalculate_centroid();

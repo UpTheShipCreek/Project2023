@@ -20,9 +20,11 @@ void Cluster::add_point(std::shared_ptr<ImageVector> point){
 
 // Centroid_[n+1] = (N/N+1) Centroid_[n] + newPoint/N+1
 void Cluster::add_point_and_set_centroid(std::shared_ptr<ImageVector> point){
-    (this->Points).push_back(point);
-    double numberOfPoints = ((this->Points).size());
+
+    double numberOfPoints = ((this->Points).size());  // calulate the number of point before we put the new on in
     double fraction = (numberOfPoints) / (numberOfPoints + 1);
+
+    (this->Points).push_back(point);
 
     double temp;
     double newvalue;
@@ -38,6 +40,41 @@ void Cluster::add_point_and_set_centroid(std::shared_ptr<ImageVector> point){
         (this->Centroid)->get_coordinates()[i] = newvalue;
     }
 }
+
+// Centroid[n-1] = (N/N-1) Centroid[n] - removedPoint/N-1
+void Cluster::remove_point_and_set_centroid(std::shared_ptr<ImageVector> point){
+
+    double numberOfPoints = ((this->Points).size());  // get the number of point before we remove the element
+
+    // Remove the point
+    for(int i = 0; i < (int)(this->Points).size(); i++){
+        if((this->Points)[i] == point){
+            (this->Points).erase((this->Points).begin() + i);
+            break;
+        }
+    }
+
+    // The centroid should be virtual at this point but we check just in case
+    if(this->Centroid->get_number() != -1){ 
+        std::shared_ptr<ImageVector> centroidCopy = std::make_shared<ImageVector>(-1, this->Centroid->get_coordinates());
+        this->Centroid = centroidCopy;
+    }
+    
+    if(numberOfPoints > 1){ // If there is only one point left in the cluster the centroid shouldn't change position
+        double fraction = numberOfPoints / (numberOfPoints - 1);
+        double temp;
+        double newvalue;
+
+        for (int i = 0; i < (int)(this->Centroid)->get_coordinates().size(); i++){
+            temp =  (this->Centroid)->get_coordinates()[i];
+            newvalue = (fraction * temp) - (point->get_coordinates()[i] / (numberOfPoints - 1));
+            
+            (this->Centroid)->get_coordinates()[i] = newvalue;
+        }
+    }
+}
+
+
 std::shared_ptr<ImageVector>& Cluster::get_centroid(){
     return this->Centroid;
 }
