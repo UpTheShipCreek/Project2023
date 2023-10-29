@@ -304,32 +304,20 @@ void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
     printf("Clustering... ");
     fflush(stdout);
 
-    int  countRange, countConflicts;
 
-    bool converged = false; // Initialize the convergence flag
+    bool converged = false;
 
-    int i, j, convergedCounter;
-
-    double radius;
-
-    int clusterNumberConvergenceTolerance = int((double)(this->Clusters).size() * NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE); // If at 80% of the clusters are converged then we have converged
-
-    std::vector<int> previousNumberOfPoints;
-
+    int i, j, countRange, countConflicts;
+    int epoch = 0;
+    double radius, tempDistance, numberOfPointsChangedCluster, minimumCentroidDistance = DBL_MAX;
+    
+    std::shared_ptr<ImageVector> centroid;
     std::shared_ptr<ImageVector> image;
-    std::shared_ptr<Cluster> cluster;
-    std::unordered_set<std::shared_ptr<ImageVector>> unassignedImages;
-    std::vector<std::shared_ptr<ImageVector>> imagesToErase;
-
+    std::shared_ptr<Cluster> nearestCluster;
     std::vector<std::shared_ptr<Cluster>> prospectiveClusters;
-
-    for(auto& image : this->Points){
-        unassignedImages.insert(image);
-    }
+    std::unordered_set<std::shared_ptr<ImageVector>> unassignedImages;
 
     // Find the minimum distance between centroids
-    double minimumCentroidDistance = DBL_MAX;
-    double tempDistance;
     for(i = 0; i < (int)this->Clusters.size(); i++){
         for(j = 0; j < i; j++){
             tempDistance  = Kmetric->calculate_distance(this->Clusters[i]->get_centroid()->get_coordinates(), this->Clusters[j]->get_centroid()->get_coordinates());
@@ -339,28 +327,25 @@ void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
         }
     }
 
-    // Start with radius = min(dist between centers) cause 1/2 doesn't work lol
+    // Create a set with all the unassigned images, initialized as all the images
+    for(auto& image : this->Points){
+        unassignedImages.insert(image);
+    }
+
     radius = minimumCentroidDistance;
-    
     do{
-        // printf("Epoch %d\n", epochs++);
-        countConflicts = 0;
+        epoch++;
+        numberOfPointsChangedCluster = 0;
+        countConflicts = 0; 
         countRange = 0;
-
-        imagesToErase.clear();
-        previousNumberOfPoints.clear();
-        convergedCounter = 0;
-        // Matching each image with its prospective clusters in every iteration
         std::map<std::shared_ptr<ImageVector>, std::vector<std::shared_ptr<Cluster>>> imagesToProspectiveClusters;
-        
-        // Mark the images that are inside the ranges
-        for(i = 0; i < (int)(this->Clusters).size(); i++){
-            cluster = (this->Clusters)[i];
-            previousNumberOfPoints.push_back((int)cluster->get_points().size());
 
-            // Get the in range images (which come in the form of pair<double, ImageVector>)
-            auto distanceImagePairs = method->approximate_range_search_return_images(cluster->get_centroid(), radius);
-            // auto distanceImagePairs = exhaustive_range_search(this->Points, cluster->get_centroid(), radius, this->Kmetric);
+        for(auto& cluster : this->Clusters){
+            centroid = cluster->get_centroid();
+            // The approximate range search
+            auto distanceImagePairs =  method->approximate_range_search_return_images(centroid, radius);
+            
+            // For the images that are in range, save the cluster as a prospective cluster
             for(auto& distanceImagePair : distanceImagePairs){
                 // Get the image from the pair
                 image = distanceImagePair.second;
@@ -369,52 +354,58 @@ void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
                 imagesToProspectiveClusters[image].push_back(cluster);
             }
         }
-        // For a given radius, if a point lies in ≥ 2 balls, compare its distances to the respective centroids, assign to closest centroid.
-        for(auto& image : unassignedImages){
+        
+        // For each image
+        for(auto& image : this->Points){
+            // Get the prospective clusters of the image
             prospectiveClusters = imagesToProspectiveClusters[image];
+
             if((int)prospectiveClusters.size() == 1){
-                prospectiveClusters[0]->add_point_and_set_centroid(image);
-                imagesToErase.push_back(image);
+                // If the new prospective cluster is different than the one that the image was assigned to
+                if(this->PointToClusterMap[image] != prospectiveClusters[0]){
+                    // Add the image to the new cluster
+                    prospectiveClusters[0]->add_point_and_set_centroid(image);
+                    // Delete it from the old one if it had one
+                    if(this->PointToClusterMap[image] != nullptr){
+                        this->PointToClusterMap[image]->remove_point_and_set_centroid(image);
+                    }
+                    // Update the map
+                    this->PointToClusterMap[image] =  prospectiveClusters[0];
+                    // Update the image counter of images that changed cluster for the convergence condition
+                    numberOfPointsChangedCluster++;
+                }
+                unassignedImages.erase(image);
                 countRange++;
-
-                this->PointToClusterMap[image] =  prospectiveClusters[0]; // Again creating the map
             }
-            else if((int)prospectiveClusters.size() > 1){
+            else if((int)prospectiveClusters.size() > 1){ // If the image has multiple prospective clusters
                 auto nearestCluster = get_nearest_cluster(image);
-                // Okay I am moving the centroid here, it's fine since the prospective point list is set and just saves us from another loop
-                nearestCluster->add_point_and_set_centroid(image);
-                imagesToErase.push_back(image);
+                // If the new cluster is different than the one that the image was assigned to
+                if(this->PointToClusterMap[image] != nearestCluster){
+                    // Add the image to the new cluster
+                    nearestCluster->add_point_and_set_centroid(image);
+                    // Delete it from the old one if it had one
+                    if(this->PointToClusterMap[image] != nullptr){
+                        this->PointToClusterMap[image]->remove_point_and_set_centroid(image);
+                    }
+                    // Update the map
+                    this->PointToClusterMap[image] =  nearestCluster;
+                    // Update the image counter of images that changed cluster for the convergence condition
+                    numberOfPointsChangedCluster++;
+                }
+                unassignedImages.erase(image);
                 countConflicts++;
-
-                this->PointToClusterMap[image] =  nearestCluster;
             }
         }
-
-        // printf("Range: %d Conflicts: %d\n", countRange, countConflicts);
-
-        //Erase the flagged images
-        for(auto& image : imagesToErase){
-            unassignedImages.erase(image);
-        }
-
-        for(i = 0; i < (int)(this->Clusters).size(); i++){
-            cluster = (this->Clusters)[i];
-            if((int)cluster->get_points().size() == previousNumberOfPoints[i]){
-                convergedCounter++;
-            }
-        }
-        // Until most balls get no new point.
-        if(convergedCounter >= clusterNumberConvergenceTolerance){
-            converged = true;
+        if(epoch >= LEAST_NUMBER_OF_EPOCHS && (numberOfPointsChangedCluster < (int)((double)this->Points.size() * OSCILATION_TOLERANCE) || radius > this->MaxDist)){
+           converged = true;
         }
         // Multiply radii by 2
         radius *= 2;
-    }while(!converged); // Until most balls get no new point.
+    }while(!converged);
 
-    // For every unassigned point, compare its distances to all centroids
     for(auto& image : unassignedImages){
         auto nearestCluster = get_nearest_cluster(image);
-        nearestCluster->add_point(image);   // Don't set its centroid, we are done 
+        nearestCluster->add_point(image);   // We are assuming those are edge cases so there is no need to update centroids here
 
         this->PointToClusterMap[image] =  nearestCluster;
     }
