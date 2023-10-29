@@ -259,6 +259,8 @@ void kMeans::traditional_convergence_algorithm(AssignmentFunction assignment){
 }
 
 void kMeans::mac_queen_with_lloyds(){
+    printf("Clustering... ");
+    fflush(stdout);
     int i; 
     bool converged = false; // Initialize the convergence flag
 
@@ -295,8 +297,12 @@ void kMeans::mac_queen_with_lloyds(){
             converged = converged && (centroidDistance < DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE * (this->MaxDist));
         }
     }while(!converged);
+    printf("Done\n");
+    fflush(stdout);
 }
 void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
+    printf("Clustering... ");
+    fflush(stdout);
 
     int  countRange, countConflicts;
 
@@ -412,6 +418,8 @@ void kMeans::mac_queen_with_reverse(std::shared_ptr<ApproximateMethods> method){
 
         this->PointToClusterMap[image] =  nearestCluster;
     }
+    printf("Done\n");
+    fflush(stdout);
 }
 
 std::shared_ptr<Cluster> kMeans::get_nearest_cluster_excluding_the_assigned_one(std::shared_ptr<ImageVector> point){
@@ -435,6 +443,9 @@ std::shared_ptr<Cluster> kMeans::get_nearest_cluster_excluding_the_assigned_one(
     return nearestCluster;
 }
 std::vector<double> kMeans::silhouette(){
+    printf("Calculating Silhouette... ");
+    fflush(stdout);
+
     int numPoints = (int)this->Points.size();
     int numClusters = (int)(this->Clusters).size();
     double maxAB;
@@ -503,5 +514,7 @@ std::vector<double> kMeans::silhouette(){
     silhouette /= numPoints;
     silhouetteVector.push_back(silhouette);
 
+    printf("Done\n");
+    fflush(stdout);
     return  silhouetteVector;
 }
