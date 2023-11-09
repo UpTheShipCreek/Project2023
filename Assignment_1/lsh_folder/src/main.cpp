@@ -19,7 +19,7 @@ int main(int argc, char **argv){
     // --------------------- PROGRAM INITIALIZATIONS --------------------- //
     // ------------------------------------------------------------------- //
     int k = 4, L = 5, N = 1; // Default values  
-    double R = 1000.0;                           
+    double R = 10000.0;                           
     int opt;
     extern char *optarg; 
     std::string inputFile, queryFile;
@@ -59,7 +59,7 @@ int main(int argc, char **argv){
     // ------------------------------------------------------------------- //
     if(argc > 1){
         while ((opt = getopt(argc, argv, "d:q:k:L:o:N:R:")) != -1){                   //Parse through (potential) command line arguments
-            switch (opt) {
+            switch (opt){
                 case 'd':                                                               //Files
                     inputFile = optarg;
                     cmdNecessary++;
@@ -88,7 +88,8 @@ int main(int argc, char **argv){
         }
 
         if(cmdNecessary != 3){
-            printf("Program execution requires an input file, output file and a query file.\n");
+            printf("Program execution requires an input file, output file and a query file.\nInput example: ./lsh –d <input file> –q <query file> –k <int> -L <int> -ο <output file> -Ν <number of nearest> -R <radius>\n");
+            
             return -1;
         }
         else{

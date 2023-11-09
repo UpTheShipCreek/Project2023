@@ -22,7 +22,8 @@
 #define NUMBER_OF_CLUSTERS_CONVERGENCE_PERCENTAGE_TOLERANCE 0.8 // If at 100% of the clusters are converged then we have converged
 #define DISTANCE_DIFFERENCE_AS_MAX_PERCENTAGE_TOLERANCE 0.01 // If the change in the distance is less than 1% of the max distance between two points in our dataset then we have converged
 #define CHANGE_OF_DISTANCE_DIFFERENCE_PERCENTAGE_TOLERANCE 0.95 // Taking into account the percentage of the change of the change of distance between two epochs
-
+#define OSCILATION_TOLERANCE 0.005
+#define LEAST_NUMBER_OF_EPOCHS 5
 
 double round_up_to_nearest_order_of_magnitude(double number);
 

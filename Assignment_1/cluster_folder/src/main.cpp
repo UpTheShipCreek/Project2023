@@ -82,41 +82,41 @@ int main(int argc, char **argv){
      for (int i = 1; i < argc; i++){ // Start from 1 to skip the program name (argv[0])
         std::string arg = argv[i];
 
-        if(arg == "-i") {
-            if (i + 1 < argc) {
+        if(arg == "-i"){
+            if (i + 1 < argc){
                 inputFile = argv[i + 1];
                 i++; // Skip the next argument
             }
             cmdNecessary++;
         } 
-        else if (arg == "-c") {
-            if (i + 1 < argc) {
+        else if (arg == "-c"){
+            if (i + 1 < argc){
                 configFile = argv[i + 1];
                 i++;
             }
             cmdNecessary++;
         } 
-        else if (arg == "-o") {
-            if (i + 1 < argc) {
+        else if (arg == "-o"){
+            if (i + 1 < argc){
                 outputFileName = argv[i + 1];
                 i++;
             }
             cmdNecessary++;
         } 
-        else if (arg == "-m") {
-            if (i + 1 < argc) {
+        else if (arg == "-m"){
+            if (i + 1 < argc){
                 methodChoice = argv[i + 1];
                 i++;
             }
             cmdNecessary++;
         } 
-        else if (arg == "-complete") {
+        else if (arg == "-complete"){
             complete = true;
         }
     }
 
     if(cmdNecessary != 4){
-        printf("Program execution requires an input file, output file, a cluster config file and a method selection.\n");
+        printf("Program execution requires an input file, output file, a cluster config file and a method selection.\nInput example: ./cluster –i <input file> –c <configuration file> -o <output file> -complete <optional> -m <method: Classic OR LSH or Hypercube>");
         return -1;
     }
     else{

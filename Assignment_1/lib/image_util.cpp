@@ -37,7 +37,7 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
     std::vector<std::pair<double, int>> nearestImages;
 
     for(i = 0; i < (int)(images.size()); i++){
-        if(images[i]->get_number() != image->get_number()){ // Ignore comparing it to itself
+        if(images[i] != image){ // Ignore comparing it to itself
             distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
             nearest.push(std::make_pair(distance, images[i]->get_number()));
             if ((int)(nearest.size()) > numberOfNearest){

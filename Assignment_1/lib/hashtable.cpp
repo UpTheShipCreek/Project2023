@@ -70,7 +70,7 @@ void HashTable::insert(std::shared_ptr<ImageVector> image){ // Insert an image t
 
     int bucketId = id % NumberOfBuckets;
 
-    if(Table.find(bucketId) == Table.end()) {
+    if(Table.find(bucketId) == Table.end()){
         Table[bucketId] = std::vector<std::shared_ptr<ImageVector>>();
     }
 
