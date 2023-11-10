@@ -1,6 +1,8 @@
 #include <vector>
 #include <memory>
 
+#include "graph.h"
+
 // q: For monotonic relative neighbor graph, are the nodes just the points in our d-dimensional space?
 
 

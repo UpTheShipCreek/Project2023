@@ -4,13 +4,16 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -O3
 
 # Directories
 INC = ./lib
+GNNS = ./gnns_folder
 OUT = ./out
 
 # Source files
 SRC_COMMON = $(INC)/graph.cpp $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp $(INC)/image_util.cpp $(INC)/hashtable.cpp $(INC)/lsh.cpp
+SRC_GNNS = $(GNNS)/src/main.cpp
 
 # Object files
 OBJS_COMMON = $(SRC_COMMON:.cpp=.o)
+OBJS_GNNS = $(SRC_GNNS:.cpp=.o)
 
 # Include directories
 INCLUDES = -I$(INC)
@@ -23,11 +26,11 @@ all: gnns
 
 gnns: $(GNNS_EXEC)
 
-$(GNNS_EXEC): $(OBJS_COMMON)
+$(GNNS_EXEC): $(OBJS_COMMON) $(OBJS_GNNS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $(GNNS_EXEC)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -f $(OBJS_COMMON) $(GNNS_EXEC)
+	rm -f $(OBJS_COMMON) $(OBJS_GNNS) $(GNNS_EXEC)
