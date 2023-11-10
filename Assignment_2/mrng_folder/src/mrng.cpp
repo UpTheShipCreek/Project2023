@@ -68,10 +68,13 @@ class MonotonicRelativeNeighborGraph : public Graph{
                 if(copiedRp.empty()) break;
             }
             
-            // for every node v in (Rp - Lp) 
+            // for every node v in Rp
             while(!sortedRp.empty()){
+                // Get the elements in sorted order
                 auto& v = sortedRp.top().second;
                 sortedRp.pop();
+                
+                // and not in Lp
                 if(std::find(Lp->begin(), Lp->end(), v) != Lp->end()) continue; 
 
                 // and t in Lp (Lp is a shared_ptr or Neighbor type so we need to dereference it)
@@ -98,8 +101,16 @@ class MonotonicRelativeNeighborGraph : public Graph{
     }
     
     // Need to implement this
-    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> k_nearest_neighbor_search(){
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> k_nearest_neighbor_search(
+        std::shared_ptr<ImageVector> query, 
+        int L){
+        
+        // Find  node that could serve as our neutral starting point, i.e. centroid 
+        // then pass it into our genetic k nearest neighbor search
+        // Don't forget to test the genetic knn with the gnns, to see if the results are
+        // comparable 
 
+        // return generic_k_nearest_neighbor_search(centroid, query, L, K);
     }
 };
 

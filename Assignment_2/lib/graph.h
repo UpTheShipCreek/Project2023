@@ -52,6 +52,11 @@ class Graph{
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> k_nearest_neighbor_search(
         std::shared_ptr<ImageVector> query, 
         int randomRestarts, int greedySteps, int expansions, int K);
+
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> generic_k_nearest_neighbor_search(
+        std::shared_ptr<ImageVector> startNode, 
+        std::shared_ptr<ImageVector> query, 
+        int L);
 };
 
 #endif

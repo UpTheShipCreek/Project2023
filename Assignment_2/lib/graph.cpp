@@ -116,72 +116,81 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
 // Broken, can't iterate through a PQ without breaking into a protected structure of the container, so I'll need another solution
 // Maybe sort in the end instead of using a priority queue, or use a set as well as the priority queue, but then I'll need 
 // To manage both
-// std::vector<std::pair<double, ImageVector>> generic_k_nearest_neighbor_search(std::shared_ptr<ImageVector> startNode, std::shared_ptr<ImageVector> query, int L, int K){
-//     int i;
-//     double distance;
+std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_nearest_neighbor_search(std::shared_ptr<ImageVector> startNode, std::shared_ptr<ImageVector> query, int L){
+    int i;
+    double distance;
 
-//     std::shared_ptr<ImageVector> node;
-//     std::shared_ptr<Neighbors> neighbors;
-//     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
+    std::shared_ptr<ImageVector> node;
+    std::shared_ptr<Neighbors> neighbors;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
 
-//     // Initialize Candiate set, which will be actually a priority queue since we need it to be sorted
-//     std::priority_queue<
-//         std::pair<double, std::shared_ptr<ImageVector>>,  // A priority queue of pairs of distance and node
-//         std::vector<std::pair<double, std::shared_ptr<ImageVector>>>, // Saving it in a vector of pairs<double, ImageVector>
-//         std::less<std::pair<double, std::shared_ptr<ImageVector>>> // We need the priority queue to be sorted in ascending order of the distance
-//     > R;
+    // Initialize Candiate set, which will be actually a priority queue since we need it to be sorted
+    // std::priority_queue<
+    //     std::pair<double, std::shared_ptr<ImageVector>>,  // A priority queue of pairs of distance and node
+    //     std::vector<std::pair<double, std::shared_ptr<ImageVector>>>, // Saving it in a vector of pairs<double, ImageVector>
+    //     std::less<std::pair<double, std::shared_ptr<ImageVector>>> // We need the priority queue to be sorted in ascending order of the distance
+    // > R;
 
-//     distance = this->GraphMetric->calculate_distance(startNode->get_coordinates(), query->get_coordinates());
-//     R.push(std::make_pair(distance, startNode));
 
-//     // Initialize the set of unchecked nodes
-//     std::unordered_set<std::shared_ptr<ImageVector>> checkedNodes;
+    std::vector<std::shared_ptr<ImageVector>> R;   
+    std::vector<double> vectorOfDistances;
+    std::map<double, std::shared_ptr<ImageVector>> distancesToNodes;
 
-//     // while i < L
-//     i = 1;
-//     while(i < L){
-//         // For every node in the candidates 
-//         bool foundUncheckedCandidate = false;
-//         for(auto& distanceNodePair : R){
-//             node = distanceNodePair.second;
-//             // See if we have already checked this node
-//             if(checkedNodes.find(node) == checkedNodes.end()){
-//                 // If we haven't checked this node, continue the checking process with it
-//                 checkedNodes.insert(node);
-//                 foundUncheckedCandidate = true;
-//                 break;
-//             }
-//         }
+    // MAYBE MAKE A MAP OF DISTANCES TO NODES, SO WE CAN PUSH THE NODES IN THE PRIORITY QUEUE 
+    // THEN BEING SORTED BY DISTANCE AND THEN HAVE SAID DISTANCE ASSOCIATED WITH AN ELEMENT 
 
-//         // If we failed to find an unchecked candidate node, we are done
-//         if(!foundUncheckedCandidate) break;
+    distance = this->GraphMetric->calculate_distance(startNode->get_coordinates(), query->get_coordinates());
 
-//         // Get the neighbors of the candidate node
-//         neighbors = NodesNeighbors[node];
+    // From now on you need to handle all of those structures together
+    R.push_back(startNode);
+    vectorOfDistances.push_back(distance);
+    distancesToNodes[distance] = startNode;
+    
 
-//         // for all neighbors of the candidate node 
-//         for(auto& neighbor : neighbors){
-//             // if neighbor is not in the candidate set, i.e. not in R, add it 
-//             if(R.find(neighbor) == R.end()){
+    // Initialize the set of unchecked nodes
+    std::unordered_set<std::shared_ptr<ImageVector>> checkedNodes;
 
-//                 // Add the neighbor to the candidate set
-//                 dinstace = this->GraphMetric->distance(neighbor, query);
-//                 R.push(std::make_pair<distance, neighbor>);
+    // while i < L
+    i = 1;
+    while(i < L){
+        // For every node in the candidates 
+        bool foundUncheckedCandidate = false;
+        for(auto& node : R){
+            // See if we have already checked this node
+            if(checkedNodes.find(node) == checkedNodes.end()){
+                // If we haven't checked this node, continue the checking process with it
+                checkedNodes.insert(node);
+                foundUncheckedCandidate = true;
+                break;
+            }
+        }
 
-//                 // If we have exceeded the number of nearest neighbors we are allowed to check, remove the farthest neighbor
-//                 if((int)R.size() > K){
-//                     R.pop();
-//                 }
-//                 i++;
-//             }
-//         }
-//         // "sort R in ascending order of the distance to q", which we don't need to do cause we are using a Priority Queue
-//         // We do need return a vector of the K nearest neighbors in reverse though
-//         while (!R.empty()){
-//             nearestImages.push_back(R.top());
-//             R.pop();
-//         }
-//         std::vector<std::pair<double, ImageVector>> reversed(nearestImages.rbegin(), nearestImages.rend());
-//         return reversed;
-//     }
-// }
+        // If we failed to find an unchecked candidate node, we are done
+        if(!foundUncheckedCandidate) break;
+
+        // Get the neighbors of the candidate node
+        neighbors = NodesNeighbors[node];
+
+        // for all neighbors of the candidate node 
+        for(auto& neighbor : *neighbors){
+            // if neighbor is not in the candidate set, i.e. not in R, add it 
+            if(std::find(R.begin(), R.end(), neighbor) != R.end()){
+
+                // Add the neighbor to the candidate set
+                distance = this->GraphMetric->calculate_distance(neighbor->get_coordinates(), query->get_coordinates());
+                R.push_back(neighbor);
+                vectorOfDistances.push_back(distance);
+                distancesToNodes[distance] = neighbor;
+
+                // If we have exceeded the number of nearest neighbors we are allowed to check, remove the farthest neighbor
+                i++;
+            }
+        }
+    }
+    // sort R in ascending order of the distance to q
+    std::sort(vectorOfDistances.begin(), vectorOfDistances.end());
+    for(auto& distance : vectorOfDistances){
+        nearestImages.push_back(std::make_pair(distance, distancesToNodes[distance]));
+    }
+    return nearestImages;
+}
