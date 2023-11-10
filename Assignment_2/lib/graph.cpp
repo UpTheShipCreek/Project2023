@@ -214,7 +214,7 @@ int main(void){
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> lsh_nearest_approx;
     std::vector<std::shared_ptr<Neighbors>> nearest_approx_for_all;
 
-    std::shared_ptr<Neighbors> neighbors = std::make_shared<Neighbors>();
+    // std::shared_ptr<Neighbors> neighbors = std::make_shared<Neighbors>();
 
     // Get queries
     std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images("../Assignment_1/in/input.dat", 0);
@@ -229,6 +229,8 @@ int main(void){
     fflush(stdout);
     for(auto& image : images){
         nearest_approx = lsh.approximate_k_nearest_neighbors_return_images(image, GRAPH_DEFAULT_K);
+        // VERY IMPORTANT TO CREATE DIFFERENT POINTS FOR THE STRUCTURE
+        std::shared_ptr<Neighbors> neighbors = std::make_shared<Neighbors>(); 
         for(auto& neighbor : nearest_approx){
             neighbors->push_back(neighbor.second);
         }
