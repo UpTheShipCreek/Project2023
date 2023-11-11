@@ -1,1 +1,5 @@
 *.out
+/MNIST
+c_cpp_properties.json
+settings.json
+Assignment_1/out/cluster.out
