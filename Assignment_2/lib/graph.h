@@ -37,12 +37,12 @@ class Graph{
     protected:
     std::vector<std::shared_ptr<ImageVector>> Nodes; 
     std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Neighbors>> NodesNeighbors; // The list of neighbors for each node
-    Random RandGenerator; // The random number generator we are using
-    Metric* GraphMetric; // The metric we are using to calculate the distance between nodes
 
     // Note: Depending on how we initilaize the neighbor list it can we sorted or not
     // but initializing it with LSH/Hypercube will yield sorted results
     public:
+    Random RandGenerator; // The random number generator we are using
+    Metric* GraphMetric; // The metric we are using to calculate the distance between nodes
     Graph(std::vector<std::shared_ptr<ImageVector>> nodes, Metric* metric);
     Graph(std::vector<std::shared_ptr<ImageVector>> nodes, std::vector<std::shared_ptr<Neighbors>> neighborList, Metric* metric);
 
@@ -56,7 +56,7 @@ class Graph{
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> generic_k_nearest_neighbor_search(
         std::shared_ptr<ImageVector> startNode, 
         std::shared_ptr<ImageVector> query, 
-        int L);
+        int L, int K);
 };
 
 #endif
