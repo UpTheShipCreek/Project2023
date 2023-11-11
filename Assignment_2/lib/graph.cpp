@@ -120,98 +120,79 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
 // Maybe sort in the end instead of using a priority queue, or use a set as well as the priority queue, but then I'll need 
 // To manage both
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_nearest_neighbor_search(std::shared_ptr<ImageVector> startNode, std::shared_ptr<ImageVector> query, int L, int K){
-    int i;
+    
+    // Initializations
+    bool foundUncheckedCandidate;
+    
     double distance;
 
     std::shared_ptr<ImageVector> node;
     std::shared_ptr<Neighbors> neighbors;
-    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
 
-    // Initialize Candiate set, which will be actually a priority queue since we need it to be sorted
-    // std::priority_queue<
-    //     std::pair<double, std::shared_ptr<ImageVector>>,  // A priority queue of pairs of distance and node
-    //     std::vector<std::pair<double, std::shared_ptr<ImageVector>>>, // Saving it in a vector of pairs<double, ImageVector>
-    //     std::less<std::pair<double, std::shared_ptr<ImageVector>>> // We need the priority queue to be sorted in ascending order of the distance
-    // > R;
+    std::unordered_set<std::shared_ptr<ImageVector>> checkedCandidates; // The set of candidates we have already checked
+    
+    std::vector<std::shared_ptr<ImageVector>> candidateSetR; // The set of candidates we are going to check
 
+    std::priority_queue<
+        std::pair<double, std::shared_ptr<ImageVector>>, 
+        std::vector<std::pair<double, std::shared_ptr<ImageVector>>>,
+        std::less<std::pair<double, std::shared_ptr<ImageVector>>>
+    > sortedCandidateSetR;
+    // Initializations
 
-    std::vector<std::shared_ptr<ImageVector>> R;   
-    std::vector<double> vectorOfDistances;
-    std::map<double, std::shared_ptr<ImageVector>> distancesToNodes;
+    // "Add the starting node to the candidate set R"
+    candidateSetR.push_back(startNode);
+    // In our case it is a priority queue, so we will also add the node with its distance to the query
+    distance = GraphMetric->calculate_distance(startNode->get_coordinates(), query->get_coordinates());
+    sortedCandidateSetR.push(std::make_pair(distance, startNode));
 
-    // MAYBE MAKE A MAP OF DISTANCES TO NODES, SO WE CAN PUSH THE NODES IN THE PRIORITY QUEUE 
-    // THEN BEING SORTED BY DISTANCE AND THEN HAVE SAID DISTANCE ASSOCIATED WITH AN ELEMENT 
-    // printf("%d\n",__LINE__);
-    distance = this->GraphMetric->calculate_distance(startNode->get_coordinates(), query->get_coordinates());
-    // printf("%d\n",__LINE__);
-    // From now on you need to handle all of those structures together
-    R.push_back(startNode);
-    vectorOfDistances.push_back(distance);
-    distancesToNodes[distance] = startNode;
-    // printf("%d\n",__LINE__);
-
-    // Initialize the set of unchecked nodes
-    std::unordered_set<std::shared_ptr<ImageVector>> checkedNodes;
-    // while i < L
-    i = 1;
+    // For a certain amount of candidates L
+    int i = 0;
     while(i < L){
-        // printf("%d\n",__LINE__);
-        // For every node in the candidates 
-        bool foundUncheckedCandidate = false;
-        for(auto& tempNode : R){
-            // printf("Node id is %d\n", tempNode->get_number());
-            // See if we have already checked this node
-            if(checkedNodes.find(tempNode) == checkedNodes.end()){
-                // printf("%d\n",__LINE__);
-                // If we haven't checked this node, continue the checking process with it
-                checkedNodes.insert(tempNode);
+
+        // ---------------- Finding an unchecked candidate ---------------- // 
+        // For the candidates of set R
+        foundUncheckedCandidate = false;
+        for(auto& candidate : candidateSetR){
+            // If a candidate is unchecked
+            if(checkedCandidates.find(candidate) == checkedCandidates.end()){
+                // Add the candidate to the set of checked candidates
+                checkedCandidates.insert(candidate);
+                // Don't forget to flip the flag
                 foundUncheckedCandidate = true;
-                node = tempNode;
-                break; 
-                // Turns out the break was not working as I exprected it 
-                // Cause the tempNode still reached the end of the R vector and when I trying to access it I was getting Seg Fault
+                // And save the candidate (apparently the iterator goes to the end)
+                node = candidate;
+                break;
             }
         }
-        // printf("Node EXIT id is %d\n", node->get_number());
-        
-        // If we failed to find an unchecked candidate node, we are done
-        if(!foundUncheckedCandidate) break;
-        // printf("%d\n",__LINE__);
-        // Get the neighbors of the candidate node
-        // printf("Node id is %d\n", node->get_number());
-        
-        neighbors = NodesNeighbors[node];
-        if(neighbors == nullptr) // printf("Neighbors is null you dumbass\n");
-        
-        // printf("Ths element has %d neighbors\n", (int)neighbors->size());
-        
-        // for all neighbors of the candidate node 
-        for(auto neighbor : *neighbors){
-            // printf("%d\n",__LINE__);
-            // if neighbor is not in the candidate set, i.e. not in R, add it 
-            if(std::find(R.begin(), R.end(), neighbor) != R.end()){
-                // printf("%d\n",__LINE__);
-                // Add the neighbor to the candidate set
-                distance = this->GraphMetric->calculate_distance(neighbor->get_coordinates(), query->get_coordinates());
-                R.push_back(neighbor);
-                vectorOfDistances.push_back(distance);
-                distancesToNodes[distance] = neighbor;
-                // printf("%d\n",__LINE__);
-                // If we have exceeded the number of nearest neighbors we are allowed to check, remove the farthest neighbor
-                i++;
+        if(!foundUncheckedCandidate){
+            // If we didn't find an unchecked candidate, break
+            break;
+        }
+        neighbors = this->NodesNeighbors[node];
+        for(auto& neighbor : *neighbors){
+            // If the neighbor is not in the candidate set R
+            if(std::find(candidateSetR.begin(), candidateSetR.end(), neighbor) == candidateSetR.end()){
+                // Add the neighbor to the candidate set R
+                candidateSetR.push_back(neighbor);
+                // And add the neighbor to the sorted candidate set R
+                distance = GraphMetric->calculate_distance(neighbor->get_coordinates(), query->get_coordinates());
+                sortedCandidateSetR.push(std::make_pair(distance, neighbor));
+                // But don't exceed the number of neighbors we want to return
+                if((int)sortedCandidateSetR.size() > K){
+                    sortedCandidateSetR.pop();
+                }
             }
         }
+        i++;
     }
-    // sort R in ascending order of the distance to q
-    // printf("%d\n",__LINE__);
-    std::sort(vectorOfDistances.begin(), vectorOfDistances.end());
-    // printf("%d\n",__LINE__);
-    // for(auto& distance : vectorOfDistances){
-    int j = 0;
-    while((int)nearestImages.size() < K && !vectorOfDistances.empty()){
-        // printf("%d\n",__LINE__);
-        nearestImages.push_back(std::make_pair(vectorOfDistances[j], distancesToNodes[vectorOfDistances[j]]));
-        j++;
+
+    // Reverse and Return the priority queue as a vector
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
+    while (!sortedCandidateSetR.empty()){
+        nearestImages.push_back(sortedCandidateSetR.top());
+        sortedCandidateSetR.pop();
     }
-    return nearestImages;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> reversed(nearestImages.rbegin(), nearestImages.rend());
+    return reversed;
 }
