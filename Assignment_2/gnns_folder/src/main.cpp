@@ -1,5 +1,7 @@
 #include "graph.h"
 
+// Because of how LSH works, the graph we end up having is a directed graph (i.e. the edges are not symmetric)
+
 int main(void){
     Eucledean metric;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
