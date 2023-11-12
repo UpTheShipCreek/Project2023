@@ -196,3 +196,22 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_ne
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> reversed(nearestImages.rbegin(), nearestImages.rend());
     return reversed;
 }
+
+void Graph::initialize_neighbours_approximate_method(std::shared_ptr<ApproximateMethods> method){
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
+    // Load them into LSH
+    method->load_data(this->Nodes);
+    printf("Creating the edge relations between the nodes/images...");
+    fflush(stdout);
+    for(auto& node : this->Nodes){
+        nearest_approx = method->approximate_k_nearest_neighbors_return_images(node, GRAPH_DEFAULT_K);
+        // VERY IMPORTANT TO CREATE DIFFERENT POINTERS FOR EACH NEIGHBOR STRUCTURE
+        std::shared_ptr<Neighbors> neighbors = std::make_shared<Neighbors>(); 
+        for(auto& neighbor : nearest_approx){
+            neighbors->push_back(neighbor.second);
+        }
+        NodesNeighbors[node] = neighbors;
+    }
+}
+
+//  std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Neighbors>> NodesNeighbors; // The list of neighbors for each node

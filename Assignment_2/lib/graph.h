@@ -12,6 +12,7 @@
 #include "random_functions.h"
 #include "metrics.h"
 #include "lsh.h"
+#include "approximate_methods.h"
 
 // α) πληθος των πλησιεστερων γειτονων στον γραμμο k-NN 
 // β) ακεραια παραμετρος Ε των επεκτασεων 
@@ -57,6 +58,8 @@ class Graph{
         std::shared_ptr<ImageVector> startNode, 
         std::shared_ptr<ImageVector> query, 
         int L, int K);
+
+    void initialize_neighbours_approximate_method(std::shared_ptr<ApproximateMethods> method);
 };
 
 #endif
