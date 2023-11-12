@@ -6,7 +6,9 @@
 
 #include "graph.h"
 
+
 class MonotonicRelativeNeighborGraph : public Graph{
+   std::shared_ptr<ImageVector> Centroid, NavigatingNode; //he navigate >:)
 
     public: 
     // Give a set of nodes, i.e. the d dimensional points/images in our dataset 
@@ -14,11 +16,16 @@ class MonotonicRelativeNeighborGraph : public Graph{
         std::vector<std::shared_ptr<ImageVector>> nodes,  
         Metric* metric) : 
         Graph(nodes, metric){ // Constructor
-
+        
+        int i;
+        
         double distance, leastDistance, edgepv, edgept, edgevt;
+        double newValue;
+        double fraction;
 
+        std::vector<double> vectorZero(nodes[0]->get_coordinates().size(), 0.0);
+        this->Centroid = std::make_shared<ImageVector>(-1, vectorZero);
         std::shared_ptr<Neighbors> Lp;
-
         // Get the graph structure that maps the nodes to their neighbors
         // Apparently it needs to be specified reference in the type
         // std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Neighbors>>& nodesNeighbors = get_nodes_neighbors();
@@ -31,9 +38,16 @@ class MonotonicRelativeNeighborGraph : public Graph{
             
         // ----- Construction Process ----- //
         // for every node p in nodes 
-        int nodeCount = 0;
+        double nodeCount = 0;
         for(auto& p : nodes){
-            printf("nodeCount: %d\n",nodeCount++);
+            //incrementally building the centroid
+            fraction = (nodeCount) / (nodeCount + 1);
+            for (i = 0; i < (int)(this->Centroid)->get_coordinates().size(); i++){
+                newValue = (fraction * (this->Centroid)->get_coordinates()[i]) + (p->get_coordinates()[i] / (nodeCount + 1));
+                (this->Centroid)->get_coordinates()[i] = newValue;
+            }
+
+            printf("nodeCount: %f\n",nodeCount++);
             // Create a set that doesn't contain the current node called Rp
             // Sort Rp according to the distance to the current node
             for(auto& node : nodes){
@@ -113,8 +127,25 @@ class MonotonicRelativeNeighborGraph : public Graph{
             // printf("Lp size = %d\n", (int)Lp->size());
             this->NodesNeighbors[p] = Lp;
         }
+
+        // Finds the closest real node to the virtual centroid of the dataset and assigns it to the NavigatingNode
+        std::vector<std::pair<double, std::shared_ptr<ImageVector>>> vectorContainingNavigatingNode;
+        vectorContainingNavigatingNode = exhaustive_nearest_neighbor_search_return_images(this->Nodes, this->Centroid, 1, this->GraphMetric);
+        if (vectorContainingNavigatingNode.empty()){
+            this->NavigatingNode = this->Nodes[this->RandGenerator.generate_int_uniform(0, (int)this->Nodes.size() - 1)];
+        }
+        else{
+            this->NavigatingNode = vectorContainingNavigatingNode[0].second;
+        }
     }
+
+    //Calls the generic graph search with Navigating Node, which is the closest real node to the virtual centroid of the dataset, and returns it
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> k_nearest_neighbor_search(std::shared_ptr<ImageVector> query, int L, int K){
+        return generic_k_nearest_neighbor_search(this->NavigatingNode, query, L, K);
+    }
+    
 };
+
 
 int main(void){
     Eucledean metric;
@@ -142,7 +173,7 @@ int main(void){
 
         int steps = 10;
         // LOOKS GOOD, JUST NEED TO HAVE A BETTER INITIALIZATION METHOD 
-        nearest_approx = mrng.generic_k_nearest_neighbor_search(images[mrng.RandGenerator.generate_int_uniform(0, (int)images.size() - 1)], queries[i], steps, GRAPH_DEFAULT_N);
+        nearest_approx = mrng.k_nearest_neighbor_search(queries[i], steps, GRAPH_DEFAULT_N);
         lsh_nearest_approx = lsh.approximate_k_nearest_neighbors_return_images(queries[i], GRAPH_DEFAULT_N);
         for(int i = 0; i < (int)lsh_nearest_approx.size(); i++){
             printf("LSH: %f Graph: %f\n", lsh_nearest_approx[i].first, nearest_approx[i].first);
