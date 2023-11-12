@@ -22,7 +22,38 @@ bool ImageVector::operator==(const ImageVector& other) const{
     return Coordinates == other.Coordinates;
 }
 
-std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
+// std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
+//     std::vector<std::shared_ptr<ImageVector>> images, 
+//     std::shared_ptr<ImageVector> image, 
+//     int numberOfNearest,
+//     Metric* metric){
+
+//     int i;
+//     double distance;
+
+//     // I will be using a priority queue again
+//     std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
+
+//     std::vector<std::pair<double, int>> nearestImages;
+
+//     for(i = 0; i < (int)(images.size()); i++){
+//         if(images[i] != image){ // Ignore comparing it to itself
+//             distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
+//             nearest.push(std::make_pair(distance, images[i]->get_number()));
+//             if ((int)(nearest.size()) > numberOfNearest){
+//                 nearest.pop();
+//             }
+//         }
+//     }
+//     while (!nearest.empty()){
+//         nearestImages.push_back(nearest.top());
+//         nearest.pop();
+//     }
+//     std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+//     return reversed;
+// }
+
+std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustive_nearest_neighbor_search_return_images(
     std::vector<std::shared_ptr<ImageVector>> images, 
     std::shared_ptr<ImageVector> image, 
     int numberOfNearest,
@@ -32,14 +63,14 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
     double distance;
 
     // I will be using a priority queue again
-    std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
+    std::priority_queue<std::pair<double, std::shared_ptr<ImageVector>>, std::vector<std::pair<double, std::shared_ptr<ImageVector>>>, std::less<std::pair<double, std::shared_ptr<ImageVector>>>> nearest;
 
-    std::vector<std::pair<double, int>> nearestImages;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestImages;
 
     for(i = 0; i < (int)(images.size()); i++){
         if(images[i] != image){ // Ignore comparing it to itself
             distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
-            nearest.push(std::make_pair(distance, images[i]->get_number()));
+            nearest.push(std::make_pair(distance, images[i]));
             if ((int)(nearest.size()) > numberOfNearest){
                 nearest.pop();
             }
@@ -49,9 +80,10 @@ std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
         nearestImages.push_back(nearest.top());
         nearest.pop();
     }
-    std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+    std::vector<std::pair<double,std::shared_ptr<ImageVector>>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
     return reversed;
 }
+
 
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustive_range_search(
     std::vector<std::shared_ptr<ImageVector>> images, 
