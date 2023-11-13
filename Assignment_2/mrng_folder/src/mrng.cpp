@@ -154,26 +154,26 @@ int main(void){
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> lsh_nearest_approx;
     
     // Get queries !!!!!!!!!!!!!!!!!!!!!!!! CHANGED THE NAMES
-    std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images("../Assignment_1/in/input.dat", 0);
+    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images("../Assignment_1/in/input.dat", 0);
     // Get the dataset
-    std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images("../Assignment_1/in/query.dat", (int)images.size());
+    std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images("../Assignment_1/in/query.dat", (int)images.size());
 
-    // std::vector<std::shared_ptr<ImageVector>> smallDataset;
-    // auto endIter = images.begin();
-    // std::advance(endIter, std::min(1000, static_cast<int>(images.size())));
-    // smallDataset.assign(images.begin(), endIter);
+    std::vector<std::shared_ptr<ImageVector>> smallDataset;
+    auto endIter = images.begin();
+    std::advance(endIter, std::min(1000, static_cast<int>(images.size())));
+    smallDataset.assign(images.begin(), endIter);
 
-    MonotonicRelativeNeighborGraph mrng(images, &metric);
+    MonotonicRelativeNeighborGraph mrng(smallDataset, &metric);
 
     LSH lsh(LSH_DEFAULT_L, LSH_DEFAULT_K, MODULO, LSH_TABLE_SIZE, &metric);
-    lsh.load_data(images);
+    lsh.load_data(smallDataset);
 
     for(int i = 0; i < 10; i++){
         printf("Query: %d\n", i);
 
-        int steps = 10;
+        
         // LOOKS GOOD, JUST NEED TO HAVE A BETTER INITIALIZATION METHOD 
-        nearest_approx = mrng.k_nearest_neighbor_search(queries[i], steps, GRAPH_DEFAULT_N);
+        nearest_approx = mrng.k_nearest_neighbor_search(queries[i], GRAPH_DEFAULT_I, GRAPH_DEFAULT_N);
         lsh_nearest_approx = lsh.approximate_k_nearest_neighbors_return_images(queries[i], GRAPH_DEFAULT_N);
         for(int i = 0; i < (int)lsh_nearest_approx.size(); i++){
             printf("LSH: %f Graph: %f\n", lsh_nearest_approx[i].first, nearest_approx[i].first);
