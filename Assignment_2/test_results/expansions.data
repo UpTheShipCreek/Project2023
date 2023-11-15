@@ -1,0 +1,8 @@
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+Creating the edge relations between the nodes/images... Done
+Expansions:10 AverageMaxFactor: 8.750061 AverageTimePerQuery: 0.000019
+Expansions:20 AverageMaxFactor: 7.953325 AverageTimePerQuery: 0.000019
+Expansions:40 AverageMaxFactor: 7.297060 AverageTimePerQuery: 0.000020
+Expansions:50 AverageMaxFactor: 8.276422 AverageTimePerQuery: 0.000019
