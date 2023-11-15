@@ -204,14 +204,14 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_ne
     return reversed;
 }
 
-void Graph::initialize_neighbours_approximate_method(std::shared_ptr<ApproximateMethods> method){
+void Graph::initialize_neighbours_approximate_method(std::shared_ptr<ApproximateMethods> method, int k){
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
     // Load them into LSH
     method->load_data(this->Nodes);
-    // printf("Creating the edge relations between the nodes/images... ");
+    printf("Creating the edge relations between the nodes/images... ");
     fflush(stdout);
     for(auto& node : this->Nodes){
-        nearest_approx = method->approximate_k_nearest_neighbors_return_images(node, GRAPH_DEFAULT_K);
+        nearest_approx = method->approximate_k_nearest_neighbors_return_images(node, k);
         // If the node has no neighbors, skip it
         if(nearest_approx.empty()){
             continue;
@@ -223,7 +223,7 @@ void Graph::initialize_neighbours_approximate_method(std::shared_ptr<Approximate
         }
         NodesNeighbors[node] = neighbors;
     }
-    // printf("Done\n");
+    printf("Done\n");
     fflush(stdout);
 }
 
