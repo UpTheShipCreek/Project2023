@@ -1,0 +1,14 @@
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+Creating the edge relations between the nodes/images... Done
+0: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 3.209336 AverageTimePerApproxQuery: 0.000533 AverageTimePerExhaustQuery: 0.048232
+1: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 4.018354 AverageTimePerApproxQuery: 0.000531 AverageTimePerExhaustQuery: 0.047534
+2: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 3.887373 AverageTimePerApproxQuery: 0.000557 AverageTimePerExhaustQuery: 0.047837
+3: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 4.245529 AverageTimePerApproxQuery: 0.000538 AverageTimePerExhaustQuery: 0.047521
+4: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 5.195121 AverageTimePerApproxQuery: 0.000540 AverageTimePerExhaustQuery: 0.047949
+5: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 3.950279 AverageTimePerApproxQuery: 0.000534 AverageTimePerExhaustQuery: 0.048000
+6: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 4.468398 AverageTimePerApproxQuery: 0.000536 AverageTimePerExhaustQuery: 0.048561
+7: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 4.291013 AverageTimePerApproxQuery: 0.000531 AverageTimePerExhaustQuery: 0.047623
+8: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 4.314244 AverageTimePerApproxQuery: 0.000536 AverageTimePerExhaustQuery: 0.049003
+9: K: 20 R: 50 G: 10 E: 10 AverageMaxFactor: 3.309069 AverageTimePerApproxQuery: 0.000539 AverageTimePerExhaustQuery: 0.048109
