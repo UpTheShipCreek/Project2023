@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <queue>
 #include <cfloat>  // For MAX_DOUBLE
+#include <iostream>
 
 #include "image_util.h"
 #include "random_functions.h"
