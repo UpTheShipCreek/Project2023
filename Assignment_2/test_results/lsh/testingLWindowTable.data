@@ -1,0 +1,47 @@
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 2000.000000 TableSize: 3750 AverageMaxFactor: 1.414838 AverageTimePerApproxQuery: 0.005268 AverageTimePerExhaustQuery: 0.047824
+Initializing LSH tables... Done
+L: 8 K: 4 Window: 1000.000000 TableSize: 3750 AverageMaxFactor: 1.593077 AverageTimePerApproxQuery: 0.000817 AverageTimePerExhaustQuery: 0.048408
+Initializing LSH tables... Done
+L: 8 K: 4 Window: 2000.000000 TableSize: 15000 AverageMaxFactor: 1.379338 AverageTimePerApproxQuery: 0.010184 AverageTimePerExhaustQuery: 0.048990
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1000.000000 TableSize: 3750 AverageMaxFactor: 1.986986 AverageTimePerApproxQuery: 0.000472 AverageTimePerExhaustQuery: 0.048109
+Initializing LSH tables... Done
+L: 8 K: 4 Window: 2000.000000 TableSize: 7500 AverageMaxFactor: 1.520500 AverageTimePerApproxQuery: 0.010154 AverageTimePerExhaustQuery: 0.047701
+Initializing LSH tables... Done
+L: 8 K: 4 Window: 1000.000000 TableSize: 3750 AverageMaxFactor: 1.721974 AverageTimePerApproxQuery: 0.000804 AverageTimePerExhaustQuery: 0.047995
+Initializing LSH tables... Done
+L: 7 K: 4 Window: 3000.000000 TableSize: 7500 AverageMaxFactor: 1.156426 AverageTimePerApproxQuery: 0.058610 AverageTimePerExhaustQuery: 0.048171
+Initializing LSH tables... Done
+L: 8 K: 4 Window: 1000.000000 TableSize: 7500 AverageMaxFactor: 2.009816 AverageTimePerApproxQuery: 0.000694 AverageTimePerExhaustQuery: 0.048374
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 2000.000000 TableSize: 15000 AverageMaxFactor: 1.520500 AverageTimePerApproxQuery: 0.007182 AverageTimePerExhaustQuery: 0.047960
+Initializing LSH tables... Done
+L: 7 K: 4 Window: 2000.000000 TableSize: 7500 AverageMaxFactor: 1.305966 AverageTimePerApproxQuery: 0.007250 AverageTimePerExhaustQuery: 0.047660
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 3000.000000 TableSize: 3750 AverageMaxFactor: 1.286299 AverageTimePerApproxQuery: 0.040819 AverageTimePerExhaustQuery: 0.047555
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1000.000000 TableSize: 15000 AverageMaxFactor: 2.102351 AverageTimePerApproxQuery: 0.000438 AverageTimePerExhaustQuery: 0.048313
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1000.000000 TableSize: 7500 AverageMaxFactor: 1.812638 AverageTimePerApproxQuery: 0.000412 AverageTimePerExhaustQuery: 0.047909
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1000.000000 TableSize: 7500 AverageMaxFactor: 1.852726 AverageTimePerApproxQuery: 0.000452 AverageTimePerExhaustQuery: 0.047641
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 2000.000000 TableSize: 3750 AverageMaxFactor: 1.286299 AverageTimePerApproxQuery: 0.006426 AverageTimePerExhaustQuery: 0.048561
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1000.000000 TableSize: 7500 AverageMaxFactor: 1.758056 AverageTimePerApproxQuery: 0.000417 AverageTimePerExhaustQuery: 0.048490
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 2000.000000 TableSize: 3750 AverageMaxFactor: 1.565208 AverageTimePerApproxQuery: 0.005118 AverageTimePerExhaustQuery: 0.048355
+Initializing LSH tables... Done
+L: 8 K: 4 Window: 1000.000000 TableSize: 3750 AverageMaxFactor: 1.895531 AverageTimePerApproxQuery: 0.000769 AverageTimePerExhaustQuery: 0.048709
+Initializing LSH tables... Done
+L: 7 K: 4 Window: 3000.000000 TableSize: 7500 AverageMaxFactor: 1.119773 AverageTimePerApproxQuery: 0.059305 AverageTimePerExhaustQuery: 0.047253
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 2000.000000 TableSize: 3750 AverageMaxFactor: 1.402628 AverageTimePerApproxQuery: 0.008416 AverageTimePerExhaustQuery: 0.047811
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 3000.000000 TableSize: 7500 AverageMaxFactor: 1.201039 AverageTimePerApproxQuery: 0.027431 AverageTimePerExhaustQuery: 0.048321
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 3000.000000 TableSize: 15000 AverageMaxFactor: 1.379906 AverageTimePerApproxQuery: 0.043909 AverageTimePerExhaustQuery: 0.047270
+Initializing LSH tables... Done
