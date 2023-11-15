@@ -9,7 +9,7 @@ MRNG = ./mrng_folder
 OUT = ./out
 
 # Source files
-SRC_COMMON = $(INC)/graph.cpp $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp $(INC)/image_util.cpp $(INC)/hashtable.cpp $(INC)/lsh.cpp
+SRC_COMMON = $(INC)/graph.cpp $(INC)/random_functions.cpp $(INC)/io_functions.cpp $(INC)/metrics.cpp $(INC)/image_util.cpp $(INC)/hashtable.cpp $(INC)/lsh.cpp $(INC)/hypercube.cpp
 SRC_GNNS = $(GNNS)/src/main.cpp
 SRC_MRNG = $(MRNG)/src/mrng.cpp
 

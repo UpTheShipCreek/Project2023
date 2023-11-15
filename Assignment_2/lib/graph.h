@@ -12,6 +12,7 @@
 #include "random_functions.h"
 #include "metrics.h"
 #include "lsh.h"
+#include "hypercube.h"
 #include "approximate_methods.h"
 
 // α) πληθος των πλησιεστερων γειτονων στον γραμμο k-NN 
