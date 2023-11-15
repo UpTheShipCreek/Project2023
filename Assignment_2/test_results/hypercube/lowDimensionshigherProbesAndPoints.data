@@ -1,0 +1,42 @@
+Reading images... Done
+Reading images... Done
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.673475 AverageTimePerApproxQuery: 0.005360 AverageTimePerExhaustQuery: 0.047900
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.677988 AverageTimePerApproxQuery: 0.005328 AverageTimePerExhaustQuery: 0.047948
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.759499 AverageTimePerApproxQuery: 0.005314 AverageTimePerExhaustQuery: 0.047793
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.646052 AverageTimePerApproxQuery: 0.005348 AverageTimePerExhaustQuery: 0.047731
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.871523 AverageTimePerApproxQuery: 0.005178 AverageTimePerExhaustQuery: 0.047706
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.702572 AverageTimePerApproxQuery: 0.006166 AverageTimePerExhaustQuery: 0.048145
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.722690 AverageTimePerApproxQuery: 0.006085 AverageTimePerExhaustQuery: 0.047672
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.678242 AverageTimePerApproxQuery: 0.006039 AverageTimePerExhaustQuery: 0.047583
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.960800 AverageTimePerApproxQuery: 0.006060 AverageTimePerExhaustQuery: 0.047574
+Loading data into the hypercube... Done
+Dimensions: 11 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.623496 AverageTimePerApproxQuery: 0.006068 AverageTimePerExhaustQuery: 0.047817
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.707759 AverageTimePerApproxQuery: 0.005261 AverageTimePerExhaustQuery: 0.047467
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.612786 AverageTimePerApproxQuery: 0.005177 AverageTimePerExhaustQuery: 0.047307
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.892631 AverageTimePerApproxQuery: 0.005103 AverageTimePerExhaustQuery: 0.047523
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.740715 AverageTimePerApproxQuery: 0.005121 AverageTimePerExhaustQuery: 0.047380
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 4000 MaxFactor: 1.630845 AverageTimePerApproxQuery: 0.005105 AverageTimePerExhaustQuery: 0.047345
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.691409 AverageTimePerApproxQuery: 0.005960 AverageTimePerExhaustQuery: 0.047388
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 5000 MaxFactor: 2.023446 AverageTimePerApproxQuery: 0.006059 AverageTimePerExhaustQuery: 0.047217
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.713149 AverageTimePerApproxQuery: 0.005958 AverageTimePerExhaustQuery: 0.047233
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 5000 MaxFactor: 1.668028 AverageTimePerApproxQuery: 0.006004 AverageTimePerExhaustQuery: 0.047256
+Loading data into the hypercube... Done
+Dimensions: 12 Probes: 600 NumberOfElements: 5000 MaxFactor: 2.057585 AverageTimePerApproxQuery: 0.006011 AverageTimePerExhaustQuery: 0.047380
