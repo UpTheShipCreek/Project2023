@@ -14,7 +14,7 @@ Graph::Graph(std::vector<std::shared_ptr<ImageVector>> nodes, Metric* metric){
 }
 
 Graph::Graph(std::vector<std::shared_ptr<ImageVector>> nodes, std::vector<std::shared_ptr<Neighbors>> neighborList, Metric* metric){
-    // printf("%d\n",__LINE__);
+    // // printf("%d\n",__LINE__);
     this->Nodes = nodes;
     this->GraphMetric = metric;
     for(int i = 0; i < (int)nodes.size(); i++){
@@ -29,7 +29,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
     std::shared_ptr<ImageVector> query, 
     int randomRestarts, int greedySteps, int expansions, int K){ 
     // expansions means the number of neighbors the N(Y,E,G) function, from the notes, will return I think
-    // printf("%d\n",__LINE__);
+    // // printf("%d\n",__LINE__);
     // The number of expansions can't be greater that the number of neighbors we want to find
     if(expansions > K) expansions = K;
 
@@ -69,8 +69,15 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             // We will keep track of the set of the node ids that are in the priority queue
             // printf("%d\n",__LINE__);
             // N(Y_t-1, E, G), i.e. keep the first E neighbors of the node
+
+            // If the node has no neighbors, skip it
+            if(this->NodesNeighbors[node]->size() == 0) continue;
             neighbors = this->NodesNeighbors[node];
-            // printf("Number of neighbors of %d node is %d\n", node->get_number(), (int)neighbors->size());
+            
+            // Don't exceed the number of neighbors we have available
+            if(expansions > (int)neighbors->size()){
+                expansions = (int)neighbors->size();
+            }
             auto neighborsKeepE = Neighbors(neighbors->begin(), neighbors->begin() + expansions);
             // printf("%d\n",__LINE__);
             for(auto tempNode : neighborsKeepE){
@@ -201,10 +208,14 @@ void Graph::initialize_neighbours_approximate_method(std::shared_ptr<Approximate
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
     // Load them into LSH
     method->load_data(this->Nodes);
-    printf("Creating the edge relations between the nodes/images...");
+    // printf("Creating the edge relations between the nodes/images... ");
     fflush(stdout);
     for(auto& node : this->Nodes){
         nearest_approx = method->approximate_k_nearest_neighbors_return_images(node, GRAPH_DEFAULT_K);
+        // If the node has no neighbors, skip it
+        if(nearest_approx.empty()){
+            continue;
+        }
         // VERY IMPORTANT TO CREATE DIFFERENT POINTERS FOR EACH NEIGHBOR STRUCTURE
         std::shared_ptr<Neighbors> neighbors = std::make_shared<Neighbors>(); 
         for(auto& neighbor : nearest_approx){
@@ -212,6 +223,8 @@ void Graph::initialize_neighbours_approximate_method(std::shared_ptr<Approximate
         }
         NodesNeighbors[node] = neighbors;
     }
+    // printf("Done\n");
+    fflush(stdout);
 }
 
 //  std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Neighbors>> NodesNeighbors; // The list of neighbors for each node
