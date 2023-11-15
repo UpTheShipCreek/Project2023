@@ -1,5 +1,16 @@
 #include "hashtable.h"
 
+hFunction::hFunction(double window){
+    this->W = window;
+    this->V = Rand.generate_vector_normal(DIMENSIONS, MEAN, STANDARD_DEVIATION); // The N(0,1) distribution
+    this->T = Rand.generate_double_uniform(0.0, this->W); 
+    // So we were explicitly instructed to use the uniform(0,W) distribution for t and N(0,1) for the values of v, 
+    // but to also ensure that (p*v + t) is not negative?
+    // Why are we allowing negative values in the first place then? 
+    // Why are we not shifting the normal distribution to N(1,1) and the uniform distribution to (1, W+1) 
+    // so as to not have to worry about negative values?
+}
+
 hFunction::hFunction(){
     this->V = Rand.generate_vector_normal(DIMENSIONS, MEAN, STANDARD_DEVIATION); // The N(0,1) distribution
     this->T = Rand.generate_double_uniform(0.0, this->W); 
@@ -9,12 +20,22 @@ hFunction::hFunction(){
     // Why are we not shifting the normal distribution to N(1,1) and the uniform distribution to (1, W+1) 
     // so as to not have to worry about negative values?
 }
-double hFunction::evaluate_point(std::vector<double> p){ // h(p) = (p*v + t)/w
+int hFunction::evaluate_point(std::vector<double> p){ // h(p) = (p*v + t)/w
     double product = std::inner_product(p.begin(), p.end(), (this->V).begin(), 0); 
     
     double result = (product + this->T)/ this->W;
-
+    
     return (int)std::floor(result); // Casting the result into into so that we may operate it with other ints
+}
+
+gFunction::gFunction(int k, double window){
+    this->K = k;
+    this->W = window;
+    for(int i = 0; i < this->K; i++){
+        std::shared_ptr<hFunction> h = std::make_shared<hFunction>(window); // Create a new h function, I used a pointer might not need it, I just said to myself after OOP that I'd always use pointers instead of storing objects directly, something that I haven't followed here generally
+        (this->H).push_back(h); // Save its pointer to the vector
+        (this->R).push_back(Rand.generate_int_uniform(0, INT_MAX)); // Generate and save the r value
+    }
 }
 
 gFunction::gFunction(int k, int m){

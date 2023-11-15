@@ -1,9 +1,23 @@
 #include "lsh.h"
 
-LSH::LSH(int l, int k, int modulo, int tableSize, Metric* metric){
+
+LSH::LSH(int l, int k, double window, int tableSize, Metric* metric){
+    this->L = l;
+    this->K = k;
+    this->W = window;
+    this->Lmetric = metric;
+
+    Tables.reserve(L);
+
+    for (int i = 0; i < L; i++){
+        std::shared_ptr<HashFunction> hashFunction = std::make_shared<gFunction>(this->K, this->W);
+        Tables.push_back(std::make_shared<HashTable>(tableSize, hashFunction));
+    }
+}
+
+LSH::LSH(int l, int k, int tableSize, Metric* metric){
         this->L = l;
         this->K = k;
-        this->M = modulo;
         this->Lmetric = metric;
 
         Tables.reserve(L);

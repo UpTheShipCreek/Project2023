@@ -31,17 +31,20 @@ class hFunction{
 
     public:
     hFunction();
-    double evaluate_point(std::vector<double> p);
+    hFunction(double window);
+    int evaluate_point(std::vector<double> p);
 };
 
 class gFunction : public HashFunction{
+    double W = WINDOW; // The window
     int K; // Number of hi functions that a g will be combining
-    int M; // The modulo
+    int M = MODULO; // The modulo
     std::vector<std::shared_ptr<hFunction>> H;
     std::vector<int> R; // The r values that will be used in the g function
     Random Rand; // Random generator
 
     public:
+    gFunction(int k, double window);
     gFunction(int k, int m);
     int evaluate_point(std::vector<double> p) override;
 };
