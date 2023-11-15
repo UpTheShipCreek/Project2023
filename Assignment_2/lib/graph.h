@@ -24,6 +24,7 @@
 #define GRAPH_DEFAULT_E 10 // default number of expansions
 #define GRAPH_DEFAULT_R 10 // default number of random restarts
 #define GRAPH_DEFAULT_N 10 // default number of nearest neighbors we want to find
+#define GRAPH_DEFAULT_I 20
 
 
 // FOR LSH
