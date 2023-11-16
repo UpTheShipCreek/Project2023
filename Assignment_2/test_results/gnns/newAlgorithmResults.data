@@ -4,7 +4,7 @@ std::shared_ptr<LSH> lsh = std::make_shared<LSH>(6, 4, 1400, 7500, &metric);
 #define GRAPH_DEFAULT_E 30 // default number of expansions
 #define GRAPH_DEFAULT_G 10 // default number of greedy steps
 
-RandomRestarts:120 MaxFactor:3.770373 AverageFactor: 1.547923 ApproxAverage: 1242 ExhaustAverage: 46975
-RandomRestarts:130 MaxFactor:3.811864 AverageFactor: 1.540620 ApproxAverage: 1368 ExhaustAverage: 47378
-RandomRestarts:140 MaxFactor:3.405618 AverageFactor: 1.519861 ApproxAverage: 1420 ExhaustAverage: 48476
-RandomRestarts:150 MaxFactor:3.855786 AverageFactor: 1.528652 ApproxAverage: 1538 ExhaustAverage: 47050
+RandomRestarts:120 MaxFactor:4.071933 AverageFactor: 1.562873 ApproxAverage: 1271 ExhaustAverage: 56177
+RandomRestarts:130 MaxFactor:4.707645 AverageFactor: 1.530961 ApproxAverage: 1339 ExhaustAverage: 46896
+RandomRestarts:140 MaxFactor:3.857207 AverageFactor: 1.539653 ApproxAverage: 1444 ExhaustAverage: 47499
+RandomRestarts:150 MaxFactor:3.552475 AverageFactor: 1.513527 ApproxAverage: 1536 ExhaustAverage: 47138
