@@ -21,15 +21,15 @@
 // δ) ακεραιος αριμθος N των πλησιεστερων γειτονων
 // (default: k=50, E=30, R=1, N=1)
 
-#define GRAPH_DEFAULT_K 20 // default number of nearest neighbors that will be on the index
-#define GRAPH_DEFAULT_E 10 // default number of expansions
-#define GRAPH_DEFAULT_R 50 // default number of random restarts
+#define GRAPH_DEFAULT_K 50 // default number of nearest neighbors that will be on the index
+#define GRAPH_DEFAULT_E 30 // default number of expansions
+#define GRAPH_DEFAULT_R 120 // default number of random restarts
 #define GRAPH_DEFAULT_G 10 // default number of greedy steps
 
 #define GRAPH_DEFAULT_I 20
 
 // FOR LSH
-#define LSH_DEFAULT_L 5 // default number of hash tables
+#define LSH_DEFAULT_L 6 // default number of hash tables
 #define LSH_DEFAULT_K 4 // default number of hash functions
 
 #define DEFAULT_N 1 // default number of nearest neighbors we want to find
