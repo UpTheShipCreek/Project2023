@@ -3,6 +3,9 @@
 #include <unordered_set>
 #include <queue>
 #include <algorithm>
+#include <chrono>
+#include <iostream>
+
 
 #include "graph.h"
 
@@ -46,8 +49,7 @@ class MonotonicRelativeNeighborGraph : public Graph{
                 newValue = (fraction * (this->Centroid)->get_coordinates()[i]) + (p->get_coordinates()[i] / (nodeCount + 1));
                 (this->Centroid)->get_coordinates()[i] = newValue;
             }
-
-            printf("nodeCount: %f\n",nodeCount++);
+            nodeCount++;
             // Create a set that doesn't contain the current node called Rp
             // Sort Rp according to the distance to the current node
             for(auto& node : nodes){
@@ -150,36 +152,65 @@ class MonotonicRelativeNeighborGraph : public Graph{
 int main(void){
     Eucledean metric;
 
-    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
-    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> lsh_nearest_approx;
+    Random rand;
+
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> approxNearest;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustNearest;
     
-    // Get queries !!!!!!!!!!!!!!!!!!!!!!!! CHANGED THE NAMES
     std::vector<std::shared_ptr<ImageVector>> images = read_mnist_images("../Assignment_1/in/input.dat", 0);
     // Get the dataset
     std::vector<std::shared_ptr<ImageVector>> queries = read_mnist_images("../Assignment_1/in/query.dat", (int)images.size());
 
     std::vector<std::shared_ptr<ImageVector>> smallDataset;
     auto endIter = images.begin();
-    std::advance(endIter, std::min(1000, static_cast<int>(images.size())));
+    std::advance(endIter, std::min(5000, static_cast<int>(images.size())));
     smallDataset.assign(images.begin(), endIter);
 
     MonotonicRelativeNeighborGraph mrng(smallDataset, &metric);
 
-    LSH lsh(LSH_DEFAULT_L, LSH_DEFAULT_K, MODULO, LSH_TABLE_SIZE, &metric);
-    lsh.load_data(smallDataset);
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto approxTime = end - start;
+    auto exhaustTime = end - start;
 
-    for(int i = 0; i < 10; i++){
-        printf("Query: %d\n", i);
+    int numberOfQueries;
+    int I;
 
-        
-        // LOOKS GOOD, JUST NEED TO HAVE A BETTER INITIALIZATION METHOD 
-        nearest_approx = mrng.k_nearest_neighbor_search(queries[i], GRAPH_DEFAULT_I, GRAPH_DEFAULT_N);
-        lsh_nearest_approx = lsh.approximate_k_nearest_neighbors_return_images(queries[i], GRAPH_DEFAULT_N);
-        for(int i = 0; i < (int)lsh_nearest_approx.size(); i++){
-            printf("LSH: %f Graph: %f\n", lsh_nearest_approx[i].first, nearest_approx[i].first);
-            // printf("LSH: %f\n", lsh_nearest_approx[i].first);
-            fflush(stdout);
+    do{
+        printf("Give number of queries: ");
+        std::cin >> numberOfQueries;
+
+        printf("Give I: ");
+        std::cin >> I;
+
+        double maxFactor = DBL_MIN;
+        double factor;
+        double approxSum = 0;
+        double exhaustSum = 0;
+
+        for(int i = 0; i < numberOfQueries; i++){
+
+            int randomIndex = rand.generate_int_uniform(0, (int)queries.size() - 1);
+
+            start = std::chrono::high_resolution_clock::now();
+            approxNearest = mrng.k_nearest_neighbor_search(queries[randomIndex], I, DEFAULT_N);
+            end = std::chrono::high_resolution_clock::now();
+            approxTime = end - start;
+
+            start = std::chrono::high_resolution_clock::now();
+            exhaustNearest = exhaustive_nearest_neighbor_search_return_images(images, queries[randomIndex], DEFAULT_N, &metric);
+            end = std::chrono::high_resolution_clock::now();
+            exhaustTime = end - start;    
+
+            factor = approxNearest[0].first / exhaustNearest[0].first;
+            if(factor > maxFactor){
+                maxFactor = factor;
+            }
+            approxSum += approxTime.count();
+            exhaustSum += exhaustTime.count();
+
         }
-        printf("\n");
-    }
+        printf("I:%d MaxFactor: %f ApproxAverage: %f ExhaustAverage: %f\n",I, maxFactor, approxSum / numberOfQueries, exhaustSum / numberOfQueries);
+        printf("Type 'yes' if you want to try another query file: \n");
+    }while(true);
 }
