@@ -1,0 +1,10 @@
+std::shared_ptr<LSH> lsh = std::make_shared<LSH>(6, 4, 1400, 7500, &metric);
+
+#define GRAPH_DEFAULT_K 50 // default number of nearest neighbors that will be on the index
+#define GRAPH_DEFAULT_E 30 // default number of expansions
+#define GRAPH_DEFAULT_G 10 // default number of greedy steps
+
+RandomRestarts:120 MaxFactor:4.096128 AverageFactor: 1.569076 ApproxAverage: 1251 ExhaustAverage: 47163
+RandomRestarts:130 MaxFactor:4.029703 AverageFactor: 1.542915 ApproxAverage: 1358 ExhaustAverage: 47426
+RandomRestarts:140 MaxFactor:3.580399 AverageFactor: 1.526753 ApproxAverage: 1442 ExhaustAverage: 47082
+RandomRestarts:150 MaxFactor:3.786626 AverageFactor: 1.518749 ApproxAverage: 1535 ExhaustAverage: 47484
