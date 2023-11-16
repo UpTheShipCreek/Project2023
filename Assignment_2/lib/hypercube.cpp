@@ -15,6 +15,7 @@ long double factorial(int n){
 int calculate_number_of_probes_given_maximum_hamming_distance(int maximumHammingDistance, int dimensions){
     int probes = 0;
     for(int i = 1; i <= maximumHammingDistance; i++){
+        if(i > dimensions) break;
         probes += factorial(dimensions)/(factorial(i)*factorial(dimensions-i));
     }  
     return probes;
@@ -113,9 +114,12 @@ HyperCube::HyperCube(int dimensions, int probes, int numberOfElementsToCheck, Me
 
     // Calculate the maximum hamming distance to look at given that we want to visit at most this->Probes vertices
     // by finding the smallest maxHammingDistance that represents more vertices than this->Probes
-    while(calculate_number_of_probes_given_maximum_hamming_distance(this->MaxHammingDistance, this->K) < this->Probes){
+    int numOfProbes = 0;
+    // Run until you hit the max number of possible probes given the dimensions or you hit the max number of probes that the user wants
+    do{
+        numOfProbes = calculate_number_of_probes_given_maximum_hamming_distance(this->MaxHammingDistance, this->K);
         this->MaxHammingDistance++;
-    }
+    }while(numOfProbes < this->Probes && numOfProbes < (1 << this->K) -1 ); // It's -1 cause we don't want to count the vertex itself
 }
 void HyperCube::load_data(std::vector<std::shared_ptr<ImageVector>> images){
     printf("Loading data into the hypercube... ");
