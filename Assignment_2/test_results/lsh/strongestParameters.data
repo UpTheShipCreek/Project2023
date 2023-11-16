@@ -1,0 +1,9 @@
+Reading images... Done
+Reading images... Done
+Press anything other than 1:Initializing LSH tables... Done
+Number of Queries:1000 MaxFactor: 1.609474 ApproxAverage: 0.001644 ExhaustAverage: 0.047283
+Number of Queries:2000 MaxFactor: 1.776416 ApproxAverage: 0.001647 ExhaustAverage: 0.047266
+Number of Queries:3000 MaxFactor: 1.825386 ApproxAverage: 0.001610 ExhaustAverage: 0.047209
+Number of Queries:4000 MaxFactor: 1.829789 ApproxAverage: 0.001625 ExhaustAverage: 0.047235
+Number of Queries:5000 MaxFactor: 1.829789 ApproxAverage: 0.001622 ExhaustAverage: 0.047136
+Number of Queries:10000 MaxFactor: 1.829789 ApproxAverage: 0.001507 ExhaustAverage: 0.046947

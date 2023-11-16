@@ -1,0 +1,34 @@
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+L: 5 K: 3 Window: 1400 TableSize:3750 AverageMaxFactor: 1.502648 ApproxAverage: 0.006137 ExhaustAverage: 0.047472
+Initializing LSH tables... Done
+L: 5 K: 3 Window: 1400 TableSize:15000 AverageMaxFactor: 1.546287 ApproxAverage: 0.006003 ExhaustAverage: 0.047407
+Initializing LSH tables... Done
+L: 5 K: 3 Window: 1500 TableSize:3750 AverageMaxFactor: 1.577069 ApproxAverage: 0.007944 ExhaustAverage: 0.047248
+Initializing LSH tables... Done
+L: 5 K: 3 Window: 1500 TableSize:15000 AverageMaxFactor: 1.468064 ApproxAverage: 0.007040 ExhaustAverage: 0.047205
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1400 TableSize:3750 AverageMaxFactor: 1.662730 ApproxAverage: 0.001098 ExhaustAverage: 0.047208
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1400 TableSize:15000 AverageMaxFactor: 1.537495 ApproxAverage: 0.001258 ExhaustAverage: 0.047203
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1500 TableSize:3750 AverageMaxFactor: 2.080856 ApproxAverage: 0.001499 ExhaustAverage: 0.047361
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1500 TableSize:15000 AverageMaxFactor: 1.966009 ApproxAverage: 0.001404 ExhaustAverage: 0.047410
+Initializing LSH tables... Done
+L: 6 K: 3 Window: 1400 TableSize:3750 AverageMaxFactor: 1.599039 ApproxAverage: 0.007804 ExhaustAverage: 0.047438
+Initializing LSH tables... Done
+L: 6 K: 3 Window: 1400 TableSize:15000 AverageMaxFactor: 1.438581 ApproxAverage: 0.007821 ExhaustAverage: 0.047318
+Initializing LSH tables... Done
+L: 6 K: 3 Window: 1500 TableSize:3750 AverageMaxFactor: 1.545397 ApproxAverage: 0.009863 ExhaustAverage: 0.047383
+Initializing LSH tables... Done
+L: 6 K: 3 Window: 1500 TableSize:15000 AverageMaxFactor: 2.001176 ApproxAverage: 0.008808 ExhaustAverage: 0.047409
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 1400 TableSize:3750 AverageMaxFactor: 1.578819 ApproxAverage: 0.001542 ExhaustAverage: 0.047332
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 1400 TableSize:15000 AverageMaxFactor: 1.699041 ApproxAverage: 0.001409 ExhaustAverage: 0.047439
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 1500 TableSize:3750 AverageMaxFactor: 1.554632 ApproxAverage: 0.001758 ExhaustAverage: 0.047476
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 1500 TableSize:15000 AverageMaxFactor: 1.522632 ApproxAverage: 0.002067 ExhaustAverage: 0.047452

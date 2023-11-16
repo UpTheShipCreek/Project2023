@@ -1,0 +1,10 @@
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1400 TableSize:7500 AverageMaxFactor: 1.959022 ApproxAverage: 0.001098 ExhaustAverage: 0.047409
+Initializing LSH tables... Done
+L: 5 K: 4 Window: 1400 TableSize:15000 AverageMaxFactor: 1.761424 ApproxAverage: 0.001372 ExhaustAverage: 0.047415
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 1400 TableSize:7500 AverageMaxFactor: 1.734900 ApproxAverage: 0.001681 ExhaustAverage: 0.047605
+Initializing LSH tables... Done
+L: 6 K: 4 Window: 1400 TableSize:15000 AverageMaxFactor: 1.618299 ApproxAverage: 0.001769 ExhaustAverage: 0.047269
