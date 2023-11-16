@@ -71,7 +71,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             // N(Y_t-1, E, G), i.e. keep the first E neighbors of the node
 
             // If the node has no neighbors, skip it
-            if(this->NodesNeighbors[node]->size() == 0) continue;
+            if(this->NodesNeighbors[node]->size() == 0) break;
 
             // Else continue with this node
             neighbors = this->NodesNeighbors[node];
