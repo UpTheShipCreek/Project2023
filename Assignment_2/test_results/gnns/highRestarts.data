@@ -1,0 +1,8 @@
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+Creating the edge relations between the nodes/images... Done
+randomRestarts = {80, 100, 120};
+MaxFactor: 4.114816 ApproxAverage: 899 ExhaustAverage: 46766
+MaxFactor: 5.354241 ApproxAverage: 1016 ExhaustAverage: 46647
+MaxFactor: 3.617455 ApproxAverage: 1199 ExhaustAverage: 49931
