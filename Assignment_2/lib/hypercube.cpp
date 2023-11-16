@@ -209,7 +209,8 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
     probes = get_probes(bucketId, this->MaxHammingDistance, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-   for(i = 0; i < this->Probes; i++){
+   i = 0; 
+   while(i < this->Probes && i < (int)(probes.size())){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
@@ -232,6 +233,7 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
             }
             j++;
         }
+        i++;
     }
     // Fill up the a structure that we can return
     while (!nearest.empty()){
@@ -266,7 +268,8 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     probes = get_probes(imageBucketIdAndId.first, this->Probes, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-    for(i = 0; i < this->Probes; i++){
+    i = 0; 
+    while(i < this->Probes && i < (int)(probes.size())){
 
         // printf("Probe: %d\n", probes[i]);
 
@@ -289,6 +292,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
             }
             j++;
         }
+        i++;
     }
     return inRangeImages;
 }
@@ -319,7 +323,8 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     probes = get_probes(imageBucketIdAndId.first, this->Probes, this->K);
 
      // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-    for(i = 0; i < this->Probes; i++){
+    i = 0; 
+    while(i < this->Probes && i < (int)(probes.size())){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
@@ -341,6 +346,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
             }
             j++;
         }
+        i++;
     }
     // Fill up the a structure that we can return
     while (!nearest.empty()){
