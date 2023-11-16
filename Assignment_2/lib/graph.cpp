@@ -71,7 +71,9 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             // N(Y_t-1, E, G), i.e. keep the first E neighbors of the node
 
             // If the node has no neighbors, skip it
-            if(this->NodesNeighbors[node]->size() == 0) continue;
+            if(this->NodesNeighbors[node]->size() == 0) break;
+
+            // Else continue with this node
             neighbors = this->NodesNeighbors[node];
             
             // Don't exceed the number of neighbors we have available
@@ -212,9 +214,10 @@ void Graph::initialize_neighbours_approximate_method(std::shared_ptr<Approximate
     fflush(stdout);
     for(auto& node : this->Nodes){
         nearest_approx = method->approximate_k_nearest_neighbors_return_images(node, k);
-        // If the node has no neighbors, skip it
+        
+        // If the node has no neighbors, find the real ones with exhaustive search
         if(nearest_approx.empty()){
-            continue;
+            nearest_approx = exhaustive_nearest_neighbor_search_return_images(this->Nodes, node, k, this->GraphMetric);
         }
         // VERY IMPORTANT TO CREATE DIFFERENT POINTERS FOR EACH NEIGHBOR STRUCTURE
         std::shared_ptr<Neighbors> neighbors = std::make_shared<Neighbors>(); 
