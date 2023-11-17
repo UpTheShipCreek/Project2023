@@ -5,9 +5,11 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
     Metric* metric) : 
     Graph(nodes, metric){ // Constructor
     
+    printf("Constructing MRNG Graph... ");
+    fflush(stdout);
     int i;
-    
-    double distance, leastDistance, edgepv, edgept, edgevt;
+    // double leastDistance;
+    double distance, edgepv, edgept, edgevt;
     double newValue;
     double fraction;
 
@@ -124,6 +126,8 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
     else{
         this->NavigatingNode = vectorContainingNavigatingNode[0].second;
     }
+    printf("Done\n");
+    fflush(stdout);
 }
 
 //Calls the generic graph search with Navigating Node, which is the closest real node to the virtual centroid of the dataset, and returns it
