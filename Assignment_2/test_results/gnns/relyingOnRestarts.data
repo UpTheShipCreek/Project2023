@@ -1,9 +1,0 @@
-Reading images... Done
-Reading images... Done
-Initializing LSH tables... Done
-Creating the edge relations between the nodes/images... Done
-R: 4 G: 10 E: 50 AverageMaxFactor: 7.299732 AverageTimePerApproxQuery: 0.000058 AverageTimePerExhaustQuery: 0.046924
-R: 10 G: 10 E: 50 AverageMaxFactor: 6.033886 AverageTimePerApproxQuery: 0.000124 AverageTimePerExhaustQuery: 0.047230
-R: 20 G: 10 E: 50 AverageMaxFactor: 3.476877 AverageTimePerApproxQuery: 0.000234 AverageTimePerExhaustQuery: 0.047962
-R: 30 G: 10 E: 50 AverageMaxFactor: 3.270311 AverageTimePerApproxQuery: 0.000337 AverageTimePerExhaustQuery: 0.047233
-R: 40 G: 10 E: 50 AverageMaxFactor: 3.804284 AverageTimePerApproxQuery: 0.000444 AverageTimePerExhaustQuery: 0.047891

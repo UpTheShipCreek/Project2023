@@ -1,7 +1,0 @@
-Reading images... Done
-Reading images... Done
-Press anything other than 1:Loading data into the hypercube... Done
-Number of Queries:1000 MaxFactor: 1.848033 ApproxAverage: 0.004157 ExhaustAverage: 0.046868
-Number of Queries:2000 MaxFactor: 1.867650 ApproxAverage: 0.004063 ExhaustAverage: 0.046988
-Number of Queries:3000 MaxFactor: 2.346462 ApproxAverage: 0.003993 ExhaustAverage: 0.046913
-Number of Queries:4000 MaxFactor: 1.942989 ApproxAverage: 0.003923 ExhaustAverage: 0.046761

@@ -1,9 +1,0 @@
-Reading images... Done
-Reading images... Done
-Press anything other than 1:Loading data into the hypercube... Done
-Creating the edge relations between the nodes/images... Done
-Number of Queries:1000 MaxFactor: 4.045549 ApproxAverage: 0.005278 ExhaustAverage: 0.046488
-Number of Queries:2000 MaxFactor: 3.649006 ApproxAverage: 0.005293 ExhaustAverage: 0.046605
-Number of Queries:3000 MaxFactor: 2.910542 ApproxAverage: 0.005266 ExhaustAverage: 0.046639
-Number of Queries:4000 MaxFactor: 3.649006 ApproxAverage: 0.005130 ExhaustAverage: 0.046351
-Number of Queries:5000 MaxFactor: 3.292359 ApproxAverage: 0.004781 ExhaustAverage: 0.046332

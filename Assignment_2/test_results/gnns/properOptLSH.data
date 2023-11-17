@@ -1,9 +1,0 @@
-Reading images... Done
-Reading images... Done
-Press anything other than 1:Initializing LSH tables... Done
-Creating the edge relations between the nodes/images... Done
-Number of Queries:1000 MaxFactor: 2.479902 ApproxAverage: 0.005124 ExhaustAverage: 0.046433
-Number of Queries:2000 MaxFactor: 3.275721 ApproxAverage: 0.005103 ExhaustAverage: 0.046501
-Number of Queries:3000 MaxFactor: 3.245855 ApproxAverage: 0.005128 ExhaustAverage: 0.046602
-Number of Queries:4000 MaxFactor: 3.059500 ApproxAverage: 0.005100 ExhaustAverage: 0.046625
-Number of Queries:5000 MaxFactor: 3.511222 ApproxAverage: 0.005113 ExhaustAverage: 0.046645
