@@ -36,8 +36,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
     int i, j, randomInt, nodesIndexNumber;
     
     double distance;
-    double minDistance = DBL_MAX;
-    
+
     std::shared_ptr<ImageVector> node;
     std::shared_ptr<ImageVector> minDistanceNode;
     std::shared_ptr<Neighbors> neighbors;
@@ -82,6 +81,9 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             }
             auto neighborsKeepE = Neighbors(neighbors->begin(), neighbors->begin() + expansions);
             // printf("%d\n",__LINE__);
+            
+            double minDistance = DBL_MAX;
+
             for(auto tempNode : neighborsKeepE){
                 // Calcuate the distance of the neighbor to the query
                 distance = GraphMetric->calculate_distance(tempNode->get_coordinates(), query->get_coordinates());
