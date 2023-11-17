@@ -26,7 +26,7 @@ We performed those tests keeping the values which seemed optimal to us in the fi
 
 
 ### L, The number of Hashtables
-We knew that L is the variable that has the most impact, both in approximation and in time. A large L value essentially simulates an exhaustive search by creating so many hashtables that for every point, they include all possible neighbors. Thus passing through every hashtable which result in calculating every distance from every point to another. 
+We knew that L is the variable that has the most impact, both in approximation and in time. A large L value essentially simulates an exhaustive search by creating so many hashtables that for every point, they include all possible neighbors. Thus passing through every hashtable results in calculating every distance from every point to another. 
 
 Again we performed the test for L keeping the values which seemed optimal to us in the first assignment, that is:
 
@@ -81,7 +81,7 @@ The tests below were run for the values:
 
 ### General
 Having LSH as a baseline we will try to find the best parameters of the Hypercube that immitate the results of LSH.
-Also based on our empirical knowledge of how the algorithm performs, we have formed a set of default values as the based testing ground of each parameter alone.
+Also based on our empirical knowledge of how the algorithm performs, we have formed a set of default values as the base testing ground of each parameter alone.
 
 ### K, the dimensions of the Hypercube
 We obviously don't want to dimensions to be too low, since that would mean that there are not enough buckets to adequetly differentiate between the datapoints. Of course the more dimensions the most accurate our approximations, but that also depends on the rest of parameters. 
@@ -131,7 +131,7 @@ The following is how the algorithm performs for different ```M``` values given o
 
 ### Finding the optimal combination
 The Hypercube becomes slow when trying to immitate the accuracy of LSH but nonetheless we found a parameter combination that was accurate without compromising the querying speed too much. 
-Specifically the time per query that Hypercube needs to achieve consistent worst case approximations less than a factor of ```2``` is ```0.0051 seconds/query``` (~10 less than brute force).
+Specifically the time per query that Hypercube needs to achieve consistent worst case approximations less than a factor of ```2``` is ```0.0051 seconds/query``` (~10 times less than brute force).
 
 Those parameters are:
 
@@ -235,16 +235,16 @@ Of course the meat of this algorithm is the initialization, in creating monotoni
 
 This parameter is very straight forward. Again, just like we saw with ```M``` parameter in the Hypercube, the ```l``` parameter serves as direct way to calibrate the accuracy/speed tradeoff. Because we were working with a reduced version of the set, we shifted into thinking more about the ratio of ```l/SizeOfDataset``` than absolute numbers. 
 
-The speed we were looking for per query, was no more than the concession that was forced upon us in the previous methods (Hypercube/GNNS), meaning no less than a ~10 times speedup from the brute force.
+The speed we were looking for per query, was no less than the concession that was forced upon us in the previous methods (Hypercube/GNNS), meaning no less than a ~10 times speedup from the brute force.
 
 While MRNG displayed a better behaviour than GNNS, it is still lacking (as far as handling the worst case goes) in comparison to the Hypercube and of course, the star of the show, LSH. 
 
 ### Finding the optimal combination
-There wasn't much to this other than testing for different values of ```l```. Below are the results of our tests. And since this is only one parameter, we could afford to directly test for max approximation factors, rather than taking the average of many attempts.
+There wasn't much to this other than testing for different values of ```l```. 
 
 The way we approached it was straight forward. We pushed the ```l``` as far as it would go without resulting a speedup that was less that the factor of ~10 of the brute force, for this given dataset.
 
-The ```l``` value we settled on was ```l = 200``` which is roughly ```0.7%``` of the size of the dataset. Of course since ```l``` results in an absolute increase in querying time, this percentage will not be optimal in datasets much smaller or much larger than ```60000``` but it may be a good baseline.
+The ```l``` value we settled on was ```l = 200``` which is roughly ```0.7%``` of the size of the dataset. Of course since ```l``` results in an absolute increase in querying time, this percentage will not be optimal in datasets much smaller or much larger than ```60000``` but it may still be a good baseline.
 
 The speed needed, for the below accuracies showcased below, is ```0.0060 seconds/query```.
 
