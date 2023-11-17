@@ -1,0 +1,13 @@
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+Loading data into the hypercube... Done
+Initializing LSH tables... Done
+Creating the edge relations between the nodes/images... Done
+Press anything other than 1:Initializing LSH tables... Done
+Creating the edge relations between the nodes/images... Done
+K: 50 Restarts: 100 Greedy: 10 Expansions:10 AverageMaxFactor: 3.964766 ApproxAverage: 0.000979 ExhaustAverage: 0.046163
+K: 50 Restarts: 100 Greedy: 10 Expansions:20 AverageMaxFactor: 3.482643 ApproxAverage: 0.000958 ExhaustAverage: 0.046258
+K: 50 Restarts: 100 Greedy: 10 Expansions:30 AverageMaxFactor: 4.240541 ApproxAverage: 0.000951 ExhaustAverage: 0.046159
+K: 50 Restarts: 100 Greedy: 10 Expansions:40 AverageMaxFactor: 4.408812 ApproxAverage: 0.000965 ExhaustAverage: 0.046430
+K: 50 Restarts: 100 Greedy: 10 Expansions:50 AverageMaxFactor: 3.741932 ApproxAverage: 0.000956 ExhaustAverage: 0.046079

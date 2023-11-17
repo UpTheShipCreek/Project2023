@@ -103,47 +103,52 @@ int main(void){
     }
     // K: 100 Restarts: 400 Greedy: 10 Expansions:100 AverageMaxFactor: 2.527122 ApproxAverage: 0.005116 ExhaustAverage: 0.046603
     else{
-        genericGraph.initialize_neighbours_approximate_method(lsh, 100);
+        int numOfMethods = 2;
+        for(int j = 0; j < numOfMethods; j++){
 
-        std::vector<int> queryNumber = {1000, 2000, 3000, 4000, 5000, 10000};
-    
-        for(auto q : queryNumber){
+            if(j == 0) genericGraph.initialize_neighbours_approximate_method(lsh, 100);
+            else genericGraph.initialize_neighbours_approximate_method(cube, 100);
 
-            double maxFactor = DBL_MIN;
-            double factor;
-            double approxSum = 0;
-            double exhaustSum = 0;
+            std::vector<int> queryNumber = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000};
+        
+            for(auto q : queryNumber){
 
-            for(int i = 0; i < q; i++){
-                int randomIndex = rand.generate_int_uniform(0, (int)queries.size() - 1);
+                double maxFactor = DBL_MIN;
+                double factor;
+                double approxSum = 0;
+                double exhaustSum = 0;
+
+                for(int i = 0; i < q; i++){
+                    int randomIndex = rand.generate_int_uniform(0, (int)queries.size() - 1);
 
 
-                start = std::chrono::high_resolution_clock::now();
-                nearestApprox = genericGraph.k_nearest_neighbor_search(queries[randomIndex], 400, 10, 100, DEFAULT_N);
-                if(nearestApprox.size() == 0){
-                    printf("Error: No nearest neighbors found\n");
-                    break;
+                    start = std::chrono::high_resolution_clock::now();
+                    nearestApprox = genericGraph.k_nearest_neighbor_search(queries[randomIndex], 400, 10, 100, DEFAULT_N);
+                    if(nearestApprox.size() == 0){
+                        printf("Error: No nearest neighbors found\n");
+                        break;
+                    }
+                    end = std::chrono::high_resolution_clock::now();
+                    end = std::chrono::high_resolution_clock::now();
+                    approxTime = end - start;
+                    
+                    start = std::chrono::high_resolution_clock::now();
+                    nearestExhaust = exhaustive_nearest_neighbor_search_return_images(images, queries[randomIndex], DEFAULT_N, &metric);
+                    end = std::chrono::high_resolution_clock::now();
+                    exhaustTime = end - start;
+
+                    factor = nearestApprox[0].first / nearestExhaust[0].first;
+                    if(factor > maxFactor){
+                        maxFactor = factor;
+                    }
+                    approxSum += approxTime.count();
+                    exhaustSum += exhaustTime.count();
                 }
-                end = std::chrono::high_resolution_clock::now();
-                end = std::chrono::high_resolution_clock::now();
-                approxTime = end - start;
-                
-                start = std::chrono::high_resolution_clock::now();
-                nearestExhaust = exhaustive_nearest_neighbor_search_return_images(images, queries[randomIndex], DEFAULT_N, &metric);
-                end = std::chrono::high_resolution_clock::now();
-                exhaustTime = end - start;
-
-                factor = nearestApprox[0].first / nearestExhaust[0].first;
-                if(factor > maxFactor){
-                    maxFactor = factor;
-                }
-                approxSum += approxTime.count();
-                exhaustSum += exhaustTime.count();
+                double tA = approxSum / q;
+                double tE = exhaustSum / q;
+                printf("Number of Queries:%d MaxFactor: %f ApproxAverage: %f ExhaustAverage: %f\n", q, maxFactor, tA/billion, tE/billion);
+                fflush(stdout);
             }
-            double tA = approxSum / q;
-            double tE = exhaustSum / q;
-            printf("Number of Queries:%d MaxFactor: %f ApproxAverage: %f ExhaustAverage: %f\n", q, maxFactor, tA/billion, tE/billion);
-            fflush(stdout);
         }
     }
 }
