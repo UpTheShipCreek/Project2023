@@ -23,7 +23,7 @@ OBJS_LSH = $(SRC_LSH:.cpp=.o)
 OBJS_HYPERCUBE = $(SRC_HYPERCUBE:.cpp=.o)
 
 # Include directories
-INCLUDES = -I$(INC)
+INCLUDES = -I$(INC) -I$(MRNG)/include
 
 # Executable name
 GNNS_EXEC = gnns
