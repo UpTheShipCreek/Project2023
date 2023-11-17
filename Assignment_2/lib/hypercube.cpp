@@ -15,6 +15,7 @@ long double factorial(int n){
 int calculate_number_of_probes_given_maximum_hamming_distance(int maximumHammingDistance, int dimensions){
     int probes = 0;
     for(int i = 1; i <= maximumHammingDistance; i++){
+        if(i > dimensions) break;
         probes += factorial(dimensions)/(factorial(i)*factorial(dimensions-i));
     }  
     return probes;
@@ -113,9 +114,12 @@ HyperCube::HyperCube(int dimensions, int probes, int numberOfElementsToCheck, Me
 
     // Calculate the maximum hamming distance to look at given that we want to visit at most this->Probes vertices
     // by finding the smallest maxHammingDistance that represents more vertices than this->Probes
-    while(calculate_number_of_probes_given_maximum_hamming_distance(this->MaxHammingDistance, this->K) < this->Probes){
+    int numOfProbes = 0;
+    // Run until you hit the max number of possible probes given the dimensions or you hit the max number of probes that the user wants
+    do{
+        numOfProbes = calculate_number_of_probes_given_maximum_hamming_distance(this->MaxHammingDistance, this->K);
         this->MaxHammingDistance++;
-    }
+    }while(numOfProbes < this->Probes && numOfProbes < (1 << this->K) -1 ); // It's -1 cause we don't want to count the vertex itself
 }
 void HyperCube::load_data(std::vector<std::shared_ptr<ImageVector>> images){
     printf("Loading data into the hypercube... ");
@@ -209,7 +213,8 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
     probes = get_probes(bucketId, this->MaxHammingDistance, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-   for(i = 0; i < this->Probes; i++){
+   i = 0; 
+   while(i < this->Probes && i < (int)(probes.size())){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
@@ -232,6 +237,7 @@ std::vector<std::pair<double, int>> HyperCube::approximate_range_search(std::sha
             }
             j++;
         }
+        i++;
     }
     // Fill up the a structure that we can return
     while (!nearest.empty()){
@@ -266,7 +272,8 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     probes = get_probes(imageBucketIdAndId.first, this->Probes, this->K);
 
     // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-    for(i = 0; i < this->Probes; i++){
+    i = 0; 
+    while(i < this->Probes && i < (int)(probes.size())){
 
         // printf("Probe: %d\n", probes[i]);
 
@@ -289,6 +296,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
             }
             j++;
         }
+        i++;
     }
     return inRangeImages;
 }
@@ -319,7 +327,8 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
     probes = get_probes(imageBucketIdAndId.first, this->Probes, this->K);
 
      // For each probe / i.e. for each neighboring vertex of the hypercube within #probe steps
-    for(i = 0; i < this->Probes; i++){
+    i = 0; 
+    while(i < this->Probes && i < (int)(probes.size())){
         // Get the bucket
         bucket = (this->Table)->get_bucket_from_bucket_id(probes[i]);  
 
@@ -341,6 +350,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> HyperCube::approxim
             }
             j++;
         }
+        i++;
     }
     // Fill up the a structure that we can return
     while (!nearest.empty()){

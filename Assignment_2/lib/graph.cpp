@@ -36,8 +36,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
     int i, j, randomInt, nodesIndexNumber;
     
     double distance;
-    double minDistance = DBL_MAX;
-    
+
     std::shared_ptr<ImageVector> node;
     std::shared_ptr<ImageVector> minDistanceNode;
     std::shared_ptr<Neighbors> neighbors;
@@ -82,6 +81,10 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             }
             auto neighborsKeepE = Neighbors(neighbors->begin(), neighbors->begin() + expansions);
             // printf("%d\n",__LINE__);
+            
+            double minDistance = DBL_MAX;
+            minDistanceNode = nullptr;
+
             for(auto tempNode : neighborsKeepE){
                 // Calcuate the distance of the neighbor to the query
                 distance = GraphMetric->calculate_distance(tempNode->get_coordinates(), query->get_coordinates());
@@ -106,6 +109,11 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             }
             // Yt = minD(Y,Q) for Y in nearest neighbors of Yt-1
             // printf("%d\n",__LINE__);
+
+            // Just to be on the safe side
+            if(minDistanceNode == nullptr){
+                break;
+            }
             node = minDistanceNode;
         }
     }
@@ -208,7 +216,7 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_ne
 
 void Graph::initialize_neighbours_approximate_method(std::shared_ptr<ApproximateMethods> method, int k){
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
-    // Load them into LSH
+    // Load them into the approximate method
     method->load_data(this->Nodes);
     printf("Creating the edge relations between the nodes/images... ");
     fflush(stdout);
