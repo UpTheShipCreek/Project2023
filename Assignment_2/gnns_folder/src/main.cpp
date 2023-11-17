@@ -39,7 +39,7 @@ int main(void){
     // #define GRAPH_DEFAULT_R 120 // default number of random restarts
     // #define GRAPH_DEFAULT_G 10 // default number of greedy steps
     Graph genericGraph(images, &metric);
-    
+
     int mode;
     printf("Press anything other than 1:");
     fflush(stdout);
@@ -47,8 +47,8 @@ int main(void){
     if(mode == 1){
         std::vector<int> kappas = {100};
         std::vector<int> es = {100}; 
-        std::vector<int> restarts = {100, 120, 140, 160, 180, 200};
-        std::vector<int> greedySteps = {10, 20, 30, 50, 60, 70, 80};
+        std::vector<int> restarts = {200, 300, 400};
+        std::vector<int> greedySteps = {10, 20, 30};
 
         for(auto k : kappas){
             genericGraph.initialize_neighbours_approximate_method(lsh, k);
@@ -101,10 +101,9 @@ int main(void){
             }
         }
     }
-    // L: 6 K: 4 Window: 1400 TableSize:15000
+    // K: 100 Restarts: 400 Greedy: 10 Expansions:100 AverageMaxFactor: 2.527122 ApproxAverage: 0.005116 ExhaustAverage: 0.046603
     else{
-        lsh = std::make_shared<LSH>(6, 4, 1400, 7500, &metric);
-        lsh->load_data(images);
+        genericGraph.initialize_neighbours_approximate_method(lsh, 100);
 
         std::vector<int> queryNumber = {1000, 2000, 3000, 4000, 5000, 10000};
     
@@ -120,7 +119,7 @@ int main(void){
 
 
                 start = std::chrono::high_resolution_clock::now();
-                nearestApprox = lsh->approximate_k_nearest_neighbors_return_images(queries[randomIndex], DEFAULT_N);
+                nearestApprox = genericGraph.k_nearest_neighbor_search(queries[randomIndex], 400, 10, 100, DEFAULT_N);
                 if(nearestApprox.size() == 0){
                     printf("Error: No nearest neighbors found\n");
                     break;
