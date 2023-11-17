@@ -266,6 +266,6 @@ In the conducted tests, Locality-Sensitive Hashing (LSH) emerged as the obviousl
 
 On the other hand, the Graph algorithms, namely GNNS and MRNG, even though initally their results seems satisfactory, a notable drawback surfaced in their inconsistency when confronted with edge cases. Despite their general efficacy, these algorithms need to resort to brute force speeds to maintain accuracy. In this context, MRNG outperformed GNNS, displaying a marginally better performance, albeit with a noticeable increase in computational overhead.
 
-In conclusion, while LSH stands out as the optimal choice in terms of overall performance, the Hypercube algorithm provides a viable alternative with a negligible sacrifice in speed. The Graph algorithms, while proficient in many cases, struggle with edge cases and resort to less efficient methods, with MRNG showing a slight edge in performance despite its overhead. 
+In conclusion, while LSH stands out as the optimal choice in terms of overall performance, the Hypercube algorithm provides a viable alternative with a negligible sacrifice in speed. The Graph algorithms, while proficient in many cases, struggle with edge cases with MRNG showing a slight edge in performance.
 
 But of course we can't think of those results independently of the particular dataset (MNIST) and metric (Eucledean), both of which might be indirectly putting the graph searches at a disadvantage. 
