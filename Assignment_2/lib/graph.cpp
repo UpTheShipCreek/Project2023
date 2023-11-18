@@ -30,8 +30,6 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
     int randomRestarts, int greedySteps, int expansions, int K){ 
     // expansions means the number of neighbors the N(Y,E,G) function, from the notes, will return I think
     // // printf("%d\n",__LINE__);
-    // The number of expansions can't be greater that the number of neighbors we want to find
-    if(expansions > K) expansions = K;
 
     int i, j, randomInt, nodesIndexNumber;
     
