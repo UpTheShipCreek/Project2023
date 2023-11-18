@@ -10,8 +10,6 @@
 
 int main(int argc, char **argv){
 
-    bool trust = false;
-
     bool methodParameter = false;
     bool inputFileParameter = false;
     bool queryFileParameter = false;
@@ -100,9 +98,6 @@ int main(int argc, char **argv){
                 i++;
             }
         } 
-        else if(arg == "-trust"){
-            trust = true;
-        }
     }
 
     if(methodParameter == false){

@@ -71,7 +71,7 @@ For the MNIST ```60K``` training dataset, for a more impressive number of neighb
 
 For the small ```5K``` dataset (since the construction of the monotonic graph is very slow):
 
-    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -l 20 -m 2 -o ./out/mrng.out
+    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -l 20 -N 10 -m 2 -o ./out/mrng.out
 
 Additionally the user may choose to omit to directly enter any parameters other than the ```-m``` parameter which is required.
 
