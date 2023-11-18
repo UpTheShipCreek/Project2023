@@ -22,8 +22,6 @@ int main(int argc, char **argv){
     int l = 20; 
     int m = -1;
 
-    int opt;
-
     enum methods {gnns = 1, mrng = 2};
 
     std::string inputFileName, queryFileName, outputFileName;
@@ -40,40 +38,66 @@ int main(int argc, char **argv){
     auto approxTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto exhaustTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
-    while ((opt = getopt(argc, argv, "d:q:k:E:R:N:l:m:o")) != -1){                 
-        switch (opt){
-            case 'd':                                                               
-                inputFileName = optarg;
+    for (int i = 1; i < argc; i++){ // Start from 1 to skip the program name (argv[0])
+        std::string arg = argv[i];
+        if(arg == "-d"){
+            if (i + 1 < argc){
+                inputFileName = argv[i + 1];
                 inputFileParameter = true;
-                break;
-            case 'q':
-                queryFileName = optarg;
+                i++; // Skip the next argument
+            }
+        } 
+        else if (arg == "-q"){
+            if (i + 1 < argc){
+                queryFileName = argv[i + 1];
                 queryFileParameter = true;
-                break;
-            case 'k':
-                k = atoi(optarg);
-                break;
-            case 'E':                                                             
-                E = atoi(optarg);
-                break;
-            case 'R':
-                R = atoi(optarg);
-                break;
-            case 'N':
-                N = atoi(optarg);
-                break;
-            case 'l':
-                l = atoi(optarg);
-                break;
-            case 'm':
-                m = atoi(optarg);
-                methodParameter = true;
-                break;
-            case 'o':
-                outputFileName = optarg;
-                outputFileParameter= true;
-                break;
+                i++;
+            }
+        } 
+        else if (arg == "-k"){
+            if (i + 1 < argc){
+                k = atoi(argv[i + 1]);
+                i++;
+            }
         }
+        else if (arg == "-E"){
+            if (i + 1 < argc){
+                E = atoi(argv[i + 1]);
+                i++;
+            }
+        }
+        else if (arg == "-R"){
+            if (i + 1 < argc){
+                R = atoi(argv[i + 1]);
+                i++;
+            }
+        }
+        else if (arg == "-N"){
+            if (i + 1 < argc){
+                N = atoi(argv[i + 1]);
+                i++;
+            }
+        }
+        else if (arg == "-l"){
+            if (i + 1 < argc){
+                l = atoi(argv[i + 1]);
+                i++;
+            }
+        }
+        else if (arg == "-m"){
+            if (i + 1 < argc){
+                m = atoi(argv[i + 1]);
+                methodParameter = true;
+                i++;
+            }
+        } 
+        else if (arg == "-o"){
+            if (i + 1 < argc){
+                outputFileName = argv[i + 1];
+                outputFileParameter = true;
+                i++;
+            }
+        } 
     }
 
     if(methodParameter == false){
@@ -151,19 +175,23 @@ int main(int argc, char **argv){
             outputFile = fopen(outputFileName.c_str(), "w");
             if(outputFile == NULL){
                 outputFileName = "./out/graphSearchResults.out";
-            }
-            outputFile = fopen(outputFileName.c_str(), "w");
-            if(outputFile == NULL){
-                printf("Error opening output file. Exiting...\n");
-                return -1;
+                outputFile = fopen(outputFileName.c_str(), "w");
+                if(outputFile == NULL){
+                    printf("Error opening output file. Exiting...\n");
+                    return -1;
+                }
             }
             outputFileParameter = true;
         }
         else{
             outputFile = fopen(outputFileName.c_str(), "w");
             if(outputFile == NULL){
-                printf("Error opening output file. Exiting...\n");
-                return -1;
+                outputFileName = "./out/graphSearchResults.out";
+                outputFile = fopen(outputFileName.c_str(), "w");
+                if(outputFile == NULL){
+                    printf("Error opening output file. Exiting...\n");
+                    return -1;
+                }
             }
         }
 
