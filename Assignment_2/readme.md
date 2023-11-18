@@ -7,7 +7,7 @@ Krypotos Christos **sdi1700063**
 
 Panagiotopoulos Georgios **sdi1700113**
 
-This project offers two approximate algorithms for k-nearest-neighbor using a graph-theoretic approach.
+This project offers two approximate algorithms for k-nearest-neighbors using a graph-theoretic approach.
 
 The dataset being used is the MNIST dataset
 
