@@ -81,3 +81,13 @@ The results are saved in the ```*.out``` files with the respective names. The ``
 The parameters and the algorithms of the programs are discussed in relative detail in the [algorithm comparisons section](./algorithm_comparisons.md).
 
 ### Implementation Details
+
+#### General
+To implement the latest graph algorithms, we used the existing utilities from a prior assignment, alongside a newly developed graph class responsible for the overall graph structure. This graph class is responsible for the general graph structure but also incorporates two search algorithms. Additionally, a specialized monotonic graph class is derived from the general graph class, featuring its own distinct constructor implementation.
+
+The graph basically consists of its nodes, which we save in a vector structure, and the out-edges of each node, which we also store in a vector structure. The way we relate each node to its out edges is through a map. This implementation suits our purpose since in both GNNS and MRNG we are using the graph to traverse through the nodes, so we only care about relating the outgoing edges to each node i.e. "Where can we go from here?" and not "How many paths lead to here?".
+
+#### GNNS
+This algorithm consists of an initialization of the graph index with an approximate method (initialize_neighbours_approximate_method) and the k_nearest_neighbor_search algorithm from the assigments notes. 
+
+#### MRNG

@@ -14,7 +14,6 @@ Graph::Graph(std::vector<std::shared_ptr<ImageVector>> nodes, Metric* metric){
 }
 
 Graph::Graph(std::vector<std::shared_ptr<ImageVector>> nodes, std::vector<std::shared_ptr<Neighbors>> neighborList, Metric* metric){
-    // // printf("%d\n",__LINE__);
     this->Nodes = nodes;
     this->GraphMetric = metric;
     for(int i = 0; i < (int)nodes.size(); i++){
@@ -22,14 +21,10 @@ Graph::Graph(std::vector<std::shared_ptr<ImageVector>> nodes, std::vector<std::s
     }   
 }
 
-// MAYBE ADD A METHOD THAT INITIALIZES THE GRAPH WITH LSH OR HYPERCUBE SO THAT KNN IS READY TO BE CALLED
-// WITH THE GNNS ALGORITHM
-
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_neighbor_search(
     std::shared_ptr<ImageVector> query, 
     int randomRestarts, int greedySteps, int expansions, int K){ 
-    // expansions means the number of neighbors the N(Y,E,G) function, from the notes, will return I think
-    // // printf("%d\n",__LINE__);
+    // expansions means the number of neighbors the N(Y,E,G) function, from the notes, will return
 
     int i, j, randomInt, nodesIndexNumber;
     
@@ -48,24 +43,14 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
     > S;
 
     std::unordered_set<int> priorityQueueNodeNumbers; // This could prove problematic if we don't take care of the way we are loading multiple data files
-    // printf("%d\n",__LINE__);
     for(i = 0; i < randomRestarts; i++){
         randomInt = RandGenerator.generate_int_uniform(0, (int)Nodes.size() - 1);
-        // printf("Number of nodes is %d and random number is %d\n",(int)Nodes.size(), randomInt);
         
         // Starting with a random node chosen uniformly 
         node = this->Nodes[randomInt];
-        // printf("The number of the random node is %d\n", node->get_number());
+
         // Replace current node Y_t-1 by the neighbor that is closest to the query
         for(j = 0; j < greedySteps; j++){
-            // S = S /union N(Y_t-1, E, G)
-            // So, we need to get the neighbors of the current node
-            // Then keep the E closest
-            // And add them to our set S, which is a priority queue atm
-            // In order to maintain our S structure as a priority Queue
-            // We will keep track of the set of the node ids that are in the priority queue
-            // printf("%d\n",__LINE__);
-            // N(Y_t-1, E, G), i.e. keep the first E neighbors of the node
 
             // If the node has no neighbors, skip it
             if(this->NodesNeighbors[node]->size() == 0) break;
@@ -77,8 +62,9 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             if(expansions > (int)neighbors->size()){
                 expansions = (int)neighbors->size();
             }
+
+            // Get the first E neighbors
             auto neighborsKeepE = Neighbors(neighbors->begin(), neighbors->begin() + expansions);
-            // printf("%d\n",__LINE__);
             
             double minDistance = DBL_MAX;
             minDistanceNode = nullptr;
@@ -90,24 +76,24 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
                     minDistance = distance;
                     minDistanceNode = tempNode;
                 }
-                // printf("%d\n",__LINE__);
+                
+                // Get the nodes's number in order to check if it is already in the priority queue
                 nodesIndexNumber = tempNode->get_number();
+
                 // If the neighbor is not already in the priority queue
                 if(priorityQueueNodeNumbers.find(nodesIndexNumber) == priorityQueueNodeNumbers.end()){
-                    // printf("%d\n",__LINE__);
+            
                     // Add the neighbor to the priority queue
                     S.push(std::make_pair(distance, tempNode));
-                    // printf("%d\n",__LINE__);
+                    
+                    // Make sure you keep the size correct
                     if((int)S.size() > K){
                         S.pop();
                     }
-                    // printf("%d\n",__LINE__);
+                    
                     priorityQueueNodeNumbers.insert(nodesIndexNumber);
                 }
             }
-            // Yt = minD(Y,Q) for Y in nearest neighbors of Yt-1
-            // printf("%d\n",__LINE__);
-
             // Just to be on the safe side
             if(minDistanceNode == nullptr){
                 break;
@@ -115,7 +101,6 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
             node = minDistanceNode;
         }
     }
-
     // Reverse and Return the priority queue as a vector
     while (!S.empty()){
         nearestImages.push_back(S.top());
@@ -125,15 +110,6 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
     return reversed;
 }
 
-
-
-
-// L is the number of candidates we are allowed to check, similar to M in hypercube
-// K is the number of nearest neighbors we want to find
-// Returns a vector of pairs of the distance and the imagevector/node
-// Broken, can't iterate through a PQ without breaking into a protected structure of the container, so I'll need another solution
-// Maybe sort in the end instead of using a priority queue, or use a set as well as the priority queue, but then I'll need 
-// To manage both
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_nearest_neighbor_search(std::shared_ptr<ImageVector> startNode, std::shared_ptr<ImageVector> query, int L, int K){
     
     // Initializations
@@ -144,9 +120,11 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_ne
     std::shared_ptr<ImageVector> node;
     std::shared_ptr<Neighbors> neighbors;
 
-    std::unordered_set<std::shared_ptr<ImageVector>> checkedCandidates; // The set of candidates we have already checked
+    // The set of candidates we have already checked
+    std::unordered_set<std::shared_ptr<ImageVector>> checkedCandidates; 
     
-    std::vector<std::shared_ptr<ImageVector>> candidateSetR; // The set of candidates we are going to check
+    // The set of candidates we are going to check
+    std::vector<std::shared_ptr<ImageVector>> candidateSetR; 
 
     std::priority_queue<
         std::pair<double, std::shared_ptr<ImageVector>>, 
@@ -214,10 +192,13 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_ne
 
 void Graph::initialize_neighbours_approximate_method(std::shared_ptr<ApproximateMethods> method, int k){
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
-    // Load them into the approximate method
+
+    // Load the data into the approximate method
     method->load_data(this->Nodes);
+
     printf("Creating the edge relations between the nodes/images... ");
     fflush(stdout);
+
     for(auto& node : this->Nodes){
         nearest_approx = method->approximate_k_nearest_neighbors_return_images(node, k);
         
@@ -225,7 +206,8 @@ void Graph::initialize_neighbours_approximate_method(std::shared_ptr<Approximate
         if(nearest_approx.empty()){
             nearest_approx = exhaustive_nearest_neighbor_search_return_images(this->Nodes, node, k, this->GraphMetric);
         }
-        // VERY IMPORTANT TO CREATE DIFFERENT POINTERS FOR EACH NEIGHBOR STRUCTURE
+
+        // Make sure you create different pointers for each "Neighbors" structure
         std::shared_ptr<Neighbors> neighbors = std::make_shared<Neighbors>(); 
         for(auto& neighbor : nearest_approx){
             neighbors->push_back(neighbor.second);
@@ -235,5 +217,3 @@ void Graph::initialize_neighbours_approximate_method(std::shared_ptr<Approximate
     printf("Done\n");
     fflush(stdout);
 }
-
-//  std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Neighbors>> NodesNeighbors; // The list of neighbors for each node
