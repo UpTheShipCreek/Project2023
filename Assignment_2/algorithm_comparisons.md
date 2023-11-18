@@ -21,20 +21,20 @@ We performed those tests keeping the values which seemed optimal to us in the fi
 * ```Window = 1500```
 * ```Table Size = 3750```
 
-![png](./plots/output_2_0.png)
+![png](plots/output_2_0.png)
     
 
 
 ### L, The number of Hashtables
-We knew that L is the variable that has the most impact, both in approximation and in time. A large L value essentially simulates an exhaustive search by creating so many hashtables that for every point, they include all possible neighbors. Thus passing through every hashtable results in calculating every distance from every point to another. 
+We knew that L is the variable that has the most impact, both in approximation and in time. A large L value essentially simulates an exhaustive search by creating so many hashtables that for every point, they include all possible neighbors. Thus passing through every hashtable which result in calculating every distance from every point to another. 
 
 Again we performed the test for L keeping the values which seemed optimal to us in the first assignment, that is:
 
 * ```K = 4```
 * ```Window = 1500```
 * ```Table Size = 3750```
-    
-![png](./plots/output_4_0.png)
+
+![png](plots/output_4_0.png)
     
 
 
@@ -44,8 +44,8 @@ This value we had experimentally learned that it was very important, it was the 
 * ```L = 5```
 * ```K = 4```
 * ```Table Size = 3750```
-
-![png](./plots/output_6_0.png)
+    
+![png](plots/output_6_0.png)
     
 
 
@@ -56,8 +56,8 @@ Again the test were run with the rest of the variables constant:
 * ```L = 5```
 * ```K = 4```
 * ```W = 1500```
-
-![png](./plots/output_8_0.png)
+    
+![png](plots/output_8_0.png)
     
 
 
@@ -72,8 +72,8 @@ The tests below were run for the values:
 * ```K = 4```
 * ```W = 1400```
 * ```TableSize = 7500```
-    
-![png](./plots/output_10_0.png)
+
+![png](plots/output_10_0.png)
     
 
 
@@ -81,7 +81,7 @@ The tests below were run for the values:
 
 ### General
 Having LSH as a baseline we will try to find the best parameters of the Hypercube that immitate the results of LSH.
-Also based on our empirical knowledge of how the algorithm performs, we have formed a set of default values as the base testing ground of each parameter alone.
+Also based on our empirical knowledge of how the algorithm performs, we have formed a set of default values as the based testing ground of each parameter alone.
 
 ### K, the dimensions of the Hypercube
 We obviously don't want to dimensions to be too low, since that would mean that there are not enough buckets to adequetly differentiate between the datapoints. Of course the more dimensions the most accurate our approximations, but that also depends on the rest of parameters. 
@@ -95,8 +95,7 @@ For the test, the rest of parameters are set to:
 * ```Probes = 500```
 * ```M = 3000```
 
-    
-![png](./plots/output_13_0.png)
+![png](plots/output_13_0.png)
     
 
 
@@ -110,8 +109,7 @@ For the test, the rest of parameters are set to:
 * ```K = 14```
 * ```M = 3000```
 
-    
-![png](./plots/output_15_0.png)
+![png](plots/output_15_0.png)
     
 
 
@@ -124,14 +122,13 @@ The following is how the algorithm performs for different ```M``` values given o
 * ```K = 14```
 * ```Probes = 500```
 
-    
-![png](./plots/output_17_0.png)
+![png](plots/output_17_0.png)
     
 
 
 ### Finding the optimal combination
 The Hypercube becomes slow when trying to immitate the accuracy of LSH but nonetheless we found a parameter combination that was accurate without compromising the querying speed too much. 
-Specifically the time per query that Hypercube needs to achieve consistent worst case approximations less than a factor of ```2``` is ```0.0051 seconds/query``` (~10 times less than brute force).
+Specifically the time per query that Hypercube needs to achieve consistent worst case approximations less than a factor of ```2``` is ```0.0051 seconds/query``` (~10 less than brute force).
 
 Those parameters are:
 
@@ -139,8 +136,7 @@ Those parameters are:
 * ```Probes = 6000```
 * ```M = 4000```
 
-    
-![png](./plots/output_19_0.png)
+![png](plots/output_19_0.png)
     
 
 
@@ -148,7 +144,7 @@ Those parameters are:
 ### General
 Initially we were suprised at the performance of GNNS, since it had the ability to give better results than LSH, with fast querying speed as well. It was when we started running some more thorough tests that we realized that GNNS had the capacity to be very innacurate, yielding some terrible approximations.
 
-That wouldn't have been a problem if we were able to make GNNS perform well at less of a cost, but in fact making GNNS be as accurate as LSH with a reasonable query speed proved to be a very ambitious task. 
+Of course it also had the potential to be both fast and accurate, and that potential was hidden within the ```R``` (random restarts parameter). With a bit of a larger value than the default one (which was set to one), GNNS can yield fairly accurate results with a good querying speed. 
 
 In the tests below, we will be using LSH to fill up the index. After finding parameters that appear optimal, we will compare the two initialization methods of LSH and Hypercube, using their optimal parameters, to see if there will be any visible difference in the performance of GNNS.
 
@@ -159,36 +155,35 @@ That of course comes with a price; since the random restarts in a sense restart 
 
 Below is the impact of the ```R``` parameter keeping the rest of the parameters at a modest level. Notice that average time of a query is analogus to the number of random restarts; when the latter is doubled the first one is doubled as well. This is exactly the behavior we expected. 
 
+When it comes to its relation with the Average Max Factor, we followed the "Elbow" method. Notice in the graph below that the improvment is very steep at the ```R = 4```, which of course is the value what we chose to stick to.
+
 * ```k = 20```
 * ```greedySteps = 10```
-* ```E = 10```
+* ```E = 20```
 
-    
-![png](./plots/output_22_0.png)
+![png](plots/output_22_0.png)
     
 
 
 ### k (Max outdegree)
 Since the index is initialized with approximate methods, which are not particularly accurate given the task of a large "K" in the KNN. That's why we restricted the ```k``` values to a pool of relatively small numbers.
 
-* ```R = 100```
+* ```R = 4```
 * ```greedySteps = 10```
-* ```E = 10```
+* ```E = k```
 
-
-![png](./plots/output_24_0.png)
+![png](plots/output_24_0.png)
     
 
 
 ### E (Expansions)
 This parameter determines how many of those out edges we will be using to find. Since we are in control of both ```k``` and ```E```, we could easily omit this parameter and just use every out edge in our search, calibrating the ```k``` parameter accordingly instead. For the sake of consistency, we have included the results of KNN with varying ```E```, using the max ```k``` from our previous test, to further demonstrate this correspondance. 
 
-* ```R = 100```
-* ```k = 50```
+* ```R = 4```
+* ```k = 100```
 * ```greedySteps = 10```
 
-    
-![png](./plots/output_26_0.png)
+![png](plots/output_26_0.png)
     
 
 
@@ -198,29 +193,26 @@ This parameter controls how many steps we will take from our initial node. Initi
 The thing is, it doesn't seem to be doing its job very well, maybe because of the Eucledian metric, or maybe because the approximate methods don't make a good enough graph. It slows the down the queries without offering any improvements in our approximations.
 
 * ```k = 20```
-* ```R = 100```
+* ```R = 4```
 * ```E = 20```
 
-
-
-![png](./plots/output_28_0.png)
+![png](plots/output_28_0.png)
     
 
 
 ### Finding the optimal combination
-It should be obvious by now that GNNS is a bit volatile when it comes to approximations. No matter what we tried, we couldn't get it to match LSH's accuracy without querying times that match those of the brute force, and that's without including the double overhead of the approximate method (LSH/Hypercube) and the initialization of the graph index. 
+The tests gave us a pretty good idea about the combination of parameter that could make GNNS competitive with LSH.
 
-Nonetheless, as expected, LSH seems to create a better graph than Hypercube, as showcased by the comparison below.
+When it comes to the comparison of GNN-LSH and GNNS-Hypercube, as we expected, GNN-LSH seems to create a better graph than GNNS-Hypercube, as showcased by the comparison below.
 
-As for the quality of the approximation, we ended up searching for an appropriate time, rather than a good worst case approximation, which always exceeded ```2``` in our tests. Considering the heavy overhead of the method, we settled for a time per query that's ~10 times faster than brute force, similar to Hypercube.
+As for the quality of the approximation, we settled for a result very similar to that of the pure Hypercube, both in accuracy (albiet GNNS here is still a bit more volatile) and in querying speed, with the speed hitting the exact goal of a ~10 times faster querying speed than brute force (```0.004690 seconds/query``` in comparison to ```0.05 seconds/query``` of the brute force). 
 
-* ```K = 100```
-* ```R = 400```
-* ```E = 100```
+* ```K = 20```
+* ```R = 20```
+* ```E = 20```
 * ```G = 10```
-
     
-![png](./plots/output_30_0.png)
+![png](plots/output_30_0.png)
     
 
 
@@ -235,37 +227,35 @@ Of course the meat of this algorithm is the initialization, in creating monotoni
 
 This parameter is very straight forward. Again, just like we saw with ```M``` parameter in the Hypercube, the ```l``` parameter serves as direct way to calibrate the accuracy/speed tradeoff. Because we were working with a reduced version of the set, we shifted into thinking more about the ratio of ```l/SizeOfDataset``` than absolute numbers. 
 
-The speed we were looking for per query, was no less than the concession that was forced upon us in the previous methods (Hypercube/GNNS), meaning no less than a ~10 times speedup from the brute force.
+The speed we were looking for per query, was no more than the concession that was forced upon us in the previous methods (Hypercube/GNNS), meaning no less than a ~10 times speedup from the brute force.
 
 While MRNG displayed a better behaviour than GNNS, it is still lacking (as far as handling the worst case goes) in comparison to the Hypercube and of course, the star of the show, LSH. 
 
 ### Finding the optimal combination
-There wasn't much to this other than testing for different values of ```l```. 
+There wasn't much to this other than testing for different values of ```l```. Below are the results of our tests. And since this is only one parameter, we could afford to directly test for max approximation factors, rather than taking the average of many attempts.
 
 The way we approached it was straight forward. We pushed the ```l``` as far as it would go without resulting a speedup that was less that the factor of ~10 of the brute force, for this given dataset.
 
-The ```l``` value we settled on was ```l = 200``` which is roughly ```0.7%``` of the size of the dataset. Of course since ```l``` results in an absolute increase in querying time, this percentage will not be optimal in datasets much smaller or much larger than ```60000``` but it may still be a good baseline.
+The ```l``` value we settled on was ```l = 200``` which is roughly ```0.7%``` of the size of the dataset. Of course since ```l``` results in an absolute increase in querying time, this percentage will not be optimal in datasets much smaller or much larger than ```60000``` but it may be a good baseline.
 
 The speed needed, for the below accuracies showcased below, is ```0.0060 seconds/query```.
-
-    
-![png](./plots/output_34_0.png)
+ 
+![png](plots/output_34_0.png)
     
 
 
 ## Comparisons of the algorithms using our (optimal) parameters
 In the graphs below we compare the max approximation factor for all the algorithms given an increasing dataset size, as well as the speeds of the algorithms using the parameters that performed best in our tests.
-
     
-![png](./plots/output_36_0.png)
+![png](plots/output_36_0.png)
     
 
 
 # Conclusions
-In the conducted tests, Locality-Sensitive Hashing (LSH) emerged as the obviously superior algorithm, showcasing the highest level of performance. Similar results were achieved with the Hypercube algorithm, which, although slightly slower, demonstrated a good level of accuracy.
+In the conducted tests, Locality-Sensitive Hashing (LSH) emerged as the obviously superior algorithm, showcasing the highest level of performance. Similar results were achieved with the Hypercube and GNNS algorithms, which, although slower, demonstrated a good level of accuracy.
 
-On the other hand, the Graph algorithms, namely GNNS and MRNG, even though initally their results seems satisfactory, a notable drawback surfaced in their inconsistency when confronted with edge cases. Despite their general efficacy, these algorithms need to resort to brute force speeds to maintain accuracy. In this context, MRNG outperformed GNNS, displaying a marginally better performance, albeit with a noticeable increase in computational overhead.
+On the other hand MRNG, even though its initial results seemed satisfactory, a notable drawback surfaced in its inconsistency when confronted with edge cases.
 
-In conclusion, while LSH stands out as the optimal choice in terms of overall performance, the Hypercube algorithm provides a viable alternative with a negligible sacrifice in speed. The Graph algorithms, while proficient in many cases, struggle with edge cases with MRNG showing a slight edge in performance.
+In conclusion, while LSH stands out as the optimal choice in terms of overall performance, the Hypercube and GNNS algorithms provide viable alternatives with a small sacrifice in speed. The MRNG algorithm, while proficient in many cases, struggles to maintain a high levels of accuracy when comfronted with large query sets. 
 
 But of course we can't think of those results independently of the particular dataset (MNIST) and metric (Eucledean), both of which might be indirectly putting the graph searches at a disadvantage. 
