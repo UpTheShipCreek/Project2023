@@ -10,6 +10,8 @@
 
 int main(int argc, char **argv){
 
+    bool trust = false;
+
     bool methodParameter = false;
     bool inputFileParameter = false;
     bool queryFileParameter = false;
@@ -41,63 +43,66 @@ int main(int argc, char **argv){
     for (int i = 1; i < argc; i++){ // Start from 1 to skip the program name (argv[0])
         std::string arg = argv[i];
         if(arg == "-d"){
-            if (i + 1 < argc){
+            if(i + 1 < argc){
                 inputFileName = argv[i + 1];
                 inputFileParameter = true;
                 i++; // Skip the next argument
             }
         } 
-        else if (arg == "-q"){
-            if (i + 1 < argc){
+        else if(arg == "-q"){
+            if(i + 1 < argc){
                 queryFileName = argv[i + 1];
                 queryFileParameter = true;
                 i++;
             }
         } 
-        else if (arg == "-k"){
-            if (i + 1 < argc){
+        else if(arg == "-k"){
+            if(i + 1 < argc){
                 k = atoi(argv[i + 1]);
                 i++;
             }
         }
-        else if (arg == "-E"){
-            if (i + 1 < argc){
+        else if(arg == "-E"){
+            if(i + 1 < argc){
                 E = atoi(argv[i + 1]);
                 i++;
             }
         }
-        else if (arg == "-R"){
-            if (i + 1 < argc){
+        else if(arg == "-R"){
+            if(i + 1 < argc){
                 R = atoi(argv[i + 1]);
                 i++;
             }
         }
-        else if (arg == "-N"){
-            if (i + 1 < argc){
+        else if(arg == "-N"){
+            if(i + 1 < argc){
                 N = atoi(argv[i + 1]);
                 i++;
             }
         }
-        else if (arg == "-l"){
-            if (i + 1 < argc){
+        else if(arg == "-l"){
+            if(i + 1 < argc){
                 l = atoi(argv[i + 1]);
                 i++;
             }
         }
-        else if (arg == "-m"){
-            if (i + 1 < argc){
+        else if(arg == "-m"){
+            if(i + 1 < argc){
                 m = atoi(argv[i + 1]);
                 methodParameter = true;
                 i++;
             }
         } 
-        else if (arg == "-o"){
-            if (i + 1 < argc){
+        else if(arg == "-o"){
+            if(i + 1 < argc){
                 outputFileName = argv[i + 1];
                 outputFileParameter = true;
                 i++;
             }
         } 
+        else if(arg == "-trust"){
+            trust = true;
+        }
     }
 
     if(methodParameter == false){
