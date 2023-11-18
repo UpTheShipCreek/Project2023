@@ -15,7 +15,7 @@ The dataset being used is the MNIST dataset
 - [Structure](#structure)
 - [Compilation and Cleanup](#compilation-and-cleanup)
 - [Usage](#usage)
-    - [Input](#input)
+    - [Input Datasets](#input-datasets)
     - [Calls](#calls)
     - [Output](#output)
 - [Programs](#programs)
@@ -41,7 +41,7 @@ The dataset being used is the MNIST dataset
     make clean
 
 ## Usage
-### Input
+### Input Datasets
 
 The project already contains three datasets, the original MNIST training dataset, a ```5K``` reduced version of it and the testing datset named respectively:
 
