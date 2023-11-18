@@ -7,6 +7,7 @@
 #include "mrng.h"
 
 #define QUERY_LIMIT 10
+#define GREEDY_STEPS 10
 
 int main(int argc, char **argv){
 
@@ -199,7 +200,7 @@ int main(int argc, char **argv){
             int i = 0;
             while(i < QUERY_LIMIT && i < (int)queries.size()){
                 start = std::chrono::high_resolution_clock::now();
-                approxNearest = genericGraph->k_nearest_neighbor_search(queries[i], R, GRAPH_DEFAULT_G, E, N);
+                approxNearest = genericGraph->k_nearest_neighbor_search(queries[i], R, GREEDY_STEPS, E, N);
                 end = std::chrono::high_resolution_clock::now();
                 approxTime = end - start;
 

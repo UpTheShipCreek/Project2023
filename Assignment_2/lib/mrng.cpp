@@ -13,8 +13,12 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
     double newValue;
     double fraction;
 
+    // A zero vector to initialize the centroid with
     std::vector<double> vectorZero(nodes[0]->get_coordinates().size(), 0.0);
+
+    // Create a virtual point for the centroid
     this->Centroid = std::make_shared<ImageVector>(-1, vectorZero);
+
     std::shared_ptr<Neighbors> Lp;
 
     std::priority_queue<

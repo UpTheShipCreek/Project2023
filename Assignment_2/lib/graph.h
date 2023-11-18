@@ -15,25 +15,6 @@
 #include "hypercube.h"
 #include "approximate_methods.h"
 
-// α) πληθος των πλησιεστερων γειτονων στον γραμμο k-NN 
-// β) ακεραια παραμετρος Ε των επεκτασεων 
-// γ) ακεραιος αριθμος R των τυχαιων επανεκκινησεων
-// δ) ακεραιος αριμθος N των πλησιεστερων γειτονων
-// (default: k=50, E=30, R=1, N=1)
-
-#define GRAPH_DEFAULT_K 50 // default number of nearest neighbors that will be on the index
-#define GRAPH_DEFAULT_E 30 // default number of expansions
-#define GRAPH_DEFAULT_R 120 // default number of random restarts
-#define GRAPH_DEFAULT_G 10 // default number of greedy steps
-
-#define GRAPH_DEFAULT_I 20
-
-// FOR LSH
-#define LSH_DEFAULT_L 6 // default number of hash tables
-#define LSH_DEFAULT_K 4 // default number of hash functions
-
-#define DEFAULT_N 1 // default number of nearest neighbors we want to find
-
 using Neighbors = std::vector<std::shared_ptr<ImageVector>>; 
 
 class Graph{

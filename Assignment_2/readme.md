@@ -88,6 +88,18 @@ To implement the latest graph algorithms, we used the existing utilities from a 
 The graph basically consists of its nodes, which we save in a vector structure, and the out-edges of each node, which we also store in a vector structure. The way we relate each node to its out edges is through a map. This implementation suits our purpose since in both GNNS and MRNG we are using the graph to traverse through the nodes, so we only care about relating the outgoing edges to each node i.e. "Where can we go from here?" and not "How many paths lead to here?".
 
 #### GNNS
-This algorithm consists of an initialization of the graph index with an approximate method (initialize_neighbours_approximate_method) and the k_nearest_neighbor_search algorithm from the assigments notes. 
+This algorithm consists of an initialization of the graph index with an approximate method ```initialize_neighbours_approximate_method``` and the ```k_nearest_neighbor_search``` algorithm from the assigment's notes. 
+
+The initialization_approximate_method is pretty straightforward; the approximate method calls the LSH-KNN for the designated number of out-edges (k) and saves them as the neighbors of the node in the graph structure.
+
+The ```k_nearest_neighbor_search``` a direct implementation of the algorithm we were given; we chose a random node, go through its neighbors and maybe (depending on the greedy steps variable) jump on the neighbor we deem closest to our goal (through a metric, we are using the Eucledean in this assignment) to repeat the process. This whole process we repeat R (random restarts) times. 
+
+One implemetation deviation from the algorithm we were given is the usage of a Priority Queue instead of a sort in the end (similar to how we implemented the KNN in LSH and Hypercube).
 
 #### MRNG
+This algorithm also consists of an initialization of the graph index and a KNN algorithm, although in this case, we have implemented it as a seperate class, with the initialization of the index taking place on its constructor. 
+
+For the constructor we followed the algorithm that was given in the notes, again using a Priority Queue to manage the neighbors. 
+We also decided that since we were already iterating through all the nodes in the constructor, to also iteratively construct the Centroid of the nodes (using the sum formula we had derived in the previous assingment for the MacQueen updating of the clusters), which is used to create the Navigating Node the MRNG-KNN algorithm.
+
+The MRNG-KNN calls the Graph method of ```generic_k_nearest_neighbor_search``` and initializes it with the Navigating node. Again we followed faithfully the algorithm from the notes incorporating the Priority Queue again. The algorithm itself is very simple, it's effectiveness purely relying on the fact that the graph was constructed to be Monotonic and thus naturally leading the search to nodes that are close to our query.  

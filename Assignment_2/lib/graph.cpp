@@ -131,10 +131,10 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_ne
         std::vector<std::pair<double, std::shared_ptr<ImageVector>>>,
         std::less<std::pair<double, std::shared_ptr<ImageVector>>>
     > sortedCandidateSetR;
-    // Initializations
 
     // "Add the starting node to the candidate set R"
     candidateSetR.push_back(startNode);
+
     // In our case it is a priority queue, so we will also add the node with its distance to the query
     distance = GraphMetric->calculate_distance(startNode->get_coordinates(), query->get_coordinates());
     sortedCandidateSetR.push(std::make_pair(distance, startNode));
