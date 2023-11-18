@@ -19,7 +19,7 @@ int main(int argc, char **argv){
     int E = 30; 
     int R = 1;
     int N = 1; 
-    int l= 20; 
+    int l = 20; 
     int m = -1;
 
     int opt;
@@ -28,7 +28,7 @@ int main(int argc, char **argv){
 
     std::string inputFileName, queryFileName, outputFileName;
 
-    FILE* outputFile = fopen("./out/graphSearchResults.out", "w");
+    FILE* outputFile = NULL;
 
     Eucledean metric;
 
@@ -96,8 +96,11 @@ int main(int argc, char **argv){
             std::cin >> inputFileName;
             dataset = read_mnist_images(inputFileName, 0);
         }
+        else{
+            dataset = read_mnist_images(inputFileName, 0);
+        }
         if(dataset.empty()){
-            printf("Error reading input file. Enter another file: \n");
+            printf("Error reading input file.\n");
             inputFileParameter = false;
             continue;
         }
@@ -130,8 +133,11 @@ int main(int argc, char **argv){
                 std::cin >> queryFileName;
                 queries = read_mnist_images(queryFileName, (int)dataset.size());
             }
+            else{
+                queries = read_mnist_images(queryFileName, (int)dataset.size());
+            }
             if(queries.empty()){
-                printf("Error reading query file. Enter another file: \n");
+                printf("Error reading query file.\n");
                 queryFileParameter = false;
                 continue;
             }
@@ -153,9 +159,17 @@ int main(int argc, char **argv){
             }
             outputFileParameter = true;
         }
+        else{
+            outputFile = fopen(outputFileName.c_str(), "w");
+            if(outputFile == NULL){
+                printf("Error opening output file. Exiting...\n");
+                return -1;
+            }
+        }
 
         if(m == gnns){
-            for(int i = 0; i < QUERY_LIMIT; i++){
+            int i = 0;
+            while(i < QUERY_LIMIT && i < (int)queries.size()){
                 start = std::chrono::high_resolution_clock::now();
                 approxNearest = genericGraph->k_nearest_neighbor_search(queries[i], R, GRAPH_DEFAULT_G, E, N);
                 end = std::chrono::high_resolution_clock::now();
@@ -167,10 +181,12 @@ int main(int argc, char **argv){
                 exhaustTime = end - start;
 
                 write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, approxTime.count() / 1e9, exhaustTime.count() / 1e9, outputFile);
+                i++;
             }
         }
         else if(m == mrng){
-            for(int i = 0; i < QUERY_LIMIT; i++){
+            int i = 0;
+            while(i < QUERY_LIMIT && i < (int)queries.size()){
                 start = std::chrono::high_resolution_clock::now();
                 approxNearest = monotonicGraph->k_nearest_neighbor_search(queries[i], l, N);
                 end = std::chrono::high_resolution_clock::now();
@@ -182,6 +198,7 @@ int main(int argc, char **argv){
                 exhaustTime = end - start;
 
                 write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, approxTime.count() / 1e9, exhaustTime.count() / 1e9, outputFile);
+                i++;
             }
         }
         // Reset the flag, to show that this query file has been used
@@ -192,5 +209,6 @@ int main(int argc, char **argv){
 
     }while(wantMoreQueries == "y");
 
+    fclose(outputFile);
     return 0;
 }
