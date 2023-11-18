@@ -20,13 +20,10 @@ The dataset being used is the MNIST dataset
     - [Output](#output)
 - [Programs](#programs)
     - [Parameters](#parameters)
-        - [Approximate Methods](#approximate-methods)
-        - [Clustering](#clustering)
     - [Implementation Details](#implementation-details)
         - [General](#general)
-        - [LSH](#lsh)
-        - [Hypercube](#hypercube)
-        - [Cluster](#cluster)
+        - [GNNS](#gnns)
+        - [MNRG](#hypercube)
 
 ## Structure 
 - **in**
