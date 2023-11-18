@@ -45,9 +45,10 @@ The dataset being used is the MNIST dataset
 
 ## Usage
 
-The project already contains two datasets, the a 5k sample of the MNIST training dataset and the testing datset named respectively:
+The project already contains three datasets, the original MNIST training dataset, a ```5K``` reduced version of it and the testing datset named respectively:
 
     ./in/input.dat
+    ./in/input5k.dat
     ./in/query.dat
 
 The query dataset contains 10k images, but in our main we have reduced the amount of max queries to only 10, for speed. 
@@ -62,13 +63,15 @@ For the small ```5K``` dataset:
 
     ./graph_search -d ./in/input5k.dat -q ./in/query.dat -k 10 -E 10 -R 4 -N 10 -m 1 -o ./out/gnns.out
 
-For the MNIST ```60K``` training dataset:
+For the MNIST ```60K``` training dataset, for a more impressive number of neighbors:
 
-    ./graph_search -d ./in/input.dat -q ./in/query.dat -k 10 -E 10 -R 48 -N 10 -m 1 -o ./out/gnns.out
+    ./graph_search -d ./in/input.dat -q ./in/query.dat -k 20 -E 20 -R 4 -N 20 -m 1 -o ./out/gnns.out
 
 **MRNG**
 
-    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -l 200 -m 2 -o ./out/mrng.out
+For the small ```5K``` dataset (since the construction of the monotonic graph is very slow):
+
+    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -l 20 -m 2 -o ./out/mrng.out
 
 Additionally the user may choose to omit to directly enter any parameters other than the ```-m``` parameter which is required.
 
