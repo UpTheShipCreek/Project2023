@@ -23,7 +23,7 @@ The dataset being used is the MNIST dataset
     - [Implementation Details](#implementation-details)
         - [General](#general)
         - [GNNS](#gnns)
-        - [MRNG](#hypercube)
+        - [MRNG](#mrng)
 
 ## Structure 
 - **in**
