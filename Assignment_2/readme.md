@@ -41,7 +41,7 @@ The dataset being used is the MNIST dataset
     make clean
 
 ## Usage
-###Input
+### Input
 
 The project already contains three datasets, the original MNIST training dataset, a ```5K``` reduced version of it and the testing datset named respectively:
 
