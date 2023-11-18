@@ -57,8 +57,14 @@ The user is free to provide his own dataset as he pleases, assuming he gives the
 
 ### Calls
 **GNNS**
+    
+For the small ```5K``` dataset:
 
-    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -k 100 -E 100 -R 400 -N 10 -m 1 -o ./out/gnns.out
+    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -k 10 -E 10 -R 4 -N 10 -m 1 -o ./out/gnns.out
+
+For the MNIST ```60K``` training dataset:
+
+    ./graph_search -d ./in/input.dat -q ./in/query.dat -k 10 -E 10 -R 48 -N 10 -m 1 -o ./out/gnns.out
 
 **MRNG**
 
