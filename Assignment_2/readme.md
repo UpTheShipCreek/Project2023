@@ -28,9 +28,13 @@ The dataset being used is the MNIST dataset
 ## Structure 
 - **in**
 - **lib**
+    - graph.cpp/h
+    - mrng.cpp/h
+    - *modules from the previous assignment*
 - **out**
 - **plots**
 - **src**
+    - main.cpp
 - algorithm_comparisons
 - Makefile 
 - readme
