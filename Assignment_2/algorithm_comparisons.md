@@ -194,7 +194,7 @@ That of course comes with a price; since the random restarts in a sense restart 
 
 Below is the impact of the ```R``` parameter keeping the rest of the parameters at a modest level. Notice that average time of a query is analogus to the number of random restarts; when the latter is doubled the first one is doubled as well. This is exactly the behavior we expected. 
 
-When it comes to its relation with the Average Max Factor, we followed the "Elbow" method. Notice in the graph below that the improvment is very steep at the ```R = 4```, which of course is the value what we chose to stick to.
+When it comes to its relation with the Average Max Factor, we followed the "Elbow" method. Notice in the graph below that the improvment is very steep at the ```R = 3```.
 
 * ```k = 20```
 * ```greedySteps = 10```
