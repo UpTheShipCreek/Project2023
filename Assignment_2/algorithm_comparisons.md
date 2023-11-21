@@ -1,5 +1,8 @@
 # Algorithm Comparisons
-It is worth noting that the more approximations performed the largest the chance that the approximation factor falls into a large outlier. The following tests were performed with a relatively small number of queries but large number of times, then calculating the average max outlier, in order to get a better sense. 
+The premise of the tests below is to push the accuracy of the algorithms while maintaining an at least ~10 times increase in speed. The numbers given below were tested for the full datasets (with the expeption of MRNG which was tested on 30K dataset instead of the full 60K), trying to achieve close to brute force consistency and having an extremely low approximation factor even for a large number of queries in a row.
+With that said, for smaller datasets or less number of queries in a row, the parameters we have in our example calls would be more appropriate.
+
+All the results, excluding the final optimal combination of each method, were performed with a relatively small number of queries (```10```) but large number of times (```100```), then calculating the average max outlier, in order to get a better sense of the overall consistency, and to help us figure out which combination of parameters would be able to hold its own given a large amount of queries.
 
 ## Table of Contents
 - [Locality Sensitive Hashing](#lsh)
