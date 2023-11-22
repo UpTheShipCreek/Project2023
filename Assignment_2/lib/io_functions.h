@@ -12,6 +12,6 @@ std::vector<std::shared_ptr<ImageVector>> read_mnist_images(const std::string& f
 void write_results(
     int datasetSize,std::shared_ptr<ImageVector> query, std::vector<std::pair<double, 
     std::shared_ptr<ImageVector>>> approx,std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaust, 
-    double tApproximate, double tTrue, FILE* outputFile);
+    FILE* outputFile);
 #endif
 

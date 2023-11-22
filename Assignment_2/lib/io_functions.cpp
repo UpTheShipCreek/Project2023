@@ -48,11 +48,9 @@ void write_results(
     std::shared_ptr<ImageVector> query, 
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> approx,
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaust,
-    double tApproximate, double tTrue, FILE* outputFile
+    FILE* outputFile
     ){
         double approxDistance, exhaustDistance;
-        double factor;
-        double maxFactor= DBL_MIN;
 
         if (!outputFile) {
             printf("Error opening output file. Exiting...\n");
@@ -64,15 +62,9 @@ void write_results(
             fprintf(outputFile, "Nearest neighbor-%d: %d\n", i+1, approx[i].second->get_number());
             approxDistance = approx[i].first;
             exhaustDistance = exhaust[i].first;
-            factor = approxDistance / exhaustDistance;
-            if(factor > maxFactor){
-                maxFactor = factor;
-            }
             fprintf(outputFile, "distanceApproximate: %f\n", approxDistance);
             fprintf(outputFile, "distanceTrue: %f\n", exhaustDistance);
         }
-        fprintf(outputFile, "tAverageApproximate: %f\n", tApproximate);
-        fprintf(outputFile,"tTrue: %f\n", tTrue);
-        fprintf(outputFile, "MAF: %f\n\n", maxFactor);
+        fprintf(outputFile, "\n");
         fflush(outputFile);
     }

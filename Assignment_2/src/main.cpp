@@ -11,6 +11,8 @@
 
 int main(int argc, char **argv){
 
+    bool outputFileIsOpen = false;
+
     bool methodParameter = false;
     bool inputFileParameter = false;
     bool queryFileParameter = false;
@@ -112,7 +114,6 @@ int main(int argc, char **argv){
 
     std::string wantMoreQueries;
     std::vector<std::shared_ptr<ImageVector>> dataset;
-    std::vector<std::shared_ptr<ImageVector>> queries;
 
     // Get a correct input file
     do{
@@ -148,6 +149,7 @@ int main(int argc, char **argv){
 
     // Program loop
     do{
+        std::vector<std::shared_ptr<ImageVector>> queries;
         std::vector<std::pair<double, std::shared_ptr<ImageVector>>> approxNearest;
         std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustNearest;
 
@@ -178,27 +180,42 @@ int main(int argc, char **argv){
                 outputFileName = "./out/graphSearchResults.out";
                 outputFile = fopen(outputFileName.c_str(), "w");
                 if(outputFile == NULL){
-                    printf("Error opening output file. Exiting...\n");
+                    perror("Error opening output file. Exiting...\n");
                     return -1;
                 }
             }
             outputFileParameter = true;
+            outputFileIsOpen = true;
         }
         else{
-            outputFile = fopen(outputFileName.c_str(), "w");
-            if(outputFile == NULL){
-                outputFileName = "./out/graphSearchResults.out";
+            if(outputFileIsOpen == false){
                 outputFile = fopen(outputFileName.c_str(), "w");
                 if(outputFile == NULL){
-                    printf("Error opening output file. Exiting...\n");
-                    return -1;
+                    outputFileName = "./out/graphSearchResults.out";
+                    outputFile = fopen(outputFileName.c_str(), "w");
+                    if(outputFile == NULL){
+                        perror("Error opening output file. Exiting...\n");
+                        return -1;
+                    }
                 }
             }
+            outputFileIsOpen = true;
         }
 
         if(m == gnns){
-            int i = 0;
-            while(i < QUERY_LIMIT && i < (int)queries.size()){
+            int numOfQueries;
+            double MAF = DBL_MIN;
+            double averageApprox = 0;
+            double averageTrue = 0;
+
+            if(QUERY_LIMIT <= (int)queries.size()){
+                numOfQueries = QUERY_LIMIT;
+            }
+            else{
+                numOfQueries = (int)queries.size();
+            }
+
+            for(int i = 0; i < numOfQueries; i++){
                 start = std::chrono::high_resolution_clock::now();
                 approxNearest = genericGraph->k_nearest_neighbor_search(queries[i], R, GREEDY_STEPS, E, N);
                 end = std::chrono::high_resolution_clock::now();
@@ -209,13 +226,32 @@ int main(int argc, char **argv){
                 end = std::chrono::high_resolution_clock::now();
                 exhaustTime = end - start;
 
-                write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, approxTime.count() / 1e9, exhaustTime.count() / 1e9, outputFile);
-                i++;
+                if(approxNearest[0].first / exhaustNearest[0].first > MAF){
+                    MAF = approxNearest[0].first / exhaustNearest[0].first;
+                }
+
+                averageApprox += approxTime.count() / 1e9;
+                averageTrue += exhaustTime.count() / 1e9;
+
+                write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, outputFile);
             }
+            fprintf(outputFile, "tAverageApproximate: %f\ntAverageTrue: %f\nMAF: %f\n", averageApprox/numOfQueries, averageTrue/numOfQueries, MAF);
+            fflush(outputFile);
         }
         else if(m == mrng){
-            int i = 0;
-            while(i < QUERY_LIMIT && i < (int)queries.size()){
+            int numOfQueries;
+            double MAF = DBL_MIN;
+            double averageApprox = 0;
+            double averageTrue = 0;
+
+            if(QUERY_LIMIT <= (int)queries.size()){
+                numOfQueries = QUERY_LIMIT;
+            }
+            else{
+                numOfQueries = (int)queries.size();
+            }
+
+            for(int i = 0; i < numOfQueries; i++){
                 start = std::chrono::high_resolution_clock::now();
                 approxNearest = monotonicGraph->k_nearest_neighbor_search(queries[i], l, N);
                 end = std::chrono::high_resolution_clock::now();
@@ -226,9 +262,17 @@ int main(int argc, char **argv){
                 end = std::chrono::high_resolution_clock::now();
                 exhaustTime = end - start;
 
-                write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, approxTime.count() / 1e9, exhaustTime.count() / 1e9, outputFile);
-                i++;
+                if(approxNearest[0].first / exhaustNearest[0].first > MAF){
+                    MAF = approxNearest[0].first / exhaustNearest[0].first;
+                }
+
+                averageApprox += approxTime.count() / 1e9;
+                averageTrue += exhaustTime.count() / 1e9;
+
+                write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, outputFile);
             }
+            fprintf(outputFile, "tAverageApproximate: %f\ntAverageTrue: %f\nMAF: %f\n", averageApprox/numOfQueries, averageTrue/numOfQueries, MAF);
+            fflush(outputFile);
         }
         // Reset the flag, to show that this query file has been used
         queryFileParameter = false;
@@ -238,6 +282,8 @@ int main(int argc, char **argv){
 
     }while(wantMoreQueries == "y");
 
-    fclose(outputFile);
+    if(outputFileIsOpen){
+        fclose(outputFile);
+    }
     return 0;
 }
