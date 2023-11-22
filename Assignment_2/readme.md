@@ -63,11 +63,11 @@ The user is free to provide his own dataset as he pleases, assuming he gives the
     
 For the small ```5K``` dataset:
 
-    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -k 10 -E 10 -R 4 -N 10 -m 1 -o ./out/gnns.out
+    ./graph_search -d ./in/input5k.dat -q ./in/query.dat -k 10 -E 10 -R 3 -N 10 -m 1 -o ./out/gnns.out
 
 For the MNIST ```60K``` training dataset, for a more impressive number of neighbors:
 
-    ./graph_search -d ./in/input.dat -q ./in/query.dat -k 20 -E 20 -R 4 -N 20 -m 1 -o ./out/gnns.out
+    ./graph_search -d ./in/input.dat -q ./in/query.dat -k 20 -E 20 -R 3 -N 20 -m 1 -o ./out/gnns.out
 
 **MRNG**
 

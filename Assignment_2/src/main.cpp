@@ -148,6 +148,7 @@ int main(int argc, char **argv){
     }
 
     // Program loop
+    int imagesAlreadyRead = (int)dataset.size();
     do{
         std::vector<std::shared_ptr<ImageVector>> queries;
         std::vector<std::pair<double, std::shared_ptr<ImageVector>>> approxNearest;
@@ -158,10 +159,10 @@ int main(int argc, char **argv){
             if(queryFileParameter == false){
                 printf("Give a path for the query file: ");
                 std::cin >> queryFileName;
-                queries = read_mnist_images(queryFileName, (int)dataset.size());
+                queries = read_mnist_images(queryFileName, imagesAlreadyRead);
             }
             else{
-                queries = read_mnist_images(queryFileName, (int)dataset.size());
+                queries = read_mnist_images(queryFileName, imagesAlreadyRead);
             }
             if(queries.empty()){
                 printf("Error reading query file.\n");
@@ -169,6 +170,7 @@ int main(int argc, char **argv){
                 continue;
             }
             queryFileParameter = true;
+            imagesAlreadyRead += (int)queries.size();
         }while(queries.empty());
 
         // Get a valid output file if you can but don't dwell on it
@@ -235,7 +237,7 @@ int main(int argc, char **argv){
 
                 write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, outputFile);
             }
-            fprintf(outputFile, "tAverageApproximate: %f\ntAverageTrue: %f\nMAF: %f\n", averageApprox/numOfQueries, averageTrue/numOfQueries, MAF);
+            fprintf(outputFile, "tAverageApproximate: %f\ntAverageTrue: %f\nMAF: %f\n\n", averageApprox/numOfQueries, averageTrue/numOfQueries, MAF);
             fflush(outputFile);
         }
         else if(m == mrng){
