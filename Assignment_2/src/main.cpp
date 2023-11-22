@@ -273,7 +273,7 @@ int main(int argc, char **argv){
 
                 write_results((int)dataset.size(), queries[i], approxNearest, exhaustNearest, outputFile);
             }
-            fprintf(outputFile, "tAverageApproximate: %f\ntAverageTrue: %f\nMAF: %f\n", averageApprox/numOfQueries, averageTrue/numOfQueries, MAF);
+            fprintf(outputFile, "tAverageApproximate: %f\ntAverageTrue: %f\nMAF: %f\n\n", averageApprox/numOfQueries, averageTrue/numOfQueries, MAF);
             fflush(outputFile);
         }
         // Reset the flag, to show that this query file has been used
