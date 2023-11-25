@@ -175,7 +175,7 @@ Specifically the time per query that Hypercube needs to achieve consistent worst
 Those parameters are:
 
 * ```K = 11```
-* ```Probes = 6000```
+* ```Probes = 600```
 * ```M = 4000```
 
 ![png](plots/output_19_0.png)
