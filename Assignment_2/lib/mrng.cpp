@@ -11,8 +11,7 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
     printf("Constructing MRNG Graph... ");
     fflush(stdout);
     int i;
-    // double leastDistance;
-    double distance, edgepv, edgept, edgevt;
+    double edgepv, edgept, edgevt;
     double newValue;
     double fraction;
 
