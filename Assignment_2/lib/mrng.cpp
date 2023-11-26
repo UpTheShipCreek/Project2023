@@ -4,7 +4,10 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
     std::vector<std::shared_ptr<ImageVector>> nodes,  
     Metric* metric) : 
     Graph(nodes, metric){ // Constructor
-    
+
+    std::shared_ptr<LSH> lsh = std::make_shared<LSH>(6, 4, 1400, 7500, metric);
+    lsh->load_data(nodes);
+
     printf("Constructing MRNG Graph... ");
     fflush(stdout);
     int i;
@@ -21,11 +24,7 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
 
     std::shared_ptr<Neighbors> Lp;
 
-    std::priority_queue<
-        std::pair<double, std::shared_ptr<ImageVector>>,  // A priority queue of pairs of distance and node
-        std::vector<std::pair<double, std::shared_ptr<ImageVector>>>, // Saving it in a vector of pairs<double, ImageVector>
-        std::greater<std::pair<double, std::shared_ptr<ImageVector>>> // We need the priority queue to be sorted in ascending order of the distance
-    > sortedRp;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> sortedRp;
         
     // ----- Construction Process ----- //
     // For every node p in nodes 
@@ -40,26 +39,21 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
         }
         nodeCount++;
 
-        // Create a set that doesn't contain the current node called Rp
-        // Sort Rp according to the distance to the current node
-        for(auto& node : nodes){
-            distance = this->GraphMetric->calculate_distance(p->get_coordinates(), node->get_coordinates());
-            if(distance != 0.0) sortedRp.push(std::make_pair(distance, node));
-            // Maybe here we can also save the distance in a map so we can easily access it later
+        sortedRp = lsh->approximate_k_nearest_neighbors_return_images(p, 200);
+        if(sortedRp.empty()){
+            sortedRp = exhaustive_nearest_neighbor_search_return_images(this->Nodes, p, 200, metric);
         }
 
         Lp = std::make_shared<Neighbors>();
-        Lp->push_back(sortedRp.top().second);
+        Lp->push_back(sortedRp[0].second);
         
         // For every node v in Rp--
         bool flag;
-        while(!sortedRp.empty()){
+        for(auto& vpair : sortedRp){
             flag = true;
 
-            // Get the elements in sorted order
-            auto& v = sortedRp.top().second;
-            sortedRp.pop();
-            
+            auto& v = vpair.second;
+
             // --and not in Lp
             if(std::find(Lp->begin(), Lp->end(), v) != Lp->end()) continue; 
 
