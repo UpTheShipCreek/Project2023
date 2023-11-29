@@ -49,6 +49,9 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
         // Starting with a random node chosen uniformly 
         node = this->Nodes[randomInt];
 
+
+        double previousMinDistance = DBL_MAX;
+
         // Replace current node Y_t-1 by the neighbor that is closest to the query
         for(j = 0; j < greedySteps; j++){
 
@@ -94,6 +97,15 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
                     priorityQueueNodeNumbers.insert(nodesIndexNumber);
                 }
             }
+
+            // If we have converged at a local minimum then break
+            if (minDistance >= previousMinDistance) {
+                break;
+            }
+
+            // Update the previous minimum distance
+            previousMinDistance = minDistance;
+            
             // Just to be on the safe side
             if(minDistanceNode == nullptr){
                 break;
