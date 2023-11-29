@@ -133,14 +133,15 @@ int main(int argc, char **argv){
         inputFileParameter = true;
     }while(dataset.empty());
 
+    int table_size = (int)dataset.size() / 8;
+    std::shared_ptr<LSH> lsh = std::make_shared<LSH>(6, 4, 1400, table_size, &metric);
 
     if(m == gnns){
-        std::shared_ptr<LSH> lsh = std::make_shared<LSH>(6, 4, 1400, 7500, &metric);
         genericGraph = std::make_shared<Graph>(dataset, &metric);
         genericGraph->initialize_neighbours_approximate_method(lsh, k);
     }
     else if(m == mrng){
-        monotonicGraph = std::make_shared<MonotonicRelativeNeighborGraph>(dataset, &metric);
+        monotonicGraph = std::make_shared<MonotonicRelativeNeighborGraph>(dataset, lsh, l, &metric);
     }
     else{
         printf("Graph search method parameter missing. Exiting... \n");

@@ -77,7 +77,7 @@ For the small ```5K``` dataset:
 
 For the MNIST ```60K``` training dataset:
 
-    ./graph_search -d ./in/input.dat -q ./in/query.dat -l 500 -N 20 -m 2 -o ./out/mrng.out
+    ./graph_search -d ./in/input.dat -q ./in/query.dat -l 400 -N 20 -m 2 -o ./out/mrng.out
 
 Additionally the user may choose to omit to directly enter any parameters other than the ```-m``` parameter which is required.
 
@@ -110,7 +110,7 @@ This algorithm also consists of an initialization of the graph index and a KNN a
 
 Initially we had followed the construction from the notes and we were satisfied with the results. But this construction was way too slow so, to make it easier to run and test our code, we decided to use LSH for approximation of the first few elements of the Rp set. Since for every node p, MRGN essentially creates out-edges towards a select few of the closest neighbors, those that are needed to assemble a monotonic path, most of the nodes of the dataset that are further away don't really play a role. So, sticking to a subset of the closets neighbors does approximate the original MRNG, being a bit more volatile but also faster many-fold. 
 
-Other than that we followed the algorithm that was given in the notes, again using a Priority Queue to manage the neighbors. 
+Other than that we stuck to the algorithm that was given in the notes, again using a Priority Queue to manage the neighbors. 
 We also decided that since we were already iterating through all the nodes in the constructor, to also iteratively construct the Centroid of the nodes (using the sum formula we had derived in the previous assingment for the MacQueen updating of the clusters), which is used to create the Navigating Node the MRNG-KNN algorithm.
 
-The MRNG-KNN calls the Graph method of ```generic_k_nearest_neighbor_search``` and initializes it with the Navigating node. Again we followed faithfully the algorithm from the notes incorporating the Priority Queue again. The algorithm itself is very simple, it's effectiveness purely relying on the fact that the graph was constructed to be Monotonic and thus naturally leading the search to nodes that are close to our query.  
+The MRNG-KNN calls the Graph method of ```generic_k_nearest_neighbor_search``` and initializes it with the Navigating node. Again we followed faithfully the algorithm from the notes incorporating the Priority Queue. The algorithm itself is very simple, it's effectiveness purely relying on the fact that the graph was constructed to be Monotonic and thus naturally leading the search to nodes that are close to our query.  

@@ -1,12 +1,12 @@
 #include "mrng.h"
 
 MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
-    std::vector<std::shared_ptr<ImageVector>> nodes,  
+    std::vector<std::shared_ptr<ImageVector>> nodes, 
+    std::shared_ptr<ApproximateMethods> method, int k,
     Metric* metric) : 
     Graph(nodes, metric){ // Constructor
 
-    std::shared_ptr<LSH> lsh = std::make_shared<LSH>(6, 4, 1400, 7500, metric);
-    lsh->load_data(nodes);
+    method->load_data(nodes);
 
     printf("Constructing MRNG Graph... ");
     fflush(stdout);
@@ -38,9 +38,9 @@ MonotonicRelativeNeighborGraph::MonotonicRelativeNeighborGraph(
         }
         nodeCount++;
 
-        sortedRp = lsh->approximate_k_nearest_neighbors_return_images(p, 200);
+        sortedRp = method->approximate_k_nearest_neighbors_return_images(p, k);
         if(sortedRp.empty()){
-            sortedRp = exhaustive_nearest_neighbor_search_return_images(this->Nodes, p, 200, metric);
+            sortedRp = exhaustive_nearest_neighbor_search_return_images(this->Nodes, p, k, metric);
         }
 
         Lp = std::make_shared<Neighbors>();
