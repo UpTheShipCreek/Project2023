@@ -9,19 +9,21 @@
 #define QUERY_LIMIT 10
 #define GREEDY_STEPS 10
 
+enum architecture {bigEndian = 0, littleEndian = 1};
+
 int main(void){
 
     Eucledean metric;
 
-    std::string datasetFilename = "./in/input.dat";
-    std::string querysetFilename = "./in/query.dat";
+    std::string datasetFilename = "./in/encoded_dataset.dat";
+    std::string querysetFilename = "./in/encoded_queryset.dat";
 
     // Read images from file
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images(datasetFilename, 0);
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images(datasetFilename, 0, littleEndian);
     HeaderInfo* datasetHeaderInfo = datasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> dataset = datasetInfo.second;
     
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> querysetInfo = read_mnist_images(querysetFilename, (int)dataset.size());
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> querysetInfo = read_mnist_images(querysetFilename, (int)dataset.size(), littleEndian);
     HeaderInfo* querysetHeaderInfo = querysetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> queryset = querysetInfo.second;
 
@@ -42,7 +44,7 @@ int main(void){
     // LSH(int l, int k, double window, int tableSize, Metric* metric)
     std::shared_ptr<LSH> lsh = std::make_shared<LSH>(5, 4, 1400, 3750, &metric, dimensions);
     lsh->load_data(dataset);
-    
+
     
     // // HyperCube(int dimensions, int probes, int numberOfElementsToCheck, Metric* metric)
     // std::shared_ptr<HyperCube> hypercube = std::make_shared<HyperCube>(11, 600, 4000, &metric);
