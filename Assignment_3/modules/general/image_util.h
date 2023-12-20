@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <queue>
+#include <map>
 
 #include "metrics.h"
 
@@ -20,7 +21,17 @@ class ImageVector{
     bool operator==(const ImageVector& other) const;
 };
 
+std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, int numberOfNearest,Metric* metric);
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustive_nearest_neighbor_search_return_images(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, int numberOfNearest, Metric* metric);
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustive_range_search(std::vector<std::shared_ptr<ImageVector>> images, std::shared_ptr<ImageVector> image, double r, Metric* metric);
+
+class SpaceCorrespondace{
+    std::vector<int> Indexes;
+    std::map<int, std::vector<double>> InitialSpace;
+
+    public:
+    SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial, std::vector<std::shared_ptr<ImageVector>> reduced);
+    std::vector<double> get_initial(int number);
+};
 
 #endif

@@ -1,4 +1,21 @@
 #include "image_util.h"
+#include <stdio.h>
+
+// The dataset is fine but then the index of the queryset is wrong, it starts from 60000 but reduced[60000] is out of bounds for the queryset
+SpaceCorrespondace::SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial, std::vector<std::shared_ptr<ImageVector>> reduced){
+    int index, number, offset;
+    offset = (int)initial[0]->get_number();
+
+    for(auto& element : initial){
+        number = element->get_number();
+        index = number - offset;
+        InitialSpace[number] = element->get_coordinates();
+    }
+}
+std::vector<double> SpaceCorrespondace::get_initial(int number){
+    return InitialSpace[number];
+}
+
 
 ImageVector::ImageVector(int number, std::vector<double> coordinates){
     this->Number = number;
@@ -22,36 +39,36 @@ bool ImageVector::operator==(const ImageVector& other) const{
     return Coordinates == other.Coordinates;
 }
 
-// std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
-//     std::vector<std::shared_ptr<ImageVector>> images, 
-//     std::shared_ptr<ImageVector> image, 
-//     int numberOfNearest,
-//     Metric* metric){
+std::vector<std::pair<double, int>> exhaustive_nearest_neighbor_search(
+    std::vector<std::shared_ptr<ImageVector>> images, 
+    std::shared_ptr<ImageVector> image, 
+    int numberOfNearest,
+    Metric* metric){
 
-//     int i;
-//     double distance;
+    int i;
+    double distance;
 
-//     // I will be using a priority queue again
-//     std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
+    // I will be using a priority queue again
+    std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::less<std::pair<double, int>>> nearest;
 
-//     std::vector<std::pair<double, int>> nearestImages;
+    std::vector<std::pair<double, int>> nearestImages;
 
-//     for(i = 0; i < (int)(images.size()); i++){
-//         if(images[i] != image){ // Ignore comparing it to itself
-//             distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
-//             nearest.push(std::make_pair(distance, images[i]->get_number()));
-//             if ((int)(nearest.size()) > numberOfNearest){
-//                 nearest.pop();
-//             }
-//         }
-//     }
-//     while (!nearest.empty()){
-//         nearestImages.push_back(nearest.top());
-//         nearest.pop();
-//     }
-//     std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
-//     return reversed;
-// }
+    for(i = 0; i < (int)(images.size()); i++){
+        if(images[i] != image){ // Ignore comparing it to itself
+            distance = metric->calculate_distance(image->get_coordinates(), images[i]->get_coordinates());
+            nearest.push(std::make_pair(distance, images[i]->get_number()));
+            if ((int)(nearest.size()) > numberOfNearest){
+                nearest.pop();
+            }
+        }
+    }
+    while (!nearest.empty()){
+        nearestImages.push_back(nearest.top());
+        nearest.pop();
+    }
+    std::vector<std::pair<double,int>> reversed(nearestImages.rbegin(), nearestImages.rend()); // Our vector is in reverse order so we need to reverse it
+    return reversed;
+}
 
 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustive_nearest_neighbor_search_return_images(
     std::vector<std::shared_ptr<ImageVector>> images, 
