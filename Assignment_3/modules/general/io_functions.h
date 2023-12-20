@@ -22,7 +22,7 @@ class HeaderInfo{
     bool operator==(const HeaderInfo& other) const;
 };
 
-std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> read_mnist_images(const std::string& filename, int imagesAlreadyRead);
+std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> read_mnist_images(const std::string& filename, int imagesAlreadyRead, bool littleEndian);
 void write_results(
     int datasetSize,std::shared_ptr<ImageVector> query, std::vector<std::pair<double, 
     std::shared_ptr<ImageVector>>> approx,std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaust, 

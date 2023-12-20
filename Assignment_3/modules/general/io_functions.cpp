@@ -22,7 +22,7 @@ bool HeaderInfo::operator==(const HeaderInfo& other) const{
 }
 
 // Need to make this work with the new ImageVector class
-std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> read_mnist_images(const std::string& filename, int imagesAlreadyRead){ // Need this so as the image numbers do not overlap
+std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> read_mnist_images(const std::string& filename, int imagesAlreadyRead, bool littleEndian){ // Need this so as the image numbers do not overlap
     int imageNumberCounter = imagesAlreadyRead + 1;
     std::shared_ptr<ImageVector> image;
 
@@ -41,19 +41,25 @@ std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>
     // Read the number of images
     uint32_t numberOfImages;
     file.read(reinterpret_cast<char*>(&numberOfImages), sizeof(numberOfImages));
-    numberOfImages = ntohl(numberOfImages); 
+
+    if(!littleEndian) numberOfImages = ntohl(numberOfImages);  // Convert to little endian if need be 
+
     printf("Number of images: %d\n", numberOfImages);
 
     // Read the number of rows
     uint32_t numberOfRows;
     file.read(reinterpret_cast<char*>(&numberOfRows), sizeof(numberOfRows));
-    numberOfRows = ntohl(numberOfRows); // Convert to little endian
+
+    if(!littleEndian) numberOfRows = ntohl(numberOfRows); 
+
     printf("Number of rows: %d\n", numberOfRows);
 
     // Read the number of columns
     uint32_t numberOfColumns;
     file.read(reinterpret_cast<char*>(&numberOfColumns), sizeof(numberOfColumns));
-    numberOfColumns = ntohl(numberOfColumns); 
+    
+    if(!littleEndian) numberOfColumns = ntohl(numberOfColumns); 
+
     printf("Number of columns: %d\n", numberOfColumns);
 
     headerInfo = std::make_shared<HeaderInfo>(numberOfImages, numberOfRows, numberOfColumns);
