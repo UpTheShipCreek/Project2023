@@ -22,7 +22,9 @@ bool HeaderInfo::operator==(const HeaderInfo& other) const{
 }
 
 // Need to make this work with the new ImageVector class
-std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> read_mnist_images(const std::string& filename, int imagesAlreadyRead, bool littleEndian){ // Need this so as the image numbers do not overlap
+std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> read_mnist_images(const std::string& filename, int imagesAlreadyRead){ // Need this so as the image numbers do not overlap
+    bool littleEndian = false;
+    
     int imageNumberCounter = imagesAlreadyRead + 1;
     std::shared_ptr<ImageVector> image;
 
@@ -36,7 +38,12 @@ std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>
     }
 
     // Skip the header information (4 bytes)
-    file.seekg(4);
+    uint32_t magicNumber;
+    file.read(reinterpret_cast<char*>(&magicNumber), sizeof(magicNumber));
+
+    if(magicNumber == 7){
+        littleEndian = true;
+    }
 
     // Read the number of images
     uint32_t numberOfImages;
@@ -57,7 +64,7 @@ std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>
     // Read the number of columns
     uint32_t numberOfColumns;
     file.read(reinterpret_cast<char*>(&numberOfColumns), sizeof(numberOfColumns));
-    
+
     if(!littleEndian) numberOfColumns = ntohl(numberOfColumns); 
 
     printf("Number of columns: %d\n", numberOfColumns);
