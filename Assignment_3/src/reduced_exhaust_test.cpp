@@ -15,15 +15,15 @@ int main(void){
     Eucledean metric;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestExhaustReduced;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> optimalNearestApprox;
-    std::vector<double> nearestApproxInitial;
+    std::vector<double> nearestExhaustReducedCorrespondant;
     std::vector<double> nearestExhaustInitial;
     std::vector<double> queryInitial;
 
 
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
-    auto approxTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    auto exhaustTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    auto exhaustReducedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    auto optimalApproxTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
     Random rand;
 
@@ -60,7 +60,7 @@ int main(void){
         reducedDatasetHeaderInfo->get_numberOfRows() * reducedDatasetHeaderInfo->get_numberOfColumns()
     );
 
-    int const retries = 1000;
+    int const retries = 100;
     int const numberOfQueries = 10;
     int const billion = std::pow(10, 9);
 
@@ -76,8 +76,8 @@ int main(void){
         double factor;
         double sum = 0;
 
-        double approxSum = 0;
-        double exhaustSum = 0;
+        double exhaustReducedSum = 0;
+        double optimalApproxSum = 0;
         for(int j = 0; j < retries; j++){
             for(int i = 0; i < numberOfQueries; i++){
                 int randomIndex = rand.generate_int_uniform(0, (int)reducedQueryset.size() - 1);
@@ -90,29 +90,29 @@ int main(void){
                 }
                 end = std::chrono::high_resolution_clock::now();
                 end = std::chrono::high_resolution_clock::now();
-                approxTime = end - start;
+                exhaustReducedTime = end - start;
                 
                 start = std::chrono::high_resolution_clock::now();
                 optimalNearestApprox = quick_nn.approximate_k_nearest_neighbors_return_images(queryset[randomIndex], DEFAULT_N);
                 end = std::chrono::high_resolution_clock::now();
-                exhaustTime = end - start;
+                optimalApproxTime = end - start;
 
-                nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestExhaustReduced[0].second->get_number());
+                nearestExhaustReducedCorrespondant = datasetSpaceCorrespondace.get_initial(nearestExhaustReduced[0].second->get_number());
 
                 // printf("Approx: %d Exhaust: %d Query: %d\n", nearestExhaustReduced[0].second->get_number(), optimalNearestApprox[0].second, reducedQueryset[randomIndex]->get_number());
 
-                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
+                factor = metric.calculate_distance(nearestExhaustReducedCorrespondant, queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
                 if(factor > maxFactor){
                     maxFactor = factor;
                 }
-                approxSum += approxTime.count();
-                exhaustSum += exhaustTime.count();
+                exhaustReducedSum += exhaustReducedTime.count();
+                optimalApproxSum += optimalApproxTime.count();
             }
             sum += maxFactor;
         }
-        double tA = approxSum / (numberOfQueries*retries);
-        double tE = exhaustSum / (numberOfQueries*retries);
-        printf("AverageMaxFactor: %f ApproxAverage: %f ExhaustAverage: %f\n", sum/retries, tA / billion, tE / billion);
+        double tRE = exhaustReducedSum / (numberOfQueries*retries);
+        double tOA = optimalApproxSum / (numberOfQueries*retries);
+        printf("AverageMaxFactor: %f Reduced Exhuast: %f Optimal Approx: %f\n", sum/retries, tRE / billion, tOA / billion);
         fflush(stdout);
     }
     else{
@@ -122,8 +122,8 @@ int main(void){
 
             double maxFactor = DBL_MIN;
             double factor;
-            double approxSum = 0;
-            double exhaustSum = 0;
+            double exhaustReducedSum = 0;
+            double optimalApproxSum = 0;
 
             for(int i = 0; i < q; i++){
                 int randomIndex = rand.generate_int_uniform(0, (int)reducedQueryset.size() - 1);
@@ -136,27 +136,27 @@ int main(void){
                 }
                 end = std::chrono::high_resolution_clock::now();
                 end = std::chrono::high_resolution_clock::now();
-                approxTime = end - start;
+                exhaustReducedTime = end - start;
                 
                 start = std::chrono::high_resolution_clock::now();
                 optimalNearestApprox = quick_nn.approximate_k_nearest_neighbors_return_images(queryset[randomIndex], DEFAULT_N);
                 end = std::chrono::high_resolution_clock::now();
-                exhaustTime = end - start;
+                optimalApproxTime = end - start;
 
-                nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestExhaustReduced[0].second->get_number());
+                nearestExhaustReducedCorrespondant = datasetSpaceCorrespondace.get_initial(nearestExhaustReduced[0].second->get_number());
 
                 // printf("Approx: %d Exhaust: %d Query: %d\n", nearestExhaustReduced[0].second->get_number(), optimalNearestApprox[0].second, reducedQueryset[randomIndex]->get_number());
 
-                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
+                factor = metric.calculate_distance(nearestExhaustReducedCorrespondant, queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
                 if(factor > maxFactor){
                     maxFactor = factor;
                 }
-                approxSum += approxTime.count();
-                exhaustSum += exhaustTime.count();
+                exhaustReducedSum += exhaustReducedTime.count();
+                optimalApproxSum += optimalApproxTime.count();
             }
-            double tA = approxSum / q;
-            double tE = exhaustSum / q;
-            printf("Number of Queries:%d MaxFactor: %f ApproxAverage: %f ExhaustAverage: %f\n", q, maxFactor, tA/billion, tE/billion);
+            double tRE = exhaustReducedSum / q;
+            double tOA = optimalApproxSum / q;
+            printf("Number of Queries:%d MaxFactor: %f Reduced Exhuast: %f Optimal Approx: %f\n", q, maxFactor, tRE/billion, tOA/billion);
             fflush(stdout);
         }
     }
