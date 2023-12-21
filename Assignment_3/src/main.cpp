@@ -13,7 +13,7 @@
 int main(void){
 
     Eucledean metric;
-    std::vector<std::pair<double, int>> nearestApproxNumber;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestApprox;
     std::vector<std::pair<double, int>> nearestExhaustNumber;
     std::vector<double> nearestApproxInitial;
     std::vector<double> nearestExhaustInitial;
@@ -51,8 +51,8 @@ int main(void){
     HeaderInfo* reducedQuerysetHeaderInfo = reducedQuerysetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> reducedQueryset = reducedQuerysetInfo.second;
 
-    SpaceCorrespondace datasetSpaceCorrespondace(dataset, reducedDataset);
-    SpaceCorrespondace querysetSpaceCorrespondace(queryset, reducedQueryset);
+    SpaceCorrespondace datasetSpaceCorrespondace(dataset);
+    SpaceCorrespondace querysetSpaceCorrespondace(queryset);
 
     if(!(*datasetHeaderInfo == *querysetHeaderInfo)){
         printf("Dataset and queryset header info do not match\n");
@@ -77,12 +77,12 @@ int main(void){
 
     int mode;
 
-    printf("Press anything other than 1:");
+    printf("To run the method with different parameters press 1:");
     std::cin >> mode;
     if(mode == 1){
         std::vector<int> lambdas = {3, 4, 5, 6, 7, 8, 9, 10};
-        std::vector<int> kappas = {3, 4, 5, 6, 7, 8, 9, 10};
-        std::vector<int> windows = {70, 100, 130, 160, 190}; 
+        std::vector<int> kappas = {3, 4};
+        std::vector<int> windows = {70, 100}; 
         std::vector<int> tables = {3750, 7500}; 
         for (auto l : lambdas){
             for(auto k : kappas){
@@ -101,10 +101,9 @@ int main(void){
                             for(int i = 0; i < numberOfQueries; i++){
                                 int randomIndex = rand.generate_int_uniform(0, (int)reducedQueryset.size() - 1);
 
-
                                 start = std::chrono::high_resolution_clock::now();
-                                nearestApproxNumber = lsh->approximate_k_nearest_neighbors(reducedQueryset[randomIndex], DEFAULT_N);
-                                if(nearestApproxNumber.size() == 0){
+                                nearestApprox = lsh->approximate_k_nearest_neighbors_return_images(reducedQueryset[randomIndex], DEFAULT_N);
+                                if(nearestApprox.size() == 0){
                                     printf("Error: No nearest neighbors found\n");
                                     break;
                                 }
@@ -113,21 +112,20 @@ int main(void){
                                 approxTime = end - start;
                                 
                                 start = std::chrono::high_resolution_clock::now();
-                                nearestExhaustNumber = exhaustive_nearest_neighbor_search(reducedDataset, reducedQueryset[randomIndex], DEFAULT_N, &metric);
+                                nearestExhaustNumber = exhaustive_nearest_neighbor_search(dataset, queryset[randomIndex], DEFAULT_N, &metric);
                                 end = std::chrono::high_resolution_clock::now();
                                 exhaustTime = end - start;
 
-                                nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestApproxNumber[0].second);
-                                nearestExhaustInitial = datasetSpaceCorrespondace.get_initial(nearestExhaustNumber[0].second);
-                                queryInitial = querysetSpaceCorrespondace.get_initial(reducedQueryset[randomIndex]->get_number());
+                                nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestApprox[0].second->get_number());
 
-                                factor = metric.calculate_distance(nearestApproxInitial, queryInitial) / metric.calculate_distance(nearestExhaustInitial, queryInitial);
+                                // printf("Approx: %d Exhaust: %d Query: %d\n", nearestApprox[0].second->get_number(), nearestExhaustNumber[0].second, reducedQueryset[randomIndex]->get_number());
+
+                                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / nearestExhaustNumber[0].first;
                                 if(factor > maxFactor){
                                     maxFactor = factor;
                                 }
                                 approxSum += approxTime.count();
                                 exhaustSum += exhaustTime.count();
-                                
                             }
                             sum += maxFactor;
                         }
@@ -142,7 +140,7 @@ int main(void){
     }
     // L: 6 K: 4 Window: 1400 TableSize:15000
     else{
-        lsh = std::make_shared<LSH>(3, 3, 100, 3750, &metric, dimensions);
+        lsh = std::make_shared<LSH>(5, 3, 100, 3750, &metric, dimensions);
         lsh->load_data(reducedDataset);
 
         std::vector<int> queryNumber = {1000, 2000, 3000, 4000, 5000, 10000};
@@ -157,10 +155,9 @@ int main(void){
             for(int i = 0; i < q; i++){
                 int randomIndex = rand.generate_int_uniform(0, (int)reducedQueryset.size() - 1);
 
-
                 start = std::chrono::high_resolution_clock::now();
-                nearestApproxNumber = lsh->approximate_k_nearest_neighbors(reducedQueryset[randomIndex], DEFAULT_N);
-                if(nearestApproxNumber.size() == 0){
+                nearestApprox = lsh->approximate_k_nearest_neighbors_return_images(reducedQueryset[randomIndex], DEFAULT_N);
+                if(nearestApprox.size() == 0){
                     printf("Error: No nearest neighbors found\n");
                     break;
                 }
@@ -169,20 +166,20 @@ int main(void){
                 approxTime = end - start;
                 
                 start = std::chrono::high_resolution_clock::now();
-                nearestExhaustNumber = exhaustive_nearest_neighbor_search(reducedDataset, reducedQueryset[randomIndex], DEFAULT_N, &metric);
+                nearestExhaustNumber = exhaustive_nearest_neighbor_search(dataset, queryset[randomIndex], DEFAULT_N, &metric);
                 end = std::chrono::high_resolution_clock::now();
                 exhaustTime = end - start;
 
-                nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestApproxNumber[0].second);
-                nearestExhaustInitial = datasetSpaceCorrespondace.get_initial(nearestExhaustNumber[0].second);
+                nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestApprox[0].second->get_number());
 
-                factor = metric.calculate_distance(nearestApproxInitial, queryInitial) / metric.calculate_distance(nearestExhaustInitial, queryInitial);
+                printf("Approx: %d Exhaust: %d Query: %d\n", nearestApprox[0].second->get_number(), nearestExhaustNumber[0].second, reducedQueryset[randomIndex]->get_number());
+
+                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / nearestExhaustNumber[0].first;
                 if(factor > maxFactor){
                     maxFactor = factor;
                 }
                 approxSum += approxTime.count();
                 exhaustSum += exhaustTime.count();
-              
             }
             double tA = approxSum / q;
             double tE = exhaustSum / q;
