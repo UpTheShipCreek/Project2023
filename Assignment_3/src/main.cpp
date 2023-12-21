@@ -14,7 +14,7 @@ int main(void){
 
     Eucledean metric;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestApprox;
-    std::vector<std::pair<double, int>> nearestExhaustNumber;
+    std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestExhaust;
     std::vector<double> nearestApproxInitial;
     std::vector<double> nearestExhaustInitial;
     std::vector<double> queryInitial;
@@ -75,14 +75,17 @@ int main(void){
 
     std::shared_ptr<LSH> lsh;
 
+    LSH quick_nn(6, 4, 1400, 7500, &metric, 784); 
+    quick_nn.load_data(dataset);
+
     int mode;
 
     printf("To run the method with different parameters press 1:");
     std::cin >> mode;
     if(mode == 1){
         std::vector<int> lambdas = {3, 4, 5, 6, 7, 8, 9, 10};
-        std::vector<int> kappas = {3, 4};
-        std::vector<int> windows = {70, 100}; 
+        std::vector<int> kappas = {3};
+        std::vector<int> windows = {70, 80, 90, 100, 110, 120, 130, 140, 150}; 
         std::vector<int> tables = {3750, 7500}; 
         for (auto l : lambdas){
             for(auto k : kappas){
@@ -112,15 +115,15 @@ int main(void){
                                 approxTime = end - start;
                                 
                                 start = std::chrono::high_resolution_clock::now();
-                                nearestExhaustNumber = exhaustive_nearest_neighbor_search(dataset, queryset[randomIndex], DEFAULT_N, &metric);
+                                nearestExhaust = quick_nn.approximate_k_nearest_neighbors_return_images(queryset[randomIndex], DEFAULT_N);
                                 end = std::chrono::high_resolution_clock::now();
                                 exhaustTime = end - start;
 
                                 nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestApprox[0].second->get_number());
 
-                                // printf("Approx: %d Exhaust: %d Query: %d\n", nearestApprox[0].second->get_number(), nearestExhaustNumber[0].second, reducedQueryset[randomIndex]->get_number());
+                                // printf("Approx: %d Exhaust: %d Query: %d\n", nearestApprox[0].second->get_number(), nearestExhaust[0].second, reducedQueryset[randomIndex]->get_number());
 
-                                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / nearestExhaustNumber[0].first;
+                                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / nearestExhaust[0].first;
                                 if(factor > maxFactor){
                                     maxFactor = factor;
                                 }
@@ -138,7 +141,6 @@ int main(void){
             }
         }
     }
-    // L: 6 K: 4 Window: 1400 TableSize:15000
     else{
         lsh = std::make_shared<LSH>(5, 3, 100, 3750, &metric, dimensions);
         lsh->load_data(reducedDataset);
@@ -166,15 +168,15 @@ int main(void){
                 approxTime = end - start;
                 
                 start = std::chrono::high_resolution_clock::now();
-                nearestExhaustNumber = exhaustive_nearest_neighbor_search(dataset, queryset[randomIndex], DEFAULT_N, &metric);
+                nearestExhaust = quick_nn.approximate_k_nearest_neighbors_return_images(queryset[randomIndex], DEFAULT_N);
                 end = std::chrono::high_resolution_clock::now();
                 exhaustTime = end - start;
 
                 nearestApproxInitial = datasetSpaceCorrespondace.get_initial(nearestApprox[0].second->get_number());
 
-                printf("Approx: %d Exhaust: %d Query: %d\n", nearestApprox[0].second->get_number(), nearestExhaustNumber[0].second, reducedQueryset[randomIndex]->get_number());
+                // printf("Approx: %d Exhaust: %d Query: %d\n", nearestApprox[0].second->get_number(), nearestExhaust[0].second, reducedQueryset[randomIndex]->get_number());
 
-                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / nearestExhaustNumber[0].first;
+                factor = metric.calculate_distance(nearestApproxInitial, queryset[randomIndex]->get_coordinates()) / nearestExhaust[0].first;
                 if(factor > maxFactor){
                     maxFactor = factor;
                 }
