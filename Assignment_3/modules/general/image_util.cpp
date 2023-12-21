@@ -2,13 +2,11 @@
 #include <stdio.h>
 
 // The dataset is fine but then the index of the queryset is wrong, it starts from 60000 but reduced[60000] is out of bounds for the queryset
-SpaceCorrespondace::SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial, std::vector<std::shared_ptr<ImageVector>> reduced){
-    int index, number, offset;
-    offset = (int)initial[0]->get_number();
+SpaceCorrespondace::SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial){
+    int number;
 
     for(auto& element : initial){
         number = element->get_number();
-        index = number - offset;
         InitialSpace[number] = element->get_coordinates();
     }
 }

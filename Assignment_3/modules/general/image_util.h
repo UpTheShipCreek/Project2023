@@ -30,7 +30,7 @@ class SpaceCorrespondace{
     std::map<int, std::vector<double>> InitialSpace;
 
     public:
-    SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial, std::vector<std::shared_ptr<ImageVector>> reduced);
+    SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial);
     std::vector<double> get_initial(int number);
 };
 
