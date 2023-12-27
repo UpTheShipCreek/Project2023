@@ -1,108 +1,99 @@
 import argparse
-from tensorflow.keras import layers, models
-from tensorflow.keras.datasets import mnist
-from matplotlib import pyplot as plt
 import numpy as np
+import tensorflow as tf
 
-#Functions 
-def load_images(file):
-    file.seek(18)
+def write_mnist_images(filename, images_array, image_size):
+    try:
+        with open(filename, 'wb') as file:
 
-    images = []
+            # Write the header information (16 bytes)
+            magic_number = np.int32(7)
+            file.write(magic_number.tobytes())
+
+            number_of_images = np.int32(images_array.shape[0])
+            file.write(number_of_images.tobytes())
+
+            number_of_rows = np.int32(image_size)
+            file.write(number_of_rows.tobytes())    
+
+            number_of_columns = np.int32(1)
+            file.write(number_of_columns.tobytes())
+
+            print("Writing images... ")
+
+            for image in images_array:
+                pixel_bytes = image.astype(np.uint8)
+                for pixel in pixel_bytes:
+                    file.write(pixel.tobytes())
+
+    except IOError:
+        print("Error while writing to file")
+
+    print("Done")
+
+def read_mnist_images(filename):
+    all_images = []
 
     try:
-        # Read and process each image entry
-        while True:
-            # Read 784 bytes (28x28 image size)
-            image_pixels = np.frombuffer(file.read(784), dtype=np.uint8)
+        with open(filename, 'rb') as file:
+            # Skip the header information (16 bytes)
+            file.seek(16)
 
-            # Check if the read operation resulted in an empty byte string
-            if not image_pixels.any():
-                break
+            print("Reading images... ")
 
-            # Convert pixel values to double (no normalization in this case)
-            normalized_pixels = image_pixels.astype(float)
+            # Read and process each image entry
+            while True:
+                # Read 784 bytes (28x28 image size)
+                image_pixels = np.frombuffer(file.read(784), dtype=np.uint8)
 
-            # Create an array representing the image
-            singleImage = np.array(normalized_pixels.tolist())
+                # Check if the read operation resulted in an empty byte string
+                if not image_pixels.any():
+                    break
 
-            images.append(singleImage)
+                # Convert pixel values to double (no normalization in this case)
+                normalized_pixels = image_pixels.astype(float)
+
+                # Create an array representing the image
+                image = np.array(normalized_pixels.tolist())
+
+                all_images.append(image)
 
     except IOError:
         print("Error while opening file")
         return np.array([])
 
-    return np.array(images)  
-
-#Function builds the autoencoder
-def BuildAutoEncoder():
-    #encoder
-    inputImage = tf.keras.input(shape=(28,28,1))
-    x = layers.Conv2D(16, (3, 3), activation='relu', padding='same')(inputImage)
-    x = layers.MaxPooling2D((2, 2), padding='same')(x)
-    x = layers.Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    x = layers.MaxPooling2D((2, 2), padding='same')(x)
-    x = layers.Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    encoded = layers.MaxPooling2D((2, 2), padding='same')(x)
-
-    # Decoder
-    x = layers.Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
-    x = layers.UpSampling2D((2, 2))(x)
-    x = layers.Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-    x = layers.UpSampling2D((2, 2))(x)
-    x = layers.Conv2D(16, (3, 3), activation='relu')(x)
-    x = layers.UpSampling2D((2, 2))(x)
-    decoded = layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
-
-    # Create the autoencoder model
-    autoencoder = models.Model(input_img, encoded)  # Output is the encoded layer
-    autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
-
-    return autoencoder
-
-
-# Function to compress and save vectors
-def compress_and_save(images, output_file):
-    compressed_vectors = autoencoder.predict(images)
-
-    # Reshape to (num_samples, flattened_vector_size)
-    compressed_vectors = compressed_vectors.reshape((compressed_vectors.shape[0], -1))
-
-    # Save compressed vectors to file
-    np.save(output_file, compressed_vectors)
+    print("Done")
+    return np.array(all_images)
 
 
 def main():
-    #CMD arguments parsing
-    parser = argparse.ArgumentParser(description='MNIST Autoencoder')
-    parser.add_argument('-d','dataset_path', required=True, help='Path to the MNIST dataset')
-    parser.add_argument('-q', '--queryset', required=True, help='Path to the query dataset')
-    parser.add_argument('-od', '--output_dataset_file', required=True, help='Output file for the compressed dataset vectors')
-    parser.add_argument('-oq', '--output_query_file', required=True, help='Output file for the compressed query vectors')
-
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Apply an encoder to datasets.')
+    parser.add_argument('dataset_path', help='Path to the dataset file.')
+    parser.add_argument('queryset_path', help='Path to the query set file.')
+    parser.add_argument('output_dataset_path', help='Path to the output dataset file.')
+    parser.add_argument('output_queryset_path', help='Path to the output query set file.')
     args = parser.parse_args()
 
-    #Load input data
-    file = open(args.dataset_path, 'rb')
-    #Load MNIST dataset
-    train_images = load_images(file)
+    # Load the datasets
+    dataset = read_mnist_images(args.dataset_path)
+    queryset = read_mnist_images(args.queryset_path)
+
     
-    #Load input data
-    file = open(args.dataset_path, 'rb')
-    #Load MNIST dataset
-    train_images = load_images(file)
 
-    train_images = train_images.reshape((train_images.shape[0], 28, 28, 1))
-    test_images = test_images.reshape((test_images.shape[0], 28, 28, 1))
-    
-    #Build and train autoencoder
-    autoencoder = BuildAutoEncoder()
-    autoencoder.fit(train_images, train_images, epochs=10, batch_size=128, shuffle=True, validation_data=(test_images, test_images))
+    # Load the encoder
+    encoder = tf.keras.models.load_model('.\python\encoder.keras')
 
-    # Compress and save the dataset vectors
-    compress_and_save(train_images, args.output_dataset_file, autoencoder)
+    # Apply the encoder to the datasets
+    encoded_dataset = encoder.predict(dataset)
+    encoded_queryset = encoder.predict(queryset)
 
-    # Load, compress, and save the query dataset vectors
-    query_images = load_images(args.queryset)
-    query_images = query_images.reshape((query_images.shape[0], 28, 28, 1))
-    compress_and_save(query_images, args.output_query_file, autoencoder)
+    print("Intial shapes: ", dataset.shape, queryset.shape)
+    print("Encoded shapes: ", encoded_dataset.shape, encoded_queryset.shape)
+    _, image_size = encoded_queryset.shape
+
+    write_mnist_images(args.output_dataset_path, encoded_dataset, image_size)
+    write_mnist_images(args.output_queryset_path, encoded_queryset, image_size)
+
+if __name__ == '__main__':
+    main()
