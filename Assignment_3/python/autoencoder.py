@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
 
+filepath = '.\encoder.keras'
+
 def build_autoencoder(input_shape, latent_dim):
     model = models.Sequential()
 
@@ -30,5 +32,9 @@ def normalize_to_integer(array):
 def save_model(model, filepath):
     model.save(filepath)
 
-def load_model(filepath):
-    return tf.keras.models.load_model(filepath, compile=False)
+input_shape = (28, 28, 1)
+latent_dim = 10
+autoencoder = build_autoencoder(input_shape, latent_dim)
+
+# Save the autoencoder model
+autoencoder.save(filepath)
