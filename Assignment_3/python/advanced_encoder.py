@@ -5,6 +5,19 @@ from keras import layers, Model, losses
 from keras.datasets import mnist
 from scipy.stats import kendalltau
 from annoy import AnnoyIndex
+import tensorflow_probability as tfp
+
+def tensor_get_nearest(data, k):
+    # Calculate the pairwise distances
+    pairwise_distances = tf.norm(tf.expand_dims(data, 1) - tf.expand_dims(data, 0), axis=-1)
+
+    # Get the indices of the k+1 nearest neighbors for each vector
+    _, indices = tf.math.top_k(-pairwise_distances, k=k+1)
+
+    # Exclude the first column, which is the index of the vector itself
+    indices = indices[:, 1:]
+
+    return indices
 
 def get_nearest(batch, vector_size):
 
@@ -29,8 +42,20 @@ def get_nearest(batch, vector_size):
     
     return srList
 
-def kendal_tau_loss(list1, list2):
-  return 1 - kendalltau(list1, list2)
+def spearman_rank_correlation(y_true, y_pred):
+    y_true_rank = tf.cast(tf.argsort(y_true), dtype=tf.float32)
+    y_pred_rank = tf.cast(tf.argsort(y_pred), dtype=tf.float32)
+    return tfp.stats.correlation(y_true_rank, y_pred_rank, sample_axis=None, event_axis=None)
+
+def spearman_rank_loss(y_true, y_pred):
+    correlation = spearman_rank_correlation(y_true, y_pred)
+    return 1. - correlation
+
+def kendal_tau_loss(y_true, y_pred):
+    y_true_rank = tf.cast(tf.argsort(y_true), dtype=tf.float32)
+    y_pred_rank = tf.cast(tf.argsort(y_pred), dtype=tf.float32)
+    correlation, _ = tfp.stats.correlation(y_true_rank, y_pred_rank, sample_axis=None, event_axis=None)
+    return 1. - correlation
 
 
 def batch_kendal_tau_loss(encoder, batch, vector_size):
@@ -46,7 +71,7 @@ def batch_kendal_tau_loss(encoder, batch, vector_size):
   for pair in pairSRs:
     loss_sum += (lambda f, p : f(p))(kendal_tau_loss, pair)
 
-  return loss_sum/vector_size
+  return loss_sum/(2*vector_size)
 
 class Autoencoder(Model):
     def __init__(self, encoding_dimension):
@@ -80,25 +105,34 @@ class Autoencoder(Model):
     def train_step(self, data):
         data, _ = data  # Unpack the tuple
         vector_size = data.shape[1]
+        k = data.shape[0] // 5
         with tf.GradientTape() as tape:
-            initialSR = get_nearest(data, vector_size)
-
+            initialSR = tensor_get_nearest(data, k)
             encoded = self.encoder(data)
+            reducedSR = tensor_get_nearest(encoded, k)
 
-            reducedSR = get_nearest(encoded, vector_size)
+            # Stack the two tensors along the last dimension
+            pairSRs = tf.stack([initialSR, reducedSR], axis=-1)
 
-            pairSRs = list(zip(initialSR, reducedSR))   
+            # Define a function to calculate the Kendall tau loss for a pair of rankings
+            def calculate_loss(pair):
+                y_true = tf.cast(pair[0], tf.float32)
+                y_pred = tf.cast(pair[1], tf.float32)
+                
+                loss = spearman_rank_loss(y_true, y_pred)
+                return tf.cast(loss, tf.float32)
 
-            ktLossSum = 0
-            for pair in pairSRs:
-                ktLossSum += (lambda f, p : f(p))(kendal_tau_loss, pair)
-            kendall_tau_loss_value = ktLossSum/vector_size
+
+            # Use tf.map_fn to apply the function to each pair of rankings
+            ktLosses = tf.map_fn(calculate_loss, pairSRs, dtype=tf.float32)
+
+            # Calculate the sum of the Kendall tau losses
+            ktLossSum = tf.reduce_sum(ktLosses)
+            spearman_loss_value = ktLossSum / vector_size
 
             decoded = self.decoder(encoded)
-            
             reconstruction_loss = tf.reduce_mean(tf.square(data - decoded))  # Mean Squared Error
-            
-            total_loss = reconstruction_loss + kendall_tau_loss_value
+            total_loss = (0.2 * reconstruction_loss) + (0.8 * tf.cast(spearman_loss_value, tf.float32))
 
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
@@ -106,7 +140,7 @@ class Autoencoder(Model):
         return {
             "loss": total_loss,
             "reconstruction_loss": reconstruction_loss,
-            "kendall_tau_loss": kendall_tau_loss_value,
+            "kendall_tau_loss": spearman_loss_value,
         }
 
 
