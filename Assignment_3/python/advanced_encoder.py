@@ -3,7 +3,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 from keras import layers, Model, losses
 from keras.datasets import mnist
-from scipy.stats import kendalltau
+import keras.backend as K
 from annoy import AnnoyIndex
 import tensorflow_probability as tfp
 
@@ -51,11 +51,14 @@ def spearman_rank_loss(y_true, y_pred):
     correlation = spearman_rank_correlation(y_true, y_pred)
     return 1. - correlation
 
-def kendal_tau_loss(y_true, y_pred):
-    y_true_rank = tf.cast(tf.argsort(y_true), dtype=tf.float32)
-    y_pred_rank = tf.cast(tf.argsort(y_pred), dtype=tf.float32)
-    correlation, _ = tfp.stats.correlation(y_true_rank, y_pred_rank, sample_axis=None, event_axis=None)
-    return 1. - correlation
+def kendal_tau_loss(y_true, y_pred, k):
+    subtracted = tf.subtract(y_true, y_pred)
+    normalized = K.switch(K.not_equal(subtracted, 0), K.ones_like(subtracted), subtracted)
+
+    print("Normalized shape: ", normalized.shape, "Vector size: ", k)
+    disordered = tf.reduce_sum(normalized)
+
+    return disordered/k
 
 
 def batch_kendal_tau_loss(encoder, batch, vector_size):
@@ -82,9 +85,13 @@ class Autoencoder(Model):
         # Encoder
         self.encoder = tf.keras.Sequential([
             layers.Reshape((28, 28, 1)),
-            layers.Conv2D(78, (3, 3), activation='leaky_relu', padding='same', activity_regularizer=tf.keras.regularizers.l1(1e-4)),
+            layers.Conv2D(78, (3, 3), activation='leaky_relu', padding='same', activity_regularizer=tf.keras.regularizers.l1(1e-6)),
             layers.MaxPooling2D((2, 2), padding='same'),
-            layers.Conv2D(encoding_dimension, (3, 3), activation='leaky_relu', padding='same', activity_regularizer=tf.keras.regularizers.l1(1e-4)),
+            layers.Conv2D(156, (3, 3), activation='leaky_relu', padding='same', activity_regularizer=tf.keras.regularizers.l1(1e-6)),
+            layers.MaxPooling2D((2, 2), padding='same'),
+            layers.Conv2D(78, (3, 3), activation='leaky_relu', padding='same', activity_regularizer=tf.keras.regularizers.l1(1e-6)),
+            layers.MaxPooling2D((2, 2), padding='same'),
+            layers.Conv2D(encoding_dimension, (3, 3), activation='leaky_relu', padding='same', activity_regularizer=tf.keras.regularizers.l1(1e-5)),
             layers.Flatten(),
             layers.Dense(encoding_dimension),
         ])
@@ -113,13 +120,14 @@ class Autoencoder(Model):
 
             # Stack the two tensors along the last dimension
             pairSRs = tf.stack([initialSR, reducedSR], axis=-1)
+            pairSRs = tf.transpose(pairSRs, perm=[0, 2, 1])
 
             # Define a function to calculate the Kendall tau loss for a pair of rankings
             def calculate_loss(pair):
                 y_true = tf.cast(pair[0], tf.float32)
                 y_pred = tf.cast(pair[1], tf.float32)
                 
-                loss = spearman_rank_loss(y_true, y_pred)
+                loss = kendal_tau_loss(y_true, y_pred, k)
                 return tf.cast(loss, tf.float32)
 
 
@@ -128,11 +136,11 @@ class Autoencoder(Model):
 
             # Calculate the sum of the Kendall tau losses
             ktLossSum = tf.reduce_sum(ktLosses)
-            spearman_loss_value = ktLossSum / vector_size
+            custom_loss_value = ktLossSum / data.shape[0]
 
             decoded = self.decoder(encoded)
             reconstruction_loss = tf.reduce_mean(tf.square(data - decoded))  # Mean Squared Error
-            total_loss = (0.2 * reconstruction_loss) + (0.8 * tf.cast(spearman_loss_value, tf.float32))
+            total_loss = (0.0005 * reconstruction_loss) + (0.995 * tf.cast(custom_loss_value, tf.float32))
 
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
@@ -140,7 +148,7 @@ class Autoencoder(Model):
         return {
             "loss": total_loss,
             "reconstruction_loss": reconstruction_loss,
-            "kendall_tau_loss": spearman_loss_value,
+            "kendall_tau_loss": custom_loss_value,
         }
 
 
@@ -167,9 +175,9 @@ val_dataset = tf.reshape(val_dataset, (-1, 28*28))
 test_dataset = tf.reshape(test_dataset, (-1, 28*28))
 
 # Parameters
-encoding_dimension = 78
-epochs_param = 5
-batch_size_param = 100
+encoding_dimension = 36
+epochs_param = 100
+batch_size_param = 500
 
 # Create and train the autoencoder
 autoencoder = Autoencoder(encoding_dimension)
