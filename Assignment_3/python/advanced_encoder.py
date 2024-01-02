@@ -3,7 +3,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 from keras import layers, Model, losses
 from keras.datasets import mnist
-import keras.backend as K
 from annoy import AnnoyIndex
 import tensorflow_probability as tfp
 
@@ -51,14 +50,23 @@ def spearman_rank_loss(y_true, y_pred):
     correlation = spearman_rank_correlation(y_true, y_pred)
     return 1. - correlation
 
+# Pressumably differentiable implementation of the Kendall tau loss but python doesn't seem to agree
 def kendal_tau_loss(y_true, y_pred, k):
-    subtracted = tf.subtract(y_true, y_pred)
-    normalized = K.switch(K.not_equal(subtracted, 0), K.ones_like(subtracted), subtracted)
+    subtracted = tf.raw_ops.Sub(x=y_true, y=y_pred)
 
-    print("Normalized shape: ", normalized.shape, "Vector size: ", k)
-    disordered = tf.reduce_sum(normalized)
+    normalized = tf.raw_ops.DivNoNan(x=subtracted, y=subtracted)
 
-    return disordered/k
+    disordered = tf.raw_ops.SparseReduceSum(
+        input_indices=tf.reshape(tf.cast(tf.range(tf.shape(normalized)[0]), tf.int64), shape=[-1, 1]),
+        input_values=normalized,
+        input_shape=tf.cast(tf.shape(normalized), tf.int64),
+        reduction_axes=[0]
+    )
+    loss = tf.raw_ops.Div(x=tf.cast(disordered, tf.float32), y=tf.constant(k, dtype=tf.float32))
+
+    # Check for NaN or Inf values
+    tf.debugging.check_numerics(loss, message='Loss has NaN or Inf values')
+    return loss
 
 
 def batch_kendal_tau_loss(encoder, batch, vector_size):
