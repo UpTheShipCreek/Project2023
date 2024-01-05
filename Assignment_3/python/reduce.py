@@ -21,6 +21,15 @@ def write_mnist_images(filename, images_array, image_size):
 
             print("Writing images... ")
 
+            value = np.amin(images_array)
+            if(value < 0): 
+                images_array = images_array + np.abs(value)
+            
+            positive_min = np.amin(images_array)
+            positive_max = np.amax(images_array)
+
+            images_array = images_array * (255 / (positive_max - positive_min))
+
             for image in images_array:
                 pixel_bytes = image.astype(np.uint8)
                 for pixel in pixel_bytes:
@@ -82,7 +91,7 @@ def main():
     
 
     # Load the encoder
-    encoder = tf.keras.models.load_model('.\python\encoder.keras')
+    encoder = tf.keras.models.load_model('./encoder.keras')
 
     # Apply the encoder to the datasets
     encoded_dataset = encoder.predict(dataset)
