@@ -51,7 +51,7 @@ std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>
 
     if(!littleEndian) numberOfImages = ntohl(numberOfImages);  // Convert to little endian if need be 
 
-    printf("Number of images: %d\n", numberOfImages);
+    // printf("Number of images: %d\n", numberOfImages);
 
     // Read the number of rows
     uint32_t numberOfRows;
@@ -59,7 +59,7 @@ std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>
 
     if(!littleEndian) numberOfRows = ntohl(numberOfRows); 
 
-    printf("Number of rows: %d\n", numberOfRows);
+    // printf("Number of rows: %d\n", numberOfRows);
 
     // Read the number of columns
     uint32_t numberOfColumns;
@@ -67,7 +67,7 @@ std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>
 
     if(!littleEndian) numberOfColumns = ntohl(numberOfColumns); 
 
-    printf("Number of columns: %d\n", numberOfColumns);
+    // printf("Number of columns: %d\n", numberOfColumns);
 
     headerInfo = std::make_shared<HeaderInfo>(numberOfImages, numberOfRows, numberOfColumns);
 

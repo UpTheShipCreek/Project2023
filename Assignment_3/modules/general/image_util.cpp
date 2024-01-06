@@ -1,5 +1,4 @@
 #include "image_util.h"
-#include <stdio.h>
 
 // The dataset is fine but then the index of the queryset is wrong, it starts from 60000 but reduced[60000] is out of bounds for the queryset
 SpaceCorrespondace::SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial){

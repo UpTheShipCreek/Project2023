@@ -5,6 +5,7 @@
 #include "approximate_methods.h"
 
 class LSH : public ApproximateMethods{
+    bool DataLoaded = false;
     int K, L, DataDimensions; 
     double W = WINDOW;
     int M = MODULO;

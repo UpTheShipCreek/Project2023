@@ -17,13 +17,23 @@ LSH::LSH(int l, int k, double window, int tableSize, Metric* metric, int dimensi
 }
 
 void LSH::load_data(std::vector<std::shared_ptr<ImageVector>> images){ // Load the data to the LSH
+    // printf("Loading data to LSH... \n");
+    // fflush(stdout);
+    if(this->DataLoaded){
+        // printf("Data already loaded\n");
+        // fflush(stdout);
+        return;
+    }
     printf("Initializing LSH tables... ");
     fflush(stdout);
+    // int c = 0;
     for (int i = 0; i < (int)(images.size()); i++){
         for (int j = 0; j < this->L; j++){
             (this->Tables)[j]->insert(images[i]);
         }
+        // printf("%d\n", c++);
     }
+    this->DataLoaded = true;
     printf("Done\n");
     fflush(stdout);
 }
