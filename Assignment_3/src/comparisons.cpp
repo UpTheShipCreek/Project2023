@@ -7,7 +7,7 @@
 #include "mrng.h"
 
 #define DEFAULT_N 10
-#define MRNG_L_FACTOR 0.006
+#define MRNG_L_FACTOR 0.001
 
 double calculate_average_approximation_factor(std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestNeighbours, std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestNeighboursApprox){
     double sum = 0;
