@@ -91,7 +91,7 @@ def main():
     
 
     # Load the encoder
-    encoder = tf.keras.models.load_model('./encoder.keras')
+    encoder = tf.keras.models.load_model('./python/encoder.keras')
 
     # Apply the encoder to the datasets
     encoded_dataset = encoder.predict(dataset)
