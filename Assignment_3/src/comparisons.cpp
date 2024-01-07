@@ -244,7 +244,7 @@ int main(void){
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedExhaustDistanceCorrespondace;
             for(auto& image : nearestReducedExhaust){
                 nearestReducedExhaustDistanceCorrespondace.push_back({
-                    metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number()), queryset[randomIndex]->get_coordinates())
+                    metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number())->get_coordinates(), queryset[randomIndex]->get_coordinates())
                     ,
                     image.second
                 });
@@ -266,7 +266,7 @@ int main(void){
                 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedGnnsDistanceCorrespondace;
                 for(auto& image : nearestReducedGnns){
                     nearestReducedGnnsDistanceCorrespondace.push_back({
-                        metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number()), queryset[randomIndex]->get_coordinates())
+                        metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number())->get_coordinates(), queryset[randomIndex]->get_coordinates())
                         ,
                         image.second
                     });
@@ -289,7 +289,7 @@ int main(void){
                 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedMrngDistanceCorrespondace;
                 for(auto& image : nearestReducedMrng){
                     nearestReducedMrngDistanceCorrespondace.push_back({
-                        metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number()), queryset[randomIndex]->get_coordinates())
+                        metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number())->get_coordinates(), queryset[randomIndex]->get_coordinates())
                         ,
                         image.second
                     });

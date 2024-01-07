@@ -5,10 +5,11 @@ double round_up_to_nearest_order_of_magnitude(double number){
     return ceil(number / order) * order;
 }
 
-kMeans::kMeans(std::vector<std::shared_ptr<Cluster>> Clusters, Metric* metric){
+kMeans::kMeans(std::vector<std::shared_ptr<Cluster>> Clusters, std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Cluster>> PointToClusterMap, Metric* metric){
     this->Clusters = Clusters;
     this->K = (int)(this->Clusters).size();
     this->Kmetric = metric;
+    this->PointToClusterMap = PointToClusterMap;
     
     for(int i = 0; i < (int)(this->Clusters).size(); i++){
         this->Points.insert(this->Points.end(), (this->Clusters)[i]->get_points().begin(), (this->Clusters)[i]->get_points().end());
@@ -458,20 +459,28 @@ std::vector<double> kMeans::silhouette(){
     std::vector<double> silhouetteVector;
 
     for(int i = 0; i < numClusters; i++){
+        // printf("%d %s\n", __LINE__, __FUNCTION__);
 
         double cluster_silhouette = 0;
 
         int clusterSize = (int)(this->Clusters[i])->get_points().size();
         for(int j = 0; j < clusterSize; j++){
+            // printf("%d %s\n", __LINE__, __FUNCTION__);
             double object_silhouette;
             auto secondNearestCluster = get_nearest_cluster_excluding_the_assigned_one((this->Clusters[i])->get_points()[j]);
+
+            // printf("%d %s\n", __LINE__, __FUNCTION__);
+            fflush(stdout);
 
             double average_distance_on_same_cluster = 0;
             double average_distance_on_other_cluster = 0;
 
             int pointJNumber = (this->Clusters[i])->get_points()[j]->get_number();
+            // printf("%d %s\n", __LINE__, __FUNCTION__);
+            fflush(stdout);
 
             for(int k = 0; k < clusterSize; k++){ // For this cluster
+                // printf("%d %s\n", __LINE__, __FUNCTION__);
                 int pointKNumber = (this->Clusters[i])->get_points()[k]->get_number();
 
                 if(distancesMatrix[pointJNumber][pointKNumber] == -1){ 
@@ -486,6 +495,7 @@ std::vector<double> kMeans::silhouette(){
             int secondClusterSize = (int)(secondNearestCluster)->get_points().size();
 
             for(int l = 0; l < secondClusterSize; l++){ // For the other cluster
+                // printf("%d %s\n", __LINE__, __FUNCTION__);
                 int pointLNumber = (secondNearestCluster)->get_points()[l]->get_number();
 
                 if(distancesMatrix[pointJNumber][pointLNumber] == -1){
@@ -496,6 +506,7 @@ std::vector<double> kMeans::silhouette(){
                 }
                 average_distance_on_other_cluster += distancesMatrix[pointJNumber][pointLNumber];
             }
+            // printf("%d %s\n", __LINE__, __FUNCTION__);
 
             average_distance_on_same_cluster /= (double)clusterSize;
             average_distance_on_other_cluster /= (double)secondClusterSize;
@@ -508,10 +519,12 @@ std::vector<double> kMeans::silhouette(){
             cluster_silhouette += object_silhouette;
             silhouette += object_silhouette;
         }
+        // printf("%d %s\n", __LINE__, __FUNCTION__);
         cluster_silhouette /= (double)clusterSize;
         silhouetteVector.push_back(cluster_silhouette);
 
     }
+    // printf("%d %s\n", __LINE__, __FUNCTION__);
     silhouette /= numPoints;
     silhouetteVector.push_back(silhouette);
 
