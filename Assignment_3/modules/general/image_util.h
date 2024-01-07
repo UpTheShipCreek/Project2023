@@ -27,11 +27,11 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> exhaustive_range_se
 
 class SpaceCorrespondace{
     std::vector<int> Indexes;
-    std::map<int, std::vector<double>> InitialSpace;
+    std::map<int, std::shared_ptr<ImageVector>> InitialSpace;
 
     public:
     SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>> initial);
-    std::vector<double> get_initial(int number);
+    std::shared_ptr<ImageVector> get_initial(int number);
 };
 
 #endif

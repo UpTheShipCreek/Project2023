@@ -5,6 +5,16 @@ double round_up_to_nearest_order_of_magnitude(double number){
     return ceil(number / order) * order;
 }
 
+kMeans::kMeans(std::vector<std::shared_ptr<Cluster>> Clusters, Metric* metric){
+    this->Clusters = Clusters;
+    this->K = (int)(this->Clusters).size();
+    this->Kmetric = metric;
+    
+    for(int i = 0; i < (int)(this->Clusters).size(); i++){
+        this->Points.insert(this->Points.end(), (this->Clusters)[i]->get_points().begin(), (this->Clusters)[i]->get_points().end());
+    }
+}
+
 kMeans::kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* metric){ // Needs the number of clusters and the dataset
     this->K = k;
     this->Points = points;

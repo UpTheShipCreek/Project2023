@@ -6,13 +6,12 @@ SpaceCorrespondace::SpaceCorrespondace(std::vector<std::shared_ptr<ImageVector>>
 
     for(auto& element : initial){
         number = element->get_number();
-        InitialSpace[number] = element->get_coordinates();
+        InitialSpace[number] = element;
     }
 }
-std::vector<double> SpaceCorrespondace::get_initial(int number){
+std::shared_ptr<ImageVector> SpaceCorrespondace::get_initial(int number){
     return InitialSpace[number];
 }
-
 
 ImageVector::ImageVector(int number, std::vector<double> coordinates){
     this->Number = number;

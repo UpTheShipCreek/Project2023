@@ -85,6 +85,10 @@ std::shared_ptr<ImageVector> Cluster::recalculate_centroid(){
     int j;
     int clusterSize = (int)(this->Points).size();
 
+    if(this->Centroid == nullptr){
+        this->Centroid = std::make_shared<ImageVector>(-1, (this->Points[0])->get_coordinates());
+    }
+
     if(clusterSize == 0){
         return this->Centroid;
     }
