@@ -89,18 +89,39 @@ std::shared_ptr<ImageVector> Cluster::recalculate_centroid(){
         this->Centroid = std::make_shared<ImageVector>(-1, (this->Points[0])->get_coordinates());
     }
 
+    // printf("%d %s\n", __LINE__, __FUNCTION__);
+
     if(clusterSize == 0){
         return this->Centroid;
     }
+
+    // printf("%d %s\n", __LINE__, __FUNCTION__);
+
     std::vector<double> sum = (this->Points[0])->get_coordinates(); // Get the first point as initialization
+
+    // printf("%d %s\n", __LINE__, __FUNCTION__);
+
     for(int i = 1; i < clusterSize; i++){ // Sum the vectors
+        
         for(j = 0; j < (int)sum.size(); j++){ // Add each coordinate of the vectors
+            if(this->Points[i] == nullptr){
+                printf("Null pointer at %d\n", i);
+            }
+            else if(this->Points[i]->get_coordinates().size() != sum.size()){
+                printf("Different size at %d\n", i);
+            }
             sum[j] += (this->Points[i])->get_coordinates()[j];
         }
     }
+
+    // printf("%d %s\n", __LINE__, __FUNCTION__);
+
     for(j = 0; j < (int)sum.size(); j++){ // Divide each coordinate by the number of points
         sum[j] /= clusterSize;
     }
+
+    // printf("%d %s\n", __LINE__, __FUNCTION__);
+
     if(this->Centroid->get_number() != -1){ // If the centroid is not virtual we need to create another one in order not to change the coordinates of the actual dataset image
         std::shared_ptr<ImageVector> centroidCopy = std::make_shared<ImageVector>(-1, sum);
         this->Centroid = centroidCopy;
@@ -108,5 +129,8 @@ std::shared_ptr<ImageVector> Cluster::recalculate_centroid(){
     else{
         this->Centroid->get_coordinates() = sum;
     }
+
+    // printf("%d %s\n", __LINE__, __FUNCTION__);
+
     return this->Centroid;
 }

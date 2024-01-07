@@ -40,7 +40,7 @@ class kMeans{
     Metric* Kmetric;
 
     public:
-    kMeans(std::vector<std::shared_ptr<Cluster>> Clusters, Metric* metric);
+    kMeans(std::vector<std::shared_ptr<Cluster>> Clusters, std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Cluster>> PointToClusterMap, Metric* metric);
     kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* metric);
     std::shared_ptr<Cluster> get_nearest_cluster(std::shared_ptr<ImageVector> point);
     std::vector<std::shared_ptr<ImageVector>> get_centroids();
