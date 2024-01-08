@@ -64,12 +64,12 @@ int main(void){
     start = std::chrono::high_resolution_clock::now();
     kmeans->mac_queen_with_lloyds();
     end = std::chrono::high_resolution_clock::now();
-    originalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    originalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
     start = std::chrono::high_resolution_clock::now();
     reducedKmeans->mac_queen_with_lloyds();
     end = std::chrono::high_resolution_clock::now();
-    reducedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    reducedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
 
     // Get the reduced clusters in order to traslate them to the original space
@@ -114,7 +114,7 @@ int main(void){
     std::vector<double> originalSilhouettes = kmeans->silhouette();
     end = std::chrono::high_resolution_clock::now();
 
-    originalSilhouetteTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    originalSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
     double oST = originalSilhouetteTime.count() / 1e9;
     double cOT = originalTime.count() / 1e9;
@@ -129,7 +129,7 @@ int main(void){
     std::vector<double> reducedSilhouettes = translatedKmeans->silhouette();
     end = std::chrono::high_resolution_clock::now();
 
-    reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
     double rST = reducedSilhouetteTime.count() / 1e9;
     double cRT = reducedTime.count() / 1e9;

@@ -110,12 +110,23 @@ int main(void){
     // GNNS
     // std::shared_ptr<Graph> gnns;
     std::shared_ptr<Graph> gnns = std::make_shared<Graph>(dataset, &metric);
+
+    start = std::chrono::high_resolution_clock::now();
     gnns->initialize_neighbours_approximate_method(lsh, 50);
+    end = std::chrono::high_resolution_clock::now();
+    auto gnnsInitializationTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    double gnnsIndexCreationTime = gnnsInitializationTime.count() / 1e9;
+    printf("Original GNNS initialization time: %f\n", gnnsIndexCreationTime);
     
     // MRNG
-    // std::shared_ptr<MonotonicRelativeNeighborGraph> mrng;
     int l = (int)(MRNG_L_FACTOR * (double)dataset.size());
+    start = std::chrono::high_resolution_clock::now();
     std::shared_ptr<MonotonicRelativeNeighborGraph> mrng = std::make_shared<MonotonicRelativeNeighborGraph>(dataset, lsh, l, &metric);
+    end = std::chrono::high_resolution_clock::now();
+    auto mrngInitializationTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    double mrngIndexCreationTime = mrngInitializationTime.count() / 1e9;
+    printf("Original MRNG initialization time: %f\n", mrngIndexCreationTime);
+    
 
     // Set up the methods for the Reduced Space
     // Reduced LSH
@@ -127,13 +138,21 @@ int main(void){
     // fflush(stdout);
 
     // GNNS
-    // printf("Reduced GNNS\n");
     std::shared_ptr<Graph> reducedGnns = std::make_shared<Graph>(reducedDataset, &metric);
-    // printf("Reduced GNNS initializing\n");
+    start = std::chrono::high_resolution_clock::now();
     reducedGnns->initialize_neighbours_approximate_method(reducedLsh, 50);
+    end = std::chrono::high_resolution_clock::now();
+    auto reducedGnnsInitializationTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    double reducedGnnsIndexCreationTime = reducedGnnsInitializationTime.count() / 1e9;
+    printf("Reduced GNNS initialization time: %f\n", reducedGnnsIndexCreationTime);
     
     // MRNG
+    start = std::chrono::high_resolution_clock::now();
     std::shared_ptr<MonotonicRelativeNeighborGraph> reducedMrng = std::make_shared<MonotonicRelativeNeighborGraph>(reducedDataset, reducedLsh, l, &metric);
+    end = std::chrono::high_resolution_clock::now();
+    auto reducedMrngInitializationTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    double reducedMrngIndexCreationTime = reducedMrngInitializationTime.count() / 1e9;
+    printf("Reduced MRNG initialization time: %f\n", reducedMrngIndexCreationTime);
 
     // Search 
     std::vector<int> queriesInRowNumbers = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000};
