@@ -452,62 +452,40 @@ std::vector<double> kMeans::silhouette(){
     int numClusters = (int)(this->Clusters).size();
     double maxAB;
 
-    // Since I've indexed the images beginning from 1, I need to add one more row and column to the matrix in order to not just -1 every single index
-    std::vector<std::vector<double>> distancesMatrix(numPoints+1, std::vector<double>(numPoints+1, -1.0)); 
-
     double silhouette = 0;
     std::vector<double> silhouetteVector;
 
     for(int i = 0; i < numClusters; i++){
-        // printf("%d %s\n", __LINE__, __FUNCTION__);
 
         double cluster_silhouette = 0;
 
         int clusterSize = (int)(this->Clusters[i])->get_points().size();
         for(int j = 0; j < clusterSize; j++){
-            // printf("%d %s\n", __LINE__, __FUNCTION__);
+            
             double object_silhouette;
             auto secondNearestCluster = get_nearest_cluster_excluding_the_assigned_one((this->Clusters[i])->get_points()[j]);
-
-            // printf("%d %s\n", __LINE__, __FUNCTION__);
-            fflush(stdout);
 
             double average_distance_on_same_cluster = 0;
             double average_distance_on_other_cluster = 0;
 
-            int pointJNumber = (this->Clusters[i])->get_points()[j]->get_number();
-            // printf("%d %s\n", __LINE__, __FUNCTION__);
-            fflush(stdout);
-
             for(int k = 0; k < clusterSize; k++){ // For this cluster
-                // printf("%d %s\n", __LINE__, __FUNCTION__);
-                int pointKNumber = (this->Clusters[i])->get_points()[k]->get_number();
-
-                if(distancesMatrix[pointJNumber][pointKNumber] == -1){ 
-                    double tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), 
-                                                                    (this->Clusters[i])->get_points()[k]->get_coordinates());
-                    distancesMatrix[pointJNumber][pointKNumber] = tempdistance;
-                    distancesMatrix[pointKNumber][pointJNumber] = tempdistance;
-                }
-                average_distance_on_same_cluster += distancesMatrix[pointJNumber][pointKNumber];
+                double tempdistance = Kmetric->calculate_distance(
+                    (this->Clusters[i])->get_points()[j]->get_coordinates(),                         
+                    (this->Clusters[i])->get_points()[k]->get_coordinates()
+                );
+                average_distance_on_same_cluster += tempdistance;
             }
 
             int secondClusterSize = (int)(secondNearestCluster)->get_points().size();
 
             for(int l = 0; l < secondClusterSize; l++){ // For the other cluster
-                // printf("%d %s\n", __LINE__, __FUNCTION__);
-                int pointLNumber = (secondNearestCluster)->get_points()[l]->get_number();
-
-                if(distancesMatrix[pointJNumber][pointLNumber] == -1){
-                    double tempdistance = Kmetric->calculate_distance((this->Clusters[i])->get_points()[j]->get_coordinates(), 
-                                                                    (secondNearestCluster)->get_points()[l]->get_coordinates());
-                    distancesMatrix[pointJNumber][pointLNumber] = tempdistance;
-                    distancesMatrix[pointLNumber][pointJNumber] = tempdistance;
-                }
-                average_distance_on_other_cluster += distancesMatrix[pointJNumber][pointLNumber];
+                
+                double tempdistance = Kmetric->calculate_distance(
+                    (this->Clusters[i])->get_points()[j]->get_coordinates(), 
+                    (secondNearestCluster)->get_points()[l]->get_coordinates()
+                );
+                average_distance_on_other_cluster += tempdistance;
             }
-            // printf("%d %s\n", __LINE__, __FUNCTION__);
-
             average_distance_on_same_cluster /= (double)clusterSize;
             average_distance_on_other_cluster /= (double)secondClusterSize;
             
@@ -519,12 +497,10 @@ std::vector<double> kMeans::silhouette(){
             cluster_silhouette += object_silhouette;
             silhouette += object_silhouette;
         }
-        // printf("%d %s\n", __LINE__, __FUNCTION__);
         cluster_silhouette /= (double)clusterSize;
         silhouetteVector.push_back(cluster_silhouette);
 
     }
-    // printf("%d %s\n", __LINE__, __FUNCTION__);
     silhouette /= numPoints;
     silhouetteVector.push_back(silhouette);
 
