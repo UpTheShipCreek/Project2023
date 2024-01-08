@@ -1,0 +1,35 @@
+Reading images... Done
+Reading images... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Clustering... Done
+Number of clusters: 10
+Calculating Silhouette... Done
+Original Time Clustering: 18.753000 Silhouette: 834.079000
+Original Silhouette[0]: 0.032433
+Original Silhouette[1]: 0.206990
+Original Silhouette[2]: 0.105634
+Original Silhouette[3]: 0.090113
+Original Silhouette[4]: 0.090815
+Original Silhouette[5]: 0.047206
+Original Silhouette[6]: 0.019007
+Original Silhouette[7]: 0.031474
+Original Silhouette[8]: 0.093152
+Original Silhouette[9]: 0.051456
+Original Silhouette[10]: 0.084369
+Calculating Silhouette... Done
+Reduced Time Clustering: 5.111000 Silhouette: 764.281000
+Reduced Silhouette[0]: 0.089298
+Reduced Silhouette[1]: 0.220248
+Reduced Silhouette[2]: 0.180341
+Reduced Silhouette[3]: 0.036025
+Reduced Silhouette[4]: 0.011119
+Reduced Silhouette[5]: 0.079227
+Reduced Silhouette[6]: -0.002504
+Reduced Silhouette[7]: 0.055894
+Reduced Silhouette[8]: -0.014093
+Reduced Silhouette[9]: 0.092802
+Reduced Silhouette[10]: 0.068673

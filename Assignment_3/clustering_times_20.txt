@@ -1,0 +1,504 @@
+Reading images... Done
+Reading images... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Initialization++
+Assigning Centroids... Done 
+Initialization++
+Assigning Centroids... Done 
+Clustering... Done
+Original Time Clustering: 0.000000 Silhouette: 0.000000
+Reduced Time Clustering: 3.349000 Silhouette: 2.431150
