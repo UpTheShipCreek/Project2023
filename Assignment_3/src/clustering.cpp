@@ -31,13 +31,13 @@ int main(void){
     auto reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
     // Read the original sets from the file 
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images("./in/input5k.dat", 0);
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images("./in/input.dat", 0);
     HeaderInfo* datasetHeaderInfo = datasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> dataset = datasetInfo.second;
-    // if((int)dataset.size() != datasetHeaderInfo->get_numberOfImages()){
-    //     printf("Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
-    //     return -1;
-    // }
+    if((int)dataset.size() != datasetHeaderInfo->get_numberOfImages()){
+        printf("Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
+        return -1;
+    }
 
 
     // Read the reduced sets from the file 
@@ -52,7 +52,7 @@ int main(void){
     // Set up the correspondances, we can then use the number of the image to get the original coordinates with get_initial
     SpaceCorrespondace datasetSpaceCorrespondace(dataset);
 
-    // Original Kmeans
+    // Original Kmeas
     std::shared_ptr<kMeans> kmeans = std::make_shared<kMeans>(10, dataset, &metric);
 
     // Reduced Kmeans
@@ -74,8 +74,6 @@ int main(void){
 
     // Get the reduced clusters in order to traslate them to the original space
     std::vector<std::shared_ptr<Cluster>> reducedClusters = reducedKmeans->get_clusters();
-    printf("Number of clusters: %d\n", (int)reducedClusters.size()); 
-    fflush(stdout);
 
     std::vector<std::shared_ptr<Cluster>> translatedReducedClusters;
     std::shared_ptr<Cluster> translatedCluster;
@@ -122,10 +120,10 @@ int main(void){
     double cOT = originalTime.count() / 1e9;
 
     printf("Original Time Clustering: %f Silhouette: %f\n", cOT, oST);
-    for(int i = 0; i < (int)originalSilhouettes.size(); i++){
+    for(int i = 0; i < (int)originalSilhouettes.size()-1; i++){
         printf("Original Silhouette[%d]: %f\n", i, originalSilhouettes[i]);
     }
-
+    printf("Average Silhouette: %f\n", originalSilhouettes[originalSilhouettes.size()-1]);
     
     start = std::chrono::high_resolution_clock::now();
     std::vector<double> reducedSilhouettes = translatedKmeans->silhouette();
@@ -137,9 +135,10 @@ int main(void){
     double cRT = reducedTime.count() / 1e9;
 
     printf("Reduced Time Clustering: %f Silhouette: %f\n", cRT, rST);
-    for(int i = 0; i < (int)reducedSilhouettes.size(); i++){
+    for(int i = 0; i < (int)reducedSilhouettes.size()-1; i++){
         printf("Reduced Silhouette[%d]: %f\n", i, reducedSilhouettes[i]);
     }
+    printf("Average Silhouette: %f\n", reducedSilhouettes[reducedSilhouettes.size()-1]);
 
     return 0;
 }
