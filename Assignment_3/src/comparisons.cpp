@@ -108,7 +108,6 @@ int main(void){
     hypercube->load_data(dataset);
 
     // GNNS
-    // std::shared_ptr<Graph> gnns;
     std::shared_ptr<Graph> gnns = std::make_shared<Graph>(dataset, &metric);
 
     start = std::chrono::high_resolution_clock::now();
@@ -131,8 +130,8 @@ int main(void){
     // Set up the methods for the Reduced Space
     // Reduced LSH
     printf("Reduced dimensions: %d\n",reducedDimensions);
-    // L: 8 K: 3 Window: 110 TableSize:3750
-    std::shared_ptr<LSH> reducedLsh = std::make_shared<LSH>(3, 3, 70, 7500, &metric, reducedDimensions);
+    // L: 8 K: 2 Window: 9 TableSize:7500
+    std::shared_ptr<LSH> reducedLsh = std::make_shared<LSH>(8, 2, 9, 7500, &metric, reducedDimensions);
     reducedLsh->load_data(reducedDataset);
     // printf("Reduced LSH loaded\n");
     // fflush(stdout);
@@ -153,6 +152,7 @@ int main(void){
     auto reducedMrngInitializationTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     double reducedMrngIndexCreationTime = reducedMrngInitializationTime.count() / 1e9;
     printf("Reduced MRNG initialization time: %f\n", reducedMrngIndexCreationTime);
+    fflush(stdout);
 
     // Search 
     std::vector<int> queriesInRowNumbers = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000};
