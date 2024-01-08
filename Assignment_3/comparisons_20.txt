@@ -1,0 +1,106 @@
+Reading images... Done
+Reading images... Done
+Reading images... Done
+Reading images... Done
+Initializing LSH tables... Done
+Loading data into the hypercube... Done
+Creating the edge relations between the nodes/images... Done
+Original GNNS initialization time: 103.607153
+Constructing MRNG Graph... Done
+Original MRNG initialization time: 116.692877
+Reduced dimensions: 20
+Initializing LSH tables... Done
+Creating the edge relations between the nodes/images... Done
+Reduced GNNS initialization time: 20.019707
+Constructing MRNG Graph... Done
+Reduced MRNG initialization time: 20.167927
+Queries in row: 1000
+True Exhaustive: 0.048418
+LSH: 0.001687 AAF: 1.146747
+Hypercube: 0.005409 AAF: 1.128650
+GNNS: 0.000431 AAF: 1.234610
+MRNG: 0.000383 AAF: 1.872376
+Reduced Exhaustive: 0.004564 AAF: 1.102109
+Reduced GNNS: 0.000170 AAF: 1.268362
+Reduced MRNG: 0.000245 AAF: 1.841547
+
+Queries in row: 1500
+True Exhaustive: 0.048354
+LSH: 0.001697 AAF: 1.141913
+Hypercube: 0.005449 AAF: 1.132662
+GNNS: 0.000440 AAF: 1.237063
+MRNG: 0.000390 AAF: 1.906651
+Reduced Exhaustive: 0.004561 AAF: 1.103656
+Reduced GNNS: 0.000170 AAF: 1.256197
+Reduced MRNG: 0.000246 AAF: 1.871739
+
+Queries in row: 2000
+True Exhaustive: 0.048388
+LSH: 0.001649 AAF: 1.150676
+Hypercube: 0.005465 AAF: 1.132777
+GNNS: 0.000446 AAF: 1.231259
+MRNG: 0.000386 AAF: 1.882052
+Reduced Exhaustive: 0.004541 AAF: 1.100899
+Reduced GNNS: 0.000171 AAF: 1.256054
+Reduced MRNG: 0.000239 AAF: 1.850351
+
+Queries in row: 2500
+True Exhaustive: 0.048717
+LSH: 0.001641 AAF: 1.144406
+Hypercube: 0.005475 AAF: 1.134764
+GNNS: 0.000448 AAF: 1.225169
+MRNG: 0.000390 AAF: 1.883338
+Reduced Exhaustive: 0.004519 AAF: 1.101126
+Reduced GNNS: 0.000168 AAF: 1.252234
+Reduced MRNG: 0.000238 AAF: 1.866703
+
+Queries in row: 3000
+True Exhaustive: 0.048745
+LSH: 0.001650 AAF: 1.144513
+Hypercube: 0.005473 AAF: 1.133651
+GNNS: 0.000434 AAF: 1.233367
+MRNG: 0.000381 AAF: 1.894431
+Reduced Exhaustive: 0.004551 AAF: 1.104055
+Reduced GNNS: 0.000170 AAF: 1.261812
+Reduced MRNG: 0.000240 AAF: 1.861757
+
+Queries in row: 3500
+True Exhaustive: 0.048407
+LSH: 0.001661 AAF: 1.145425
+Hypercube: 0.005353 AAF: 1.133594
+GNNS: 0.000421 AAF: 1.230511
+MRNG: 0.000357 AAF: 1.876294
+Reduced Exhaustive: 0.004549 AAF: 1.103048
+Reduced GNNS: 0.000157 AAF: 1.251479
+Reduced MRNG: 0.000232 AAF: 1.846598
+
+Queries in row: 4000
+True Exhaustive: 0.048496
+LSH: 0.001631 AAF: 1.144877
+Hypercube: 0.005228 AAF: 1.133615
+GNNS: 0.000408 AAF: 1.226992
+MRNG: 0.000354 AAF: 1.886415
+Reduced Exhaustive: 0.004531 AAF: 1.102463
+Reduced GNNS: 0.000141 AAF: 1.258089
+Reduced MRNG: 0.000222 AAF: 1.853097
+
+Queries in row: 4500
+True Exhaustive: 0.048641
+LSH: 0.001646 AAF: 1.145711
+Hypercube: 0.005223 AAF: 1.133533
+GNNS: 0.000409 AAF: 1.229933
+MRNG: 0.000353 AAF: 1.876963
+Reduced Exhaustive: 0.004542 AAF: 1.102911
+Reduced GNNS: 0.000140 AAF: 1.255500
+Reduced MRNG: 0.000227 AAF: 1.851891
+
+Queries in row: 5000
+True Exhaustive: 0.048623
+LSH: 0.001629 AAF: 1.146147
+Hypercube: 0.005254 AAF: 1.134367
+GNNS: 0.000409 AAF: 1.222639
+MRNG: 0.000361 AAF: 1.881976
+Reduced Exhaustive: 0.004547 AAF: 1.101598
+Reduced GNNS: 0.000140 AAF: 1.254118
+Reduced MRNG: 0.000219 AAF: 1.842101
+
