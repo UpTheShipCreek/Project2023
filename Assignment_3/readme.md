@@ -12,6 +12,17 @@ This project focuses on dimensionality reduction of the MNIST dataset using a tr
 
 
 ## Table of Contents
+- [Structure](#structure)
+- [Compilation and Cleanup](#compilation-and-cleanup)
+- [Usage](#usage)
+    - [Input Datasets](#input-datasets)
+    - [Calls](#calls)
+    - [Output](#output)
+- [Programs](#programs)
+    - [Implementation Details](#implementation-details)
+        - [General](#general)
+        - [Handling the space correspondance](#handling-the-space-correspondance)
+        - [Reduce.py script](#reducepy-script)
 
 ## Structure 
 - **encoder**
@@ -60,7 +71,11 @@ Of course
 
     make 
 
-compiles both executables.
+compiles both executables and
+
+    make clean
+
+deletes the executables and the objective files.
 
 ## Usage
 ### Input Datasets
