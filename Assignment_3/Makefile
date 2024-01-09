@@ -7,23 +7,17 @@ OUT = ./out
 SRC_COMMON = $(wildcard $(INC)/general/*.cpp $(INC)/graph/*.cpp $(INC)/hash/*.cpp $(INC)/cluster/*.cpp)
 OBJS_COMMON = $(patsubst %.cpp, %.o, $(SRC_COMMON))
 
-SRC_LSH = $(SRC)/lsh_test.cpp 
-SRC_REDUCED_EXHAUST = $(SRC)/reduced_exhaust_test.cpp
 SRC_COMPARISONS = $(SRC)/comparisons.cpp
 SRC_CLUSTERING = $(SRC)/clustering.cpp
 
-OBJS_LSH = $(SRC_LSH:.cpp=.o)
-OBJS_REDUCED_EXHAUST = $(SRC_REDUCED_EXHAUST:.cpp=.o)
 OBJS_COMPARISONS = $(SRC_COMPARISONS:.cpp=.o)
 OBJS_CLUSTERING = $(SRC_CLUSTERING:.cpp=.o)
 
 INCLUDES = -I$(INC)/general -I$(INC)/graph -I$(INC)/hash -I$(INC)/cluster
-LSH_EXEC = lsh
-REDUCED_EXHAUST_EXEC = reduced_exhaust
 COMPARISONS_EXEC = comparisons
 CLUSTERING_EXEC = clustering
 
-all: lsh reduced_exhaust comparisons clustering
+all: comparisons clustering
 
 lsh: $(LSH_EXEC)
 
@@ -32,12 +26,6 @@ reduced_exhaust: $(REDUCED_EXHAUST_EXEC)
 comparisons: $(COMPARISONS_EXEC)
 
 clustering: $(CLUSTERING_EXEC)
-
-$(LSH_EXEC): $(OBJS_COMMON) $(OBJS_LSH)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $(LSH_EXEC)
-
-$(REDUCED_EXHAUST_EXEC): $(OBJS_COMMON) $(OBJS_REDUCED_EXHAUST)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $(REDUCED_EXHAUST_EXEC)
 
 $(COMPARISONS_EXEC): $(OBJS_COMMON) $(OBJS_COMPARISONS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $(COMPARISONS_EXEC)
@@ -49,4 +37,4 @@ $(CLUSTERING_EXEC): $(OBJS_COMMON) $(OBJS_CLUSTERING)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -f $(OBJS_COMMON) $(OBJS_LSH) $(OBJS_REDUCED_EXHAUST) $(OBJS_COMPARISONS) $(OBJS_CLUSTERING) $(LSH_EXEC) $(REDUCED_EXHAUST_EXEC) $(COMPARISONS_EXEC) $(CLUSTERING_EXEC)
+	rm -f $(OBJS_COMMON) $(OBJS_COMPARISONS) $(OBJS_CLUSTERING) $(COMPARISONS_EXEC) $(CLUSTERING_EXEC)
