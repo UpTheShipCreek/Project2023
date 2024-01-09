@@ -1,0 +1,127 @@
+import tensorflow as tf
+from tensorflow import keras
+from keras import layers
+from keras.datasets import mnist
+from keras.models import Model
+from keras import losses
+from keras.callbacks import EarlyStopping
+
+
+from sklearn.base import BaseEstimator
+from sklearn.model_selection import GridSearchCV
+
+
+(x_train, _), (x_test, _) = mnist.load_data()
+print(x_train.shape, x_test.shape)
+
+x_train = x_train.reshape(-1, 28*28).astype("float32") / 255.0
+x_test = x_test.reshape(-1,28*28).astype("float32") / 255.0
+print(x_train.shape, x_test.shape)
+
+
+class Autoencoder(Model):
+    def __init__(self, compressed_dimension, num_encoder_layers, layer_size, activation_function, regularizer):
+        super(Autoencoder, self).__init__()
+
+        self.compressed_dimension = compressed_dimension
+
+        self.encoder = tf.keras.Sequential()
+        self.encoder.add(layers.Reshape((28, 28, 1)))  # Assuming input images are 28x28 pixels
+
+        for _ in range(num_encoder_layers - 1):
+            self.encoder.add(layers.Conv2D(layer_size, (3, 3), activation=activation_function, padding='same', activity_regularizer=tf.keras.regularizers.l1(regularizer)))
+            self.encoder.add(layers.MaxPooling2D((2, 2), padding='same'))
+        self.encoder.add(layers.Conv2D(compressed_dimension, (3, 3), activation='relu', padding='same', activity_regularizer=tf.keras.regularizers.l1(regularizer)))
+
+        # Decoder
+        self.decoder = tf.keras.Sequential()
+        for _ in range(num_encoder_layers - 1):
+            self.decoder.add(layers.Conv2DTranspose(layer_size, (3, 3), activation=activation_function, padding='same'))
+            self.decoder.add(layers.UpSampling2D((2, 2)))
+        self.decoder.add(layers.Conv2DTranspose(1, (3, 3), activation='sigmoid', padding='same'))
+        self.decoder.add(layers.Reshape((784,)))  # Flatten the output to match the original input shape
+
+    def call(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
+
+
+def create_and_train_autoencoder(encoding_dimension, number_of_hidden_layers, layer_size, activation_function, regularizer, optimizer_param, batch_size_param, epochs_param):
+  autoencoder = Autoencoder(encoding_dimension, number_of_hidden_layers, layer_size, activation_function,regularizer)
+  early_stopping = EarlyStopping(monitor='val_loss', patience=1)
+  autoencoder.compile(optimizer=optimizer_param, loss=losses.MeanSquaredError())
+  autoencoder.fit(x_train, x_train,
+                  epochs=epochs_param,
+                  batch_size=batch_size_param,
+                  shuffle=True,
+                  validation_data=(x_test, x_test),
+                  callbacks=[early_stopping])
+  return autoencoder
+
+
+class AutoencoderEstimator(BaseEstimator):
+    def __init__(self, encoding_dimension=10, number_of_hidden_layers=2, layer_size=32, activation_function='relu', regularizer=None, optimizer_param='adam', batch_size_param=32, epochs_param=10):
+        self.encoding_dimension = encoding_dimension
+        self.number_of_hidden_layers = number_of_hidden_layers
+        self.layer_size = layer_size
+        self.activation_function = activation_function
+        self.regularizer = regularizer
+        self.optimizer_param = optimizer_param
+        self.batch_size_param = batch_size_param
+        self.epochs_param = epochs_param
+        self.autoencoder = None
+
+    def fit(self, X, y=None):
+        self.autoencoder = create_and_train_autoencoder(self.encoding_dimension, self.number_of_hidden_layers, self.layer_size, self.activation_function, self.regularizer, self.optimizer_param, self.batch_size_param, self.epochs_param)
+        return self
+
+    def predict(self, X):
+        return self.autoencoder.predict(X)
+
+encoding_dimension = 5
+number_of_hidden_layers = 2
+layer_sizes = 36
+activation_functions = 'leaky_relu'
+regularizer = 1e-4
+optimizer = 'adam'
+batch_size = 250
+epochs = 3
+
+autoencoder = create_and_train_autoencoder(
+    encoding_dimension, 
+    number_of_hidden_layers, 
+    layer_sizes, 
+    activation_functions, 
+    regularizer, 
+    optimizer, 
+    batch_size, 
+    epochs)
+
+
+encoded_images = autoencoder.encoder(x_test).numpy()
+decoded_images = autoencoder.decoder(encoded_images).numpy()
+
+# Assuming x_test is reshaped to (num_samples, 28*28)
+decoded_images_reshaped = decoded_images.reshape(-1, 28, 28)
+
+# You can visualize the original and reconstructed images to see the performance
+import matplotlib.pyplot as plt
+
+# Choose a few indices to visualize
+indices_to_visualize = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# Plot the original images
+plt.figure(figsize=(9, 3))
+for i, index in enumerate(indices_to_visualize):
+    plt.subplot(2, len(indices_to_visualize), i + 1)
+    plt.imshow(x_test[index].reshape(28, 28), cmap='gray')
+    plt.axis('off')
+
+# Plot the reconstructed images
+for i, index in enumerate(indices_to_visualize):
+    plt.subplot(2, len(indices_to_visualize), i + len(indices_to_visualize) + 1)
+    plt.imshow(decoded_images_reshaped[index], cmap='gray')
+    plt.axis('off')
+
+plt.show()

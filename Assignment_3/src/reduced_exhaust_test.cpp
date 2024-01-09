@@ -67,17 +67,19 @@ int main(void){
     LSH quick_nn(6, 4, 1400, 7500, &metric, 784); 
     quick_nn.load_data(dataset);
 
-    int mode;
-
-    printf("To run the method with different parameters press 1:");
-    std::cin >> mode;
-    if(mode == 1){
+    int foundCount = 0;
+    
+    // int mode;
+    // printf("To run the method with different parameters press 1:");
+    // std::cin >> mode;
+    if(1 == 0){
         double maxFactor = DBL_MIN;
         double factor;
         double sum = 0;
 
         double exhaustReducedSum = 0;
         double optimalApproxSum = 0;
+        
         for(int j = 0; j < retries; j++){
             for(int i = 0; i < numberOfQueries; i++){
                 int randomIndex = rand.generate_int_uniform(0, (int)reducedQueryset.size() - 1);
@@ -98,9 +100,11 @@ int main(void){
                 optimalApproxTime = end - start;
 
                 nearestExhaustReducedCorrespondant = datasetSpaceCorrespondace.get_initial(nearestExhaustReduced[0].second->get_number());
-
-                // printf("Approx: %d Exhaust: %d Query: %d\n", nearestExhaustReduced[0].second->get_number(), optimalNearestApprox[0].second, reducedQueryset[randomIndex]->get_number());
-
+                
+                if(nearestExhaustReduced[0].second->get_number() == optimalNearestApprox[0].second->get_number()){
+                    foundCount++;
+                }
+                
                 factor = metric.calculate_distance(nearestExhaustReducedCorrespondant, queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
                 if(factor > maxFactor){
                     maxFactor = factor;
@@ -112,11 +116,11 @@ int main(void){
         }
         double tRE = exhaustReducedSum / (numberOfQueries*retries);
         double tOA = optimalApproxSum / (numberOfQueries*retries);
-        printf("AverageMaxFactor: %f Reduced Exhuast: %f Optimal Approx: %f\n", sum/retries, tRE / billion, tOA / billion);
+        printf("AverageMaxFactor: %f Reduced Exhuast: %f Optimal Approx: %f Found Optimal: %d\n", sum/retries, tRE / billion, tOA / billion, foundCount);
         fflush(stdout);
     }
     else{
-        std::vector<int> queryNumber = {10000};
+        std::vector<int> queryNumber = {1000, 2000, 3000, 4000, 5000};
     
         for(auto q : queryNumber){
 
