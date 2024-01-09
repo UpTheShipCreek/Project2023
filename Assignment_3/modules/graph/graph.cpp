@@ -49,43 +49,27 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
         // Starting with a random node chosen uniformly 
         node = this->Nodes[randomInt];
 
-        // printf("%d\n", __LINE__);
-
         double previousMinDistance = DBL_MAX;
-
-        // printf("%d\n", __LINE__);
 
         // Replace current node Y_t-1 by the neighbor that is closest to the query
         for(j = 0; j < greedySteps; j++){
 
-            // printf("%d\n", __LINE__);
-
             // If the node has no neighbors, skip it
             if(this->NodesNeighbors[node]->size() == 0) break;
 
-            // printf("%d\n", __LINE__);
-
             // Else continue with this node
             neighbors = this->NodesNeighbors[node];
-
-            // printf("%d\n", __LINE__);
             
             // Don't exceed the number of neighbors we have available
             if(expansions > (int)neighbors->size()){
                 expansions = (int)neighbors->size();
             }
 
-            // printf("%d\n", __LINE__);
-
             // Get the first E neighbors
             auto neighborsKeepE = Neighbors(neighbors->begin(), neighbors->begin() + expansions);
-
-            // printf("%d\n", __LINE__);
-            
+   
             double minDistance = DBL_MAX;
             minDistanceNode = nullptr;
-
-            // printf("%d\n", __LINE__);
 
             for(auto tempNode : neighborsKeepE){
                 // Calcuate the distance of the neighbor to the query
@@ -95,58 +79,43 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::k_nearest_ne
                     minDistanceNode = tempNode;
                 }
                 
-                // printf("%d\n", __LINE__);
-
                 // Get the nodes's number in order to check if it is already in the priority queue
                 nodesIndexNumber = tempNode->get_number();
 
-                // printf("%d\n", __LINE__);
-
                 // If the neighbor is not already in the priority queue
-                if(priorityQueueNodeNumbers.find(nodesIndexNumber) == priorityQueueNodeNumbers.end()){
-
-                    // printf("%d\n", __LINE__);
-            
+                if(priorityQueueNodeNumbers.find(nodesIndexNumber) == priorityQueueNodeNumbers.end()){         
                     // Add the neighbor to the priority queue
                     S.push(std::make_pair(distance, tempNode));
-
-                    // printf("%d\n", __LINE__);
-                    
                     // Make sure you keep the size correct
                     if((int)S.size() > K){
                         S.pop();
                     }
-
-                    // printf("%d\n", __LINE__);
-                    
                     priorityQueueNodeNumbers.insert(nodesIndexNumber);
                 }
             }
-
-            // printf("%d\n", __LINE__);
+            
             // If we have converged at a local minimum then break
             if (minDistance >= previousMinDistance) {
                 break;
             }
-            // printf("%d\n", __LINE__);
             // Update the previous minimum distance
             previousMinDistance = minDistance;
-            // printf("%d\n", __LINE__);
+            
             // Just to be on the safe side
             if(minDistanceNode == nullptr){
                 break;
             }
-            // printf("%d\n", __LINE__);
+            
             node = minDistanceNode;
         }
     }
-    // printf("%d\n", __LINE__);
+    
     // Reverse and Return the priority queue as a vector
     while (!S.empty()){
         nearestImages.push_back(S.top());
         S.pop();
     }
-    // printf("%d\n", __LINE__);
+    
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> reversed(nearestImages.rbegin(), nearestImages.rend());
     return reversed;
 }
@@ -234,20 +203,14 @@ std::vector<std::pair<double, std::shared_ptr<ImageVector>>> Graph::generic_k_ne
 void Graph::initialize_neighbours_approximate_method(std::shared_ptr<ApproximateMethods> method, int k){
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearest_approx;
 
-    // printf("Initializing the approximate method... ");
-    // fflush(stdout);
     // Load the data into the approximate method
     method->load_data(this->Nodes);
-    // printf("Done\n");
-    // fflush(stdout);
 
     printf("Creating the edge relations between the nodes/images... ");
     fflush(stdout);
-    // printf("Creating edge relations for %d nodes\n", (int)this->Nodes.size());
-    // int count = 0;
+    
     for(auto& node : this->Nodes){
         nearest_approx = method->approximate_k_nearest_neighbors_return_images(node, k);
-        // printf("Approximation: %d\n", count++);
         
         // If the node has no neighbors, find the real ones with exhaustive search
         int countOfFailedApproximations = 0;

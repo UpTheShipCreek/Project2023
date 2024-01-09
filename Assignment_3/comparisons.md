@@ -9,7 +9,6 @@
     - [Results](#results)
 
 
-
 ## Nearest Neighbors
 ### Finding optimal parameters for reduced LSH
 Our 20-dimensional encoding of the images worked exceptionally well, especially when considering the average approximation factor of all the `k-nearerest neighbors`. Our main problem was to find a set of parameters so that `LSH` in the reduced space could have a good balance of accuracy and speed, since `GNNS` (and `MRNG`, optionally) rely on it.
