@@ -14,8 +14,40 @@ This project focuses on dimensionality reduction of the MNIST dataset using a tr
 ## Table of Contents
 
 ## Structure 
+- **encoder**
+    - encoder.keras
+    - reduce.py
+- **in**
+- **modules**
+    - **cluster**
+        - cluster.cpp/h
+        - kmeans.cpp/h
+    - **general**
+        - image_util.cpp/h
+        - io_functions.cpp/h
+        - metrics.cpp/h
+        - random_functions.cpp/h
+    - **graph**
+        - graph.cpp/h
+        - mrng.cpp/h
+    - **hash**
+        - approximate_methods.h
+        - hashtable.cpp/h
+        - hypercube.cpp/h
+        - lsh.cpp/h
+- **out**
+- **plots**
+- **src**
+    - clustering.cpp
+    - comparisons.cpp
+- comparisons.md
+- encoder_creation.md
+- Makefile 
+- readme.md
 
 ## Compilation and Cleanup
+
+    python3 ./encoder/reduce.py ./in/input.dat ./in/query.dat ./in/encoded_dataset.dat ./in/encoded_queryset.dat
 
 ## Usage
 ### Input Datasets
