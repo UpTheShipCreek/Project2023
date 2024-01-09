@@ -49,6 +49,10 @@ int main(void){
     std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images("./in/input.dat", 0);
     HeaderInfo* datasetHeaderInfo = datasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> dataset = datasetInfo.second;
+    if(dataset.empty()){
+        printf("Error reading input file.\n");
+        return -1;
+    }
     if((int)dataset.size() != datasetHeaderInfo->get_numberOfImages()){
         printf("Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
         return -1;
@@ -57,6 +61,10 @@ int main(void){
     std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> querysetInfo = read_mnist_images("./in/query.dat", (int)dataset.size());
     HeaderInfo* querysetHeaderInfo = querysetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> queryset = querysetInfo.second;
+    if(queryset.empty()){
+        printf("Error reading input file.\n");
+        return -1;
+    }
     if((int)queryset.size() != querysetHeaderInfo->get_numberOfImages()){
         printf("Queryset size does not match the header info\n");
         return -1;
@@ -74,6 +82,10 @@ int main(void){
     std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedDatasetInfo = read_mnist_images("./in/encoded_dataset.dat", 0);
     HeaderInfo* reducedDatasetHeaderInfo = reducedDatasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> reducedDataset = reducedDatasetInfo.second;
+    if(reducedDataset.empty()){
+        printf("Error reading input file.\n");
+        return -1;
+    }
     if((int)reducedDataset.size() != reducedDatasetHeaderInfo->get_numberOfImages()){
         printf("Reduced dataset size does not match the header info\n");
         return -1;
@@ -82,6 +94,10 @@ int main(void){
     std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedQuerysetInfo = read_mnist_images("./in/encoded_queryset.dat", (int)reducedDataset.size());
     HeaderInfo* reducedQuerysetHeaderInfo = reducedQuerysetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> reducedQueryset = reducedQuerysetInfo.second;
+    if(reducedQueryset.empty()){
+        printf("Error reading input file.\n");
+        return -1;
+    }
     if((int)reducedQueryset.size() != reducedQuerysetHeaderInfo->get_numberOfImages()){
         printf("Reduced queryset size does not match the header info\n");
         return -1;
@@ -99,7 +115,6 @@ int main(void){
 
     // Set up the methods for the Original Space
     // LSH
-    // std::shared_ptr<LSH> lsh;
     std::shared_ptr<LSH> lsh = std::make_shared<LSH>(6, 4, 1400, 7500, &metric, originalDimensions); 
     lsh->load_data(dataset);
 
@@ -130,11 +145,8 @@ int main(void){
     // Set up the methods for the Reduced Space
     // Reduced LSH
     printf("Reduced dimensions: %d\n",reducedDimensions);
-    // L: 8 K: 2 Window: 9 TableSize:7500
     std::shared_ptr<LSH> reducedLsh = std::make_shared<LSH>(8, 2, 9, 7500, &metric, reducedDimensions);
     reducedLsh->load_data(reducedDataset);
-    // printf("Reduced LSH loaded\n");
-    // fflush(stdout);
 
     // GNNS
     std::shared_ptr<Graph> reducedGnns = std::make_shared<Graph>(reducedDataset, &metric);
@@ -155,7 +167,7 @@ int main(void){
     fflush(stdout);
 
     // Search 
-    std::vector<int> queriesInRowNumbers = {1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000};
+    std::vector<int> queriesInRowNumbers = {1000};
 
     for(auto& queriesInRow : queriesInRowNumbers){
 
@@ -185,7 +197,6 @@ int main(void){
 
             // Original Space
             // True
-            // printf("Finding the true nearest neighbors... \n");
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestTrue = exhaustive_nearest_neighbor_search_return_images(dataset, queryset[randomIndex], DEFAULT_N, &metric);
             end = std::chrono::high_resolution_clock::now();
@@ -193,7 +204,6 @@ int main(void){
             trueExhaustTimeSum += trueExhaustTime.count();
 
             // LSH
-            // printf("Finding the lsh nearest neighbors... \n");
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestLSH = lsh->approximate_k_nearest_neighbors_return_images(queryset[randomIndex], DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
@@ -208,8 +218,6 @@ int main(void){
             }
 
             // Hypercube
-            // printf("Finding the hypercube nearest neighbors... \n");
-            // fflush(stdout);
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestHypercube = hypercube->approximate_k_nearest_neighbors_return_images(queryset[randomIndex], DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
@@ -224,7 +232,6 @@ int main(void){
             }
 
             // GNNS
-            // printf("Finding the gnns nearest neighbors... \n");
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestGnns = gnns->k_nearest_neighbor_search(queryset[randomIndex], 3, 10, 20, DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
@@ -239,7 +246,6 @@ int main(void){
             }
 
             // MRNG
-            // printf("Finding the mrng nearest neighbors... \n");
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestMrng = mrng->k_nearest_neighbor_search(queryset[randomIndex], l, DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
@@ -255,7 +261,6 @@ int main(void){
 
             // Reduced Space
             // Exhaustive
-            // printf("Finding the reduced exhaust nearest neighbors... \n");
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedExhaust = exhaustive_nearest_neighbor_search_return_images(reducedDataset, reducedQueryset[randomIndex], DEFAULT_N, &metric);
             end = std::chrono::high_resolution_clock::now();
@@ -273,13 +278,11 @@ int main(void){
             reducedExhaustAAF += calculate_average_approximation_factor(nearestTrue, nearestReducedExhaustDistanceCorrespondace);
 
             // GNNS
-            // printf("Finding the reduced gnns nearest neighbors... \n");
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedGnns = reducedGnns->k_nearest_neighbor_search(reducedQueryset[randomIndex], 3, 10, 20, DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
             if(nearestReducedGnns.empty()){
                 printf("Failed approximation: Reduced GNNS\n");
-                //nearestReducedGnns = exhaustive_nearest_neighbor_search_return_images(reducedDataset, reducedQueryset[randomIndex], DEFAULT_N, &metric);
             }
             else{
                 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedGnnsDistanceCorrespondace;
@@ -296,13 +299,11 @@ int main(void){
             }
 
             // MRNG
-            // printf("Finding the reduced mrng nearest neighbors... \n");
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedMrng = reducedMrng->k_nearest_neighbor_search(reducedQueryset[randomIndex], l, DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
             if(nearestReducedMrng.empty()){
                 printf("Failed approximation: Reduced MRNG\n");
-                //nearestReducedMrng = exhaustive_nearest_neighbor_search_return_images(reducedDataset, reducedQueryset[randomIndex], DEFAULT_N, &metric);
             }
             else{
                 std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedMrngDistanceCorrespondace;

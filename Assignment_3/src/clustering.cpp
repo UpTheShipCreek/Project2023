@@ -17,7 +17,6 @@
 
 #define DEFAULT_NUMBER_OF_CLUSTERS 10
 
-
 int main(void){
 
     Eucledean metric;
@@ -25,8 +24,8 @@ int main(void){
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
 
-    auto originalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    auto reducedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    auto originalClusteringTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    auto reducedClusteringTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto originalSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
@@ -34,16 +33,23 @@ int main(void){
     std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images("./in/input.dat", 0);
     HeaderInfo* datasetHeaderInfo = datasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> dataset = datasetInfo.second;
+    if(dataset.empty()){
+        printf("Error reading input file.\n");
+        return -1;
+    }
     if((int)dataset.size() != datasetHeaderInfo->get_numberOfImages()){
         printf("Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
         return -1;
     }
 
-
     // Read the reduced sets from the file 
     std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedDatasetInfo = read_mnist_images("./in/encoded_dataset.dat", 0);
     HeaderInfo* reducedDatasetHeaderInfo = reducedDatasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> reducedDataset = reducedDatasetInfo.second;
+    if(reducedDataset.empty()){
+        printf("Error reading input file.\n");
+        return -1;
+    }
     if((int)reducedDataset.size() != reducedDatasetHeaderInfo->get_numberOfImages()){
         printf("Reduced dataset size does not match the header info\n");
         return -1;
@@ -53,23 +59,24 @@ int main(void){
     SpaceCorrespondace datasetSpaceCorrespondace(dataset);
 
     // Original Kmeas
-    std::shared_ptr<kMeans> kmeans = std::make_shared<kMeans>(10, dataset, &metric);
+    std::shared_ptr<kMeans> kmeans = std::make_shared<kMeans>(DEFAULT_NUMBER_OF_CLUSTERS, dataset, &metric);
 
     // Reduced Kmeans
-    std::shared_ptr<kMeans> reducedKmeans = std::make_shared<kMeans>(10, reducedDataset, &metric);
+    std::shared_ptr<kMeans> reducedKmeans = std::make_shared<kMeans>(DEFAULT_NUMBER_OF_CLUSTERS, reducedDataset, &metric);
 
     int sizeOfOriginalSpace = (int)dataset[0]->get_coordinates().size();
-    // printf("Size of original space: %d\n", sizeOfOriginalSpace);
 
     start = std::chrono::high_resolution_clock::now();
     kmeans->mac_queen_with_lloyds();
     end = std::chrono::high_resolution_clock::now();
-    originalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    originalClusteringTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    double oCT = originalClusteringTime.count() / 1e9;
 
     start = std::chrono::high_resolution_clock::now();
     reducedKmeans->mac_queen_with_lloyds();
     end = std::chrono::high_resolution_clock::now();
-    reducedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    reducedClusteringTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    double rCT = reducedClusteringTime.count() / 1e9;
 
 
     // Get the reduced clusters in order to traslate them to the original space
@@ -109,32 +116,29 @@ int main(void){
 
     std::shared_ptr<kMeans> translatedKmeans = std::make_shared<kMeans>(translatedReducedClusters, pointToClusterMap, &metric);
 
-    // Now we can do the sihlouettes
+    // Silhouettes for the original clustering
     start = std::chrono::high_resolution_clock::now();
     std::vector<double> originalSilhouettes = kmeans->silhouette();
     end = std::chrono::high_resolution_clock::now();
-
     originalSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
     double oST = originalSilhouetteTime.count() / 1e9;
-    double cOT = originalTime.count() / 1e9;
 
-    printf("Original Time Clustering: %f Silhouette: %f\n", cOT, oST);
+    // Print the results for the original dimension clustering
+    printf("Original Time Clustering: %f Silhouette: %f\n", oCT, oST);
     for(int i = 0; i < (int)originalSilhouettes.size()-1; i++){
         printf("Original Silhouette[%d]: %f\n", i, originalSilhouettes[i]);
     }
     printf("Average Silhouette: %f\n", originalSilhouettes[originalSilhouettes.size()-1]);
     
+    // Silhouettes for the reduced clustering
     start = std::chrono::high_resolution_clock::now();
     std::vector<double> reducedSilhouettes = translatedKmeans->silhouette();
     end = std::chrono::high_resolution_clock::now();
-
     reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
     double rST = reducedSilhouetteTime.count() / 1e9;
-    double cRT = reducedTime.count() / 1e9;
 
-    printf("Reduced Time Clustering: %f Silhouette: %f\n", cRT, rST);
+    // Print the results for the reduced dimension clustering
+    printf("Reduced Time Clustering: %f Silhouette: %f\n", rCT, rST);
     for(int i = 0; i < (int)reducedSilhouettes.size()-1; i++){
         printf("Reduced Silhouette[%d]: %f\n", i, reducedSilhouettes[i]);
     }
