@@ -78,10 +78,10 @@ def read_mnist_images(filename):
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Apply an encoder to datasets.')
-    parser.add_argument('dataset_path', help='Path to the dataset file.')
-    parser.add_argument('queryset_path', help='Path to the query set file.')
-    parser.add_argument('output_dataset_path', help='Path to the output dataset file.')
-    parser.add_argument('output_queryset_path', help='Path to the output query set file.')
+    parser.add_argument('-d', '--dataset_path', required=True, help='Path to the dataset file.')
+    parser.add_argument('-q', '--queryset_path', required=True, help='Path to the query set file.')
+    parser.add_argument('-od', '--output_dataset_path', required=True, help='Path to the output dataset file.')
+    parser.add_argument('-oq', '--output_queryset_path', required=True, help='Path to the output query set file.')
     args = parser.parse_args()
 
     # Load the datasets
