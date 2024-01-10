@@ -48,8 +48,7 @@ int main(int argc, char **argv){
         return -1;
     }
     if((int)dataset.size() != datasetHeaderInfo->get_numberOfImages()){
-        printf("Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
-        return -1;
+        printf("Warning: Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
     }
 
     // Read the reduced sets from the file 
@@ -61,8 +60,7 @@ int main(int argc, char **argv){
         return -1;
     }
     if((int)reducedDataset.size() != reducedDatasetHeaderInfo->get_numberOfImages()){
-        printf("Reduced dataset size does not match the header info\n");
-        return -1;
+        printf("Warning: Reduced dataset size does not match the header info (%d vs %d)\n", (int)reducedDataset.size(), reducedDatasetHeaderInfo->get_numberOfImages());
     }
     
     // Set up the correspondances, we can then use the number of the image to get the original coordinates with get_initial

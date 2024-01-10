@@ -32,7 +32,9 @@ Both the `GNNS` and the `MRNG` initializations were significantly faster on the 
 ### Approximation Factors
 Both `GNNS` and `MRNG` performed well on the reduced space, both halving their search time whilst virtually retaining their accuracies. The overall comparisons are shown below. Notice that the `MRNG` on the reduced space performed a bit better on average than the `MRNG` on the original one. What's also interesting, is that the reduced exhaustive search outperforms Hypercube, being both faster and more accurate.
 
-Those test were performed on the `60k` dataset, on `5k` queries for a `10-nearest neighbor search`, with the `AAF` being the average of the approximation factors of all the nearest neighbors, then averaged for all the queries. (The code for the test is on the `src/comparisons.cpp`)
+Those test were performed on the `60k` dataset, on `5k` queries for a `10-nearest neighbor search`, with the `AAF` being the average of the approximation factors of all the nearest neighbors, then averaged for all the queries. 
+
+Note that the hyperparameters we chose were tuned for the exact `60k` dataset size and might not perform the same on different sizes. (The code for the test is on the `src/comparisons.cpp`)
 
 *Time of the exhaustive was approximately 10 times slower than hypercube.*
 

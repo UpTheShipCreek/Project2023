@@ -8,6 +8,8 @@
 
 #define DEFAULT_N 10
 #define MRNG_L_FACTOR 0.001
+#define HYPERCUBE_M_FACTOR 0.06
+#define HYPERCUBE_PROBES_FACTOR 0.01
 
 double calculate_average_approximation_factor(std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestNeighbours, std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestNeighboursApprox){
     double sum = 0;
@@ -127,7 +129,9 @@ int main(int argc, char **argv){
     lsh->load_data(dataset);
 
     // Hypercube
-    std::shared_ptr<HyperCube> hypercube = std::make_shared<HyperCube>(11, 600, 4000, WINDOW, &metric, originalDimensions);
+    int probes = (int)(HYPERCUBE_PROBES_FACTOR * (double)dataset.size());
+    int M = (int)(HYPERCUBE_M_FACTOR * (double)dataset.size());
+    std::shared_ptr<HyperCube> hypercube = std::make_shared<HyperCube>(11, probes, M, WINDOW, &metric, originalDimensions);
     hypercube->load_data(dataset);
 
     // GNNS
@@ -176,6 +180,8 @@ int main(int argc, char **argv){
 
     // Search 
     std::vector<int> queriesInRowNumbers = {2000};
+
+    printf("Collecting results...\n");
 
     for(auto& queriesInRow : queriesInRowNumbers){
 
