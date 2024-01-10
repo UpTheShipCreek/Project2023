@@ -18,7 +18,7 @@ double calculate_average_approximation_factor(std::vector<std::pair<double, std:
 }
 
 
-int main(void){
+int main(int argc, char **argv){
     int const billion = std::pow(10, 9);
 
     // Metric
@@ -44,30 +44,40 @@ int main(void){
     auto reducedExhaustTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto reducedGnnsTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto reducedMrngTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    
+
+
+    std::string inputFileName, queriesFileName, reducedInputFileName, reducedQueriesFileName;
+
+    if(argc != 5){
+        printf("Error: Argument Number. Example call: ./comparisons <original dataset> <original queryset> <reduced dataset> <reduced queryset>\n");
+        return -1;
+    }
+    inputFileName = argv[1];
+    queriesFileName = argv[2];
+    reducedInputFileName = argv[3];
+    reducedQueriesFileName = argv[4];
+
     // Read the original sets from the file 
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images("./in/input.dat", 0);
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images(inputFileName, 0);
     HeaderInfo* datasetHeaderInfo = datasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> dataset = datasetInfo.second;
     if(dataset.empty()){
-        printf("Error reading input file.\n");
+        printf("Error reading file: %s\n", inputFileName.c_str());
         return -1;
     }
     if((int)dataset.size() != datasetHeaderInfo->get_numberOfImages()){
-        printf("Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
-        return -1;
+        printf("Warning: Dataset size does not match the header info (%d vs %d)\n", (int)dataset.size(), datasetHeaderInfo->get_numberOfImages());
     }
 
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> querysetInfo = read_mnist_images("./in/query.dat", (int)dataset.size());
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> querysetInfo = read_mnist_images(queriesFileName, (int)dataset.size());
     HeaderInfo* querysetHeaderInfo = querysetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> queryset = querysetInfo.second;
     if(queryset.empty()){
-        printf("Error reading input file.\n");
+        printf("Error reading file: %s\n", queriesFileName.c_str());
         return -1;
     }
     if((int)queryset.size() != querysetHeaderInfo->get_numberOfImages()){
-        printf("Queryset size does not match the header info\n");
-        return -1;
+        printf("Warning: Queryset size does not match the header info (%d vs %d)\n", (int)queryset.size(), querysetHeaderInfo->get_numberOfImages());
     }
 
     // Check that the shapes match between the two original sets
@@ -79,28 +89,26 @@ int main(void){
     int originalDimensions = datasetHeaderInfo->get_numberOfRows() * datasetHeaderInfo->get_numberOfColumns();
 
     // Read the reduced sets from the file 
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedDatasetInfo = read_mnist_images("./in/encoded_dataset.dat", 0);
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedDatasetInfo = read_mnist_images(reducedInputFileName, 0);
     HeaderInfo* reducedDatasetHeaderInfo = reducedDatasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> reducedDataset = reducedDatasetInfo.second;
     if(reducedDataset.empty()){
-        printf("Error reading input file.\n");
+        printf("Error reading file: %s\n", reducedInputFileName.c_str());
         return -1;
     }
     if((int)reducedDataset.size() != reducedDatasetHeaderInfo->get_numberOfImages()){
-        printf("Reduced dataset size does not match the header info\n");
-        return -1;
+        printf("Warning: Reduced dataset size does not match the header info (%d vs %d)\n", (int)reducedDataset.size(), reducedDatasetHeaderInfo->get_numberOfImages());
     }
 
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedQuerysetInfo = read_mnist_images("./in/encoded_queryset.dat", (int)reducedDataset.size());
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedQuerysetInfo = read_mnist_images(reducedQueriesFileName, (int)reducedDataset.size());
     HeaderInfo* reducedQuerysetHeaderInfo = reducedQuerysetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> reducedQueryset = reducedQuerysetInfo.second;
     if(reducedQueryset.empty()){
-        printf("Error reading input file.\n");
+        printf("Error reading file: %s\n", reducedQueriesFileName.c_str());
         return -1;
     }
     if((int)reducedQueryset.size() != reducedQuerysetHeaderInfo->get_numberOfImages()){
-        printf("Reduced queryset size does not match the header info\n");
-        return -1;
+        printf("Warning: Reduced queryset size does not match the header info (%d vs %d)\n", (int)reducedQueryset.size(), reducedQuerysetHeaderInfo->get_numberOfImages());
     }
 
     // Check that the shapes match between the two reduced sets
@@ -167,7 +175,7 @@ int main(void){
     fflush(stdout);
 
     // Search 
-    std::vector<int> queriesInRowNumbers = {1000};
+    std::vector<int> queriesInRowNumbers = {2000};
 
     for(auto& queriesInRow : queriesInRowNumbers){
 

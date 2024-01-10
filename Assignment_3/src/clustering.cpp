@@ -17,7 +17,7 @@
 
 #define DEFAULT_NUMBER_OF_CLUSTERS 10
 
-int main(void){
+int main(int argc, char **argv){
 
     Eucledean metric;
 
@@ -29,12 +29,22 @@ int main(void){
     auto originalSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
+
+    std::string inputFileName, reducedInputFileName;
+
+    if(argc != 3){
+        printf("Error: Argument Number. Example call: ./clustering <original dataset> <reduced dataset>\n");
+        return -1;
+    }
+    inputFileName = argv[1];
+    reducedInputFileName = argv[2];
+
     // Read the original sets from the file 
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images("./in/input.dat", 0);
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images(inputFileName, 0);
     HeaderInfo* datasetHeaderInfo = datasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> dataset = datasetInfo.second;
     if(dataset.empty()){
-        printf("Error reading input file.\n");
+        printf("Error reading file: %s\n", inputFileName.c_str());
         return -1;
     }
     if((int)dataset.size() != datasetHeaderInfo->get_numberOfImages()){
@@ -43,11 +53,11 @@ int main(void){
     }
 
     // Read the reduced sets from the file 
-    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedDatasetInfo = read_mnist_images("./in/encoded_dataset.dat", 0);
+    std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> reducedDatasetInfo = read_mnist_images(reducedInputFileName, 0);
     HeaderInfo* reducedDatasetHeaderInfo = reducedDatasetInfo.first.get();
     std::vector<std::shared_ptr<ImageVector>> reducedDataset = reducedDatasetInfo.second;
     if(reducedDataset.empty()){
-        printf("Error reading input file.\n");
+        printf("Error reading file: %s\n", reducedInputFileName.c_str());
         return -1;
     }
     if((int)reducedDataset.size() != reducedDatasetHeaderInfo->get_numberOfImages()){
@@ -71,12 +81,14 @@ int main(void){
     end = std::chrono::high_resolution_clock::now();
     originalClusteringTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     double oCT = originalClusteringTime.count() / 1e9;
+    printf("Original Clustering Time: %f\n", oCT);
 
     start = std::chrono::high_resolution_clock::now();
     reducedKmeans->mac_queen_with_lloyds();
     end = std::chrono::high_resolution_clock::now();
     reducedClusteringTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     double rCT = reducedClusteringTime.count() / 1e9;
+    printf("Reduced Clustering Time: %f\n", rCT);
 
 
     // Get the reduced clusters in order to traslate them to the original space
@@ -117,28 +129,16 @@ int main(void){
     std::shared_ptr<kMeans> translatedKmeans = std::make_shared<kMeans>(translatedReducedClusters, pointToClusterMap, &metric);
 
     // Silhouettes for the original clustering
-    start = std::chrono::high_resolution_clock::now();
     std::vector<double> originalSilhouettes = kmeans->silhouette();
-    end = std::chrono::high_resolution_clock::now();
-    originalSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    double oST = originalSilhouetteTime.count() / 1e9;
-
     // Print the results for the original dimension clustering
-    printf("Original Time Clustering: %f Silhouette: %f\n", oCT, oST);
     for(int i = 0; i < (int)originalSilhouettes.size()-1; i++){
         printf("Original Silhouette[%d]: %f\n", i, originalSilhouettes[i]);
     }
     printf("Average Silhouette: %f\n", originalSilhouettes[originalSilhouettes.size()-1]);
     
     // Silhouettes for the reduced clustering
-    start = std::chrono::high_resolution_clock::now();
     std::vector<double> reducedSilhouettes = translatedKmeans->silhouette();
-    end = std::chrono::high_resolution_clock::now();
-    reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    double rST = reducedSilhouetteTime.count() / 1e9;
-
     // Print the results for the reduced dimension clustering
-    printf("Reduced Time Clustering: %f Silhouette: %f\n", rCT, rST);
     for(int i = 0; i < (int)reducedSilhouettes.size()-1; i++){
         printf("Reduced Silhouette[%d]: %f\n", i, reducedSilhouettes[i]);
     }

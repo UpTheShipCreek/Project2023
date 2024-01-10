@@ -27,7 +27,6 @@ This project focuses on dimensionality reduction of the MNIST dataset using a tr
 ## Structure 
 - **encoder**
     - encoder.keras
-    - reduce.py
 - **in**
 - **modules**
     - **cluster**
@@ -55,6 +54,7 @@ This project focuses on dimensionality reduction of the MNIST dataset using a tr
 - encoder_creation.md
 - Makefile 
 - readme.md
+- reduce.py
 
 ## Compilation and Cleanup
 For the clustering tests:
@@ -85,27 +85,19 @@ Since executables for the tests are not required in this assignment the names of
 ### Calls
 For the encoder:
 
-    python3 ./encoder/reduce.py ./in/input.dat ./in/query.dat ./in/encoded_dataset.dat ./in/encoded_queryset.dat
+    python3 reduce.py -d ./in/input.dat -q ./in/query.dat -od ./in/encoded_dataset.dat -oq ./in/encoded_queryset.dat
 
-It's **important** to note that since we want it to run from the general directory, the path hardcoded for the encoder is `./encoder/encoder.keras` and it won't run if you try to run it from inside the `./encoder/` folder.
 
 After running the encoder and making sure your files follow the exact conventions mentioned above, you can run:
     
-    ./clustering
+    ./clustering ./in/input.dat ./in/encoded_dataset.dat 
+
 or 
-    
-    ./comparisons
 
-for the clustering and nearest neighbor comparison tests respectively.
+    ./comparisons ./in/input.dat ./in/query.dat ./in/encoded_dataset.dat ./in/encoded_queryset.dat
 
-### Output
-The output of our programs is stdout but feel free to redirect the output on the `./out/` folder:
-
-    ./clustering > ./out/clustering_results.out
-
-and 
-
-    ./comparisons > ./out/comparison_results.out
+for the clustering and nearest neighbor comparison tests respectively. 
+**Important:** Make sure to give a big enough queryset cause the comparisons program averages the results of each method for 2000 queries.
 
 ## Programs
 For the new process of the creation of the encoder see the [encoder creation section](./encoder_creation.md) and for the results see the [comparisons section](./comparisons.md)
