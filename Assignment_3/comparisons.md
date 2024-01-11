@@ -44,7 +44,7 @@ Note that the hyperparameters we chose were tuned for the exact `60k` dataset si
 
 ## Clustering
 ### General
-In clustering there was indeed an improvement in the clustering time with small loss in the quality of the silhouette. In particular, for the tests we run on a `5k` subset of the dataset, which we clustered `100` times, both on the original and the reduced space, averaging the times and silhouettes yielded the below results. We also added the results of our `78-space` encoding for comparison. 
+In clustering there was indeed an improvement in the clustering time with small loss in the quality of the silhouette. In particular, we saw a `95%` improvement in the clustering time on the `20-space`, with a approximately `25%` loss in the quality of the silhouette. For the tests we run on a `5k` subset of the dataset, which we clustered `100` times, both on the original and the reduced space, averaging the times and silhouettes yielded. In the graph we've also added the results of our `78-space` encoding for comparison.
 
 ### Results
 ![png](./plots/output_6_0.png)
