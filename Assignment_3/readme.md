@@ -80,7 +80,6 @@ deletes the executables and the objective files.
 ## Usage
 ### Input Datasets
 We have again included the two datasets `input.dat` and `query.dat` with the whole project.
-Since executables for the tests are not required in this assignment the names of the input files are hardcoded in our test. So, if you want to run them with smaller datasets make sure you use the exact same name formatting (*for both the original datasets and the encoded ones*) and place them in the `./in/` folder.
 
 ### Calls
 For the encoder:
