@@ -95,7 +95,7 @@ or
 
     ./comparisons ./in/input.dat ./in/query.dat ./in/encoded_dataset.dat ./in/encoded_queryset.dat 100
 
-for the clustering and nearest neighbor comparison tests respectively. The 100 is the number of queries for the comparisons. We used a large number in our tests `(5K)`, but it too costly to print out the details for such large numbers.
+for the clustering and nearest neighbor comparison tests respectively. The `100` is the number of queries for the comparisons. We used a large number in our tests `(5K)`, but it too costly to print out the details for such large numbers.
 
 ### Output 
 The detailed output of the comparisons will be written in the `./out/comparison_details.out`
