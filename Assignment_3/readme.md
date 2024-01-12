@@ -93,10 +93,12 @@ After running the encoder and making sure your files follow the exact convention
 
 or 
 
-    ./comparisons ./in/input.dat ./in/query.dat ./in/encoded_dataset.dat ./in/encoded_queryset.dat
+    ./comparisons ./in/input.dat ./in/query.dat ./in/encoded_dataset.dat ./in/encoded_queryset.dat 100
 
 for the clustering and nearest neighbor comparison tests respectively. 
-**Important:** Make sure to give a big enough queryset cause the comparisons program averages the results of each method for 2000 queries.
+
+### Output 
+The detailed output of the comparisons will be written in the `./out/comparison_details.out`
 
 ## Programs
 For the new process of the creation of the encoder see the [encoder creation section](./encoder_creation.md) and for the results see the [comparisons section](./comparisons.md)

@@ -29,6 +29,9 @@ int main(int argc, char **argv){
     // Random
     Random rand;
 
+    // Output file
+    FILE* outputFile = fopen("./out/comparisons_details.out", "w");
+
     // Clock
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
@@ -50,14 +53,15 @@ int main(int argc, char **argv){
 
     std::string inputFileName, queriesFileName, reducedInputFileName, reducedQueriesFileName;
 
-    if(argc != 5){
-        printf("Error: Argument Number. Example call: ./comparisons <original dataset> <original queryset> <reduced dataset> <reduced queryset>\n");
+    if(argc != 6){
+        printf("Error: Argument Number. Example call: ./comparisons <original dataset> <original queryset> <reduced dataset> <reduced queryset> <number of queries>\n");
         return -1;
     }
     inputFileName = argv[1];
     queriesFileName = argv[2];
     reducedInputFileName = argv[3];
     reducedQueriesFileName = argv[4];
+    int numberOfQueries = atoi(argv[5]);
 
     // Read the original sets from the file 
     std::pair<std::shared_ptr<HeaderInfo>, std::vector<std::shared_ptr<ImageVector>>> datasetInfo = read_mnist_images(inputFileName, 0);
@@ -179,7 +183,7 @@ int main(int argc, char **argv){
     fflush(stdout);
 
     // Search 
-    std::vector<int> queriesInRowNumbers = {2000};
+    std::vector<int> queriesInRowNumbers = {numberOfQueries};
 
     printf("Collecting results...\n");
 
@@ -231,6 +235,9 @@ int main(int argc, char **argv){
                 lshAAF += calculate_average_approximation_factor(nearestTrue, nearestLSH);
             }
 
+            fprintf(outputFile, "Original LSH: \n");
+            write_results((int)dataset.size(), queryset[randomIndex], nearestLSH, nearestTrue, outputFile);
+
             // Hypercube
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestHypercube = hypercube->approximate_k_nearest_neighbors_return_images(queryset[randomIndex], DEFAULT_N);
@@ -244,6 +251,8 @@ int main(int argc, char **argv){
                 hypercubeTimeSum += hypercubeTime.count();
                 hypercubeAAF += calculate_average_approximation_factor(nearestTrue, nearestHypercube);
             }
+            fprintf(outputFile, "Original Hypercube: \n");
+            write_results((int)dataset.size(), queryset[randomIndex], nearestHypercube, nearestTrue, outputFile);
 
             // GNNS
             start = std::chrono::high_resolution_clock::now();
@@ -258,6 +267,8 @@ int main(int argc, char **argv){
                 gnnsTimeSum += gnnsTime.count();
                 gnnsAAF += calculate_average_approximation_factor(nearestTrue, nearestGnns);
             }
+            fprintf(outputFile, "Original GNNS: \n");
+            write_results((int)dataset.size(), queryset[randomIndex], nearestGnns, nearestTrue, outputFile);
 
             // MRNG
             start = std::chrono::high_resolution_clock::now();
@@ -272,6 +283,9 @@ int main(int argc, char **argv){
                 mrngTimeSum += mrngTime.count();
                 mrngAAF += calculate_average_approximation_factor(nearestTrue, nearestMrng);
             }
+            fprintf(outputFile, "Original MRNG: \n");
+            write_results((int)dataset.size(), queryset[randomIndex], nearestMrng, nearestTrue, outputFile);
+
 
             // Reduced Space
             // Exhaustive
@@ -290,16 +304,20 @@ int main(int argc, char **argv){
             reducedExhaustTime = end - start;
             reducedExhaustTimeSum += reducedExhaustTime.count();
             reducedExhaustAAF += calculate_average_approximation_factor(nearestTrue, nearestReducedExhaustDistanceCorrespondace);
+            fprintf(outputFile, "Reduced Exhaustive: \n");
+            write_results((int)dataset.size(), queryset[randomIndex], nearestReducedExhaustDistanceCorrespondace, nearestTrue, outputFile);
 
-            // GNNS
+            // Reduced GNNS
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedGnns = reducedGnns->k_nearest_neighbor_search(reducedQueryset[randomIndex], 3, 10, 20, DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
+            
+            std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedGnnsDistanceCorrespondace;
+            
             if(nearestReducedGnns.empty()){
                 printf("Failed approximation: Reduced GNNS\n");
             }
             else{
-                std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedGnnsDistanceCorrespondace;
                 for(auto& image : nearestReducedGnns){
                     nearestReducedGnnsDistanceCorrespondace.push_back({
                         metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number())->get_coordinates(), queryset[randomIndex]->get_coordinates())
@@ -311,16 +329,20 @@ int main(int argc, char **argv){
                 reducedGnnsTimeSum += reducedGnnsTime.count();
                 reducedGnnsAAF += calculate_average_approximation_factor(nearestTrue, nearestReducedGnnsDistanceCorrespondace);
             }
+            fprintf(outputFile, "Reduced GNNS: \n");
+            write_results((int)dataset.size(), queryset[randomIndex], nearestReducedGnnsDistanceCorrespondace, nearestTrue, outputFile);
 
             // MRNG
             start = std::chrono::high_resolution_clock::now();
             std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedMrng = reducedMrng->k_nearest_neighbor_search(reducedQueryset[randomIndex], l, DEFAULT_N);
             end = std::chrono::high_resolution_clock::now();
+            
+            std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedMrngDistanceCorrespondace;
+           
             if(nearestReducedMrng.empty()){
                 printf("Failed approximation: Reduced MRNG\n");
             }
-            else{
-                std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestReducedMrngDistanceCorrespondace;
+            else{  
                 for(auto& image : nearestReducedMrng){
                     nearestReducedMrngDistanceCorrespondace.push_back({
                         metric.calculate_distance(datasetSpaceCorrespondace.get_initial(image.second->get_number())->get_coordinates(), queryset[randomIndex]->get_coordinates())
@@ -332,6 +354,8 @@ int main(int argc, char **argv){
                 reducedMrngTimeSum += reducedMrngTime.count();
                 reducedMrngAAF += calculate_average_approximation_factor(nearestTrue, nearestReducedMrngDistanceCorrespondace);
             }
+            fprintf(outputFile, "Reduced MRNG: \n");
+            write_results((int)dataset.size(), queryset[randomIndex], nearestReducedMrngDistanceCorrespondace, nearestTrue, outputFile);
         }
         // Calculate the average times
         double averageTrueExhaustTime = trueExhaustTimeSum / (double)queriesInRow;
@@ -364,5 +388,6 @@ int main(int argc, char **argv){
         printf("Reduced MRNG: %f AAF: %f\n", averageReducedMrngTime / billion, averageReducedMrngAAF);
         printf("\n");
     }
-
+    fclose(outputFile);
+    return 0;
 }
