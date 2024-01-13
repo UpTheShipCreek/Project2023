@@ -86,19 +86,21 @@ For the encoder:
 
     python3 reduce.py -d ./in/input.dat -q ./in/query.dat -od ./in/encoded_dataset.dat -oq ./in/encoded_queryset.dat
 
+**Note:** Depending on the machine on which the model was trained, we encountered issues loading the encoder on different machines. Therefore, in this project, we have included both versions. Our `reduce.py` program attempts to load the second version in case the first one fails. We have tested this functionality on our WSLs, VMs, and also sought input from friends to run the encoder on their machines. So, in our experience, one of the two encoder versions works on any machine.
 
-After running the encoder and making sure your files follow the exact conventions mentioned above, you can run:
+After running the encoder you can run:
     
     ./clustering ./in/input.dat ./in/encoded_dataset.dat 
 
-or 
+and 
 
     ./comparisons ./in/input.dat ./in/query.dat ./in/encoded_dataset.dat ./in/encoded_queryset.dat 100
 
-for the clustering and nearest neighbor comparison tests respectively. 
+for the clustering and nearest neighbor comparison tests respectively. The `100` is the number of queries for the comparisons. We used a large number in our tests `(5K)`, but it too costly to print out the details for such large numbers.
+**Note:** For the `comparisons`, our program tries random queries from the queryset. We did this to avoid bias in our testing process. 
 
 ### Output 
-The detailed output of the comparisons will be written in the `./out/comparison_details.out`
+The detailed output of the comparisons will be written in the `./out/comparison_details.out` if the `out` folder exists, elsewise it is just written in the folder the program is running. 
 
 ## Programs
 For the new process of the creation of the encoder see the [encoder creation section](./encoder_creation.md) and for the results see the [comparisons section](./comparisons.md)

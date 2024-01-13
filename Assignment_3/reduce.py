@@ -2,6 +2,15 @@ import argparse
 import numpy as np
 import tensorflow as tf
 
+def load_encoder_model(model_path):
+    try:
+        encoder = tf.keras.models.load_model(model_path)
+        print("Encoder loaded successfully.")
+        return encoder
+    except Exception as e:
+        print(f"Error loading encoder: {e}")
+        return None
+
 def write_mnist_images(filename, images_array, image_size):
     try:
         with open(filename, 'wb') as file:
@@ -91,7 +100,11 @@ def main():
     
 
     # Load the encoder
-    encoder = tf.keras.models.load_model('./encoder/encoder.keras')
+    encoder = load_encoder_model('./encoder/encoder.keras')
+    if encoder is None:
+        print("Trying alternative encoder...")
+        alternative_encoder_path = './encoder/encoder_v2.keras'
+        encoder = load_encoder_model(alternative_encoder_path)
 
     # Apply the encoder to the datasets
     encoded_dataset = encoder.predict(dataset)
