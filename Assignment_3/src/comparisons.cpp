@@ -31,6 +31,14 @@ int main(int argc, char **argv){
 
     // Output file
     FILE* outputFile = fopen("./out/comparisons_details.out", "w");
+    if (outputFile == NULL){
+        outputFile = fopen("./comparisons_details.out", "w");
+        if (outputFile == NULL){
+            perror("Error opening output file");
+            return -1;
+        }
+    }
+
 
     // Clock
     auto start = std::chrono::high_resolution_clock::now();
