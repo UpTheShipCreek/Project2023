@@ -133,6 +133,20 @@ std::shared_ptr<Cluster> kMeans::get_nearest_cluster(std::shared_ptr<ImageVector
     }
     return nearestCluster;
 }
+
+double kMeans::get_distance_to_nearest_cluster(std::shared_ptr<ImageVector> point){
+    double distance;
+    double minDinstace = DBL_MAX;
+
+    for(auto& cluster : this->Clusters){
+        distance = Kmetric->calculate_distance(point->get_coordinates(), cluster->get_centroid()->get_coordinates()); // Calculate the distance from each centroid
+        if(distance < minDinstace){
+            minDinstace = distance; // Get the minimum distance
+        }
+    }
+    return minDinstace;
+}
+
 std::vector<std::shared_ptr<ImageVector>> kMeans::get_centroids(){
     std::vector<std::shared_ptr<ImageVector>> centroids;
     for(int i = 0; i < (int)(this->Clusters).size(); i++){
@@ -507,4 +521,12 @@ std::vector<double> kMeans::silhouette(){
     printf("Done\n");
     fflush(stdout);
     return  silhouetteVector;
+}
+
+double kMeans::get_objective_function_value(){
+    double result = 0;
+    for (auto& point : this->Points){
+        result += get_distance_to_nearest_cluster(point) * get_distance_to_nearest_cluster(point);
+    }
+    return std::sqrt(result);
 }

@@ -105,10 +105,10 @@ std::shared_ptr<ImageVector> Cluster::recalculate_centroid(){
         
         for(j = 0; j < (int)sum.size(); j++){ // Add each coordinate of the vectors
             if(this->Points[i] == nullptr){
-                printf("Null pointer at %d\n", i);
+                // printf("Null pointer at %d\n", i);
             }
             else if(this->Points[i]->get_coordinates().size() != sum.size()){
-                printf("Different size at %d\n", i);
+                // printf("Different size at %d\n", i);
             }
             sum[j] += (this->Points[i])->get_coordinates()[j];
         }

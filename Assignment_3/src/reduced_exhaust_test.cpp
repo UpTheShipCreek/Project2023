@@ -15,7 +15,7 @@ int main(void){
     Eucledean metric;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> nearestExhaustReduced;
     std::vector<std::pair<double, std::shared_ptr<ImageVector>>> optimalNearestApprox;
-    std::vector<double> nearestExhaustReducedCorrespondant;
+    std::shared_ptr<ImageVector> nearestExhaustReducedCorrespondant;
     std::vector<double> nearestExhaustInitial;
     std::vector<double> queryInitial;
 
@@ -105,7 +105,7 @@ int main(void){
                     foundCount++;
                 }
                 
-                factor = metric.calculate_distance(nearestExhaustReducedCorrespondant, queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
+                factor = metric.calculate_distance(nearestExhaustReducedCorrespondant->get_coordinates(), queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
                 if(factor > maxFactor){
                     maxFactor = factor;
                 }
@@ -151,7 +151,7 @@ int main(void){
 
                 // printf("Approx: %d Exhaust: %d Query: %d\n", nearestExhaustReduced[0].second->get_number(), optimalNearestApprox[0].second, reducedQueryset[randomIndex]->get_number());
 
-                factor = metric.calculate_distance(nearestExhaustReducedCorrespondant, queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
+                factor = metric.calculate_distance(nearestExhaustReducedCorrespondant->get_coordinates(), queryset[randomIndex]->get_coordinates()) / optimalNearestApprox[0].first;
                 if(factor > maxFactor){
                     maxFactor = factor;
                 }

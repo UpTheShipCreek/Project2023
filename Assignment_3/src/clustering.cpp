@@ -51,94 +51,79 @@ int main(void){
     
     // Set up the correspondances, we can then use the number of the image to get the original coordinates with get_initial
     SpaceCorrespondace datasetSpaceCorrespondace(dataset);
+    double originalOFR = 0.0;
+    double reducedOFR = 0.0;
+    for (int i = 0; i < 100; i++){
+        // Original Kmeas
+        // std::shared_ptr<kMeans> kmeans = std::make_shared<kMeans>(10, dataset, &metric);
 
-    // Original Kmeas
-    std::shared_ptr<kMeans> kmeans = std::make_shared<kMeans>(10, dataset, &metric);
+        // Reduced Kmeans
+        std::shared_ptr<kMeans> reducedKmeans = std::make_shared<kMeans>(10, reducedDataset, &metric);
 
-    // Reduced Kmeans
-    std::shared_ptr<kMeans> reducedKmeans = std::make_shared<kMeans>(10, reducedDataset, &metric);
+        int sizeOfOriginalSpace = (int)dataset[0]->get_coordinates().size();
+        // printf("Size of original space: %d\n", sizeOfOriginalSpace);
 
-    int sizeOfOriginalSpace = (int)dataset[0]->get_coordinates().size();
-    // printf("Size of original space: %d\n", sizeOfOriginalSpace);
+        // start = std::chrono::high_resolution_clock::now();
+        // kmeans->mac_queen_with_lloyds();
+        // end = std::chrono::high_resolution_clock::now();
+        // originalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        // printf("Original time: %f\n", originalTime.count()/1e9);
 
-    start = std::chrono::high_resolution_clock::now();
-    kmeans->mac_queen_with_lloyds();
-    end = std::chrono::high_resolution_clock::now();
-    originalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
-    start = std::chrono::high_resolution_clock::now();
-    reducedKmeans->mac_queen_with_lloyds();
-    end = std::chrono::high_resolution_clock::now();
-    reducedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        start = std::chrono::high_resolution_clock::now();
+        reducedKmeans->mac_queen_with_lloyds();
+        end = std::chrono::high_resolution_clock::now();
+        reducedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        printf("Reduced time: %f\n", reducedTime.count()/1e9);
 
 
-    // Get the reduced clusters in order to traslate them to the original space
-    std::vector<std::shared_ptr<Cluster>> reducedClusters = reducedKmeans->get_clusters();
+        // Get the reduced clusters in order to traslate them to the original space
+        std::vector<std::shared_ptr<Cluster>> reducedClusters = reducedKmeans->get_clusters();
 
-    std::vector<std::shared_ptr<Cluster>> translatedReducedClusters;
-    std::shared_ptr<Cluster> translatedCluster;
-    std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Cluster>> pointToClusterMap;
+        std::vector<std::shared_ptr<Cluster>> translatedReducedClusters;
+        std::shared_ptr<Cluster> translatedCluster;
+        std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Cluster>> pointToClusterMap;
 
-    for(auto& cluster : reducedClusters){
+        for(auto& cluster : reducedClusters){
 
-        std::vector<std::shared_ptr<ImageVector>> points = cluster->get_points();
+            std::vector<std::shared_ptr<ImageVector>> points = cluster->get_points();
+            
+
+            // Make a new centroid in order to give it to a cluster pointer
+            // Need first need to make a vector of coordinates
+            std::vector<double> centroidCoordinates(sizeOfOriginalSpace, 0.0);
+            std::shared_ptr<ImageVector> centroid = std::make_shared<ImageVector>(-1, centroidCoordinates);
+            std::shared_ptr<Cluster> translatedCluster = std::make_shared<Cluster>(centroid);
         
+            std::vector<std::shared_ptr<ImageVector>> translatedPoints;
 
-        // Make a new centroid in order to give it to a cluster pointer
-        // Need first need to make a vector of coordinates
-        std::vector<double> centroidCoordinates(sizeOfOriginalSpace, 0.0);
-        std::shared_ptr<ImageVector> centroid = std::make_shared<ImageVector>(-1, centroidCoordinates);
-        std::shared_ptr<Cluster> translatedCluster = std::make_shared<Cluster>(centroid);
-    
-        std::vector<std::shared_ptr<ImageVector>> translatedPoints;
-
-        // Translate the images to the original space
-        int countPoints = 0;
-        std::shared_ptr<ImageVector> translated;
-        for(auto& point : points){
-            countPoints++;
-            // printf("Image number: %d\n", point->get_number());
-            translated = datasetSpaceCorrespondace.get_initial(point->get_number());
-            pointToClusterMap[translated] = translatedCluster;
-            translatedCluster->add_point_and_set_centroid(translated);
+            // Translate the images to the original space
+            int countPoints = 0;
+            std::shared_ptr<ImageVector> translated;
+            for(auto& point : points){
+                countPoints++;
+                // printf("Image number: %d\n", point->get_number());
+                translated = datasetSpaceCorrespondace.get_initial(point->get_number());
+                pointToClusterMap[translated] = translatedCluster;
+                translatedCluster->add_point_and_set_centroid(translated);
+            }
+            
+            // Push it back to our translated vector of clusters
+            translatedReducedClusters.push_back(translatedCluster);
         }
+
+        std::shared_ptr<kMeans> translatedKmeans = std::make_shared<kMeans>(translatedReducedClusters, pointToClusterMap, &metric);
         
-        // Push it back to our translated vector of clusters
-        translatedReducedClusters.push_back(translatedCluster);
+        // originalOFR += kmeans->get_objective_function_value();
+        reducedOFR += translatedKmeans->get_objective_function_value();
     }
+    // Square the mean
+    // originalOFR /= 100.0;
+    // originalOFR *= originalOFR;
+    // printf("Original OFR: %f\n", originalOFR);
 
-    std::shared_ptr<kMeans> translatedKmeans = std::make_shared<kMeans>(translatedReducedClusters, pointToClusterMap, &metric);
-
-    // Now we can do the sihlouettes
-    start = std::chrono::high_resolution_clock::now();
-    std::vector<double> originalSilhouettes = kmeans->silhouette();
-    end = std::chrono::high_resolution_clock::now();
-
-    originalSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
-    double oST = originalSilhouetteTime.count() / 1e9;
-    double cOT = originalTime.count() / 1e9;
-
-    printf("Original Time Clustering: %f Silhouette: %f\n", cOT, oST);
-    for(int i = 0; i < (int)originalSilhouettes.size()-1; i++){
-        printf("Original Silhouette[%d]: %f\n", i, originalSilhouettes[i]);
-    }
-    printf("Average Silhouette: %f\n", originalSilhouettes[originalSilhouettes.size()-1]);
+    reducedOFR /= 100.0;
+    reducedOFR *= reducedOFR;
+    printf("Reduced OFR: %f\n", reducedOFR);
     
-    start = std::chrono::high_resolution_clock::now();
-    std::vector<double> reducedSilhouettes = translatedKmeans->silhouette();
-    end = std::chrono::high_resolution_clock::now();
-
-    reducedSilhouetteTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
-    double rST = reducedSilhouetteTime.count() / 1e9;
-    double cRT = reducedTime.count() / 1e9;
-
-    printf("Reduced Time Clustering: %f Silhouette: %f\n", cRT, rST);
-    for(int i = 0; i < (int)reducedSilhouettes.size()-1; i++){
-        printf("Reduced Silhouette[%d]: %f\n", i, reducedSilhouettes[i]);
-    }
-    printf("Average Silhouette: %f\n", reducedSilhouettes[reducedSilhouettes.size()-1]);
-
     return 0;
 }

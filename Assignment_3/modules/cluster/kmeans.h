@@ -43,6 +43,7 @@ class kMeans{
     kMeans(std::vector<std::shared_ptr<Cluster>> Clusters, std::map<std::shared_ptr<ImageVector>, std::shared_ptr<Cluster>> PointToClusterMap, Metric* metric);
     kMeans(int k, std::vector<std::shared_ptr<ImageVector>> points, Metric* metric);
     std::shared_ptr<Cluster> get_nearest_cluster(std::shared_ptr<ImageVector> point);
+    double get_distance_to_nearest_cluster(std::shared_ptr<ImageVector> point);
     std::vector<std::shared_ptr<ImageVector>> get_centroids();
     std::vector<std::shared_ptr<Cluster>>& get_clusters();
 
@@ -67,6 +68,7 @@ class kMeans{
 
     std::shared_ptr<Cluster> get_nearest_cluster_excluding_the_assigned_one(std::shared_ptr<ImageVector> point);
     std::vector<double> silhouette();
+    double get_objective_function_value();
 };
 
 #endif
