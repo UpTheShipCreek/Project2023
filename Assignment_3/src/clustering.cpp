@@ -133,6 +133,7 @@ int main(int argc, char **argv){
         printf("Original Silhouette[%d]: %f\n", i, originalSilhouettes[i]);
     }
     printf("Average Silhouette: %f\n", originalSilhouettes[originalSilhouettes.size()-1]);
+    printf("Original objective function value: %f\n", kmeans->get_objective_function_value());
     
     // Silhouettes for the reduced clustering
     std::vector<double> reducedSilhouettes = translatedKmeans->silhouette();
@@ -141,6 +142,7 @@ int main(int argc, char **argv){
         printf("Reduced Silhouette[%d]: %f\n", i, reducedSilhouettes[i]);
     }
     printf("Average Silhouette: %f\n", reducedSilhouettes[reducedSilhouettes.size()-1]);
+    printf("Reduced objective function value: %f\n", translatedKmeans->get_objective_function_value());
 
     return 0;
 }
