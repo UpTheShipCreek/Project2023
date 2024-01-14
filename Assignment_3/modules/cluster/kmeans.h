@@ -67,6 +67,8 @@ class kMeans{
 
     std::shared_ptr<Cluster> get_nearest_cluster_excluding_the_assigned_one(std::shared_ptr<ImageVector> point);
     std::vector<double> silhouette();
+    double get_distance_to_nearest_cluster(std::shared_ptr<ImageVector> point);
+    double get_objective_function_value();
 };
 
 #endif
