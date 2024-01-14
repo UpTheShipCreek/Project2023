@@ -46,7 +46,7 @@ Note that the hyperparameters we chose were tuned for the exact `60k` dataset si
 ### General
 In clustering there was indeed an improvement in the clustering time with small loss in the quality of the silhouette. In particular, we saw a `95%` improvement in the clustering time on the `20-space`, with a approximately `25%` loss in the quality of the silhouette. The value of the objective function remained identical. For the tests we run on a `5k` subset of the dataset, which we clustered `100` times, both on the original and the reduced space, averaging the times, silhouettes  and objective function values yielded. In the graph we've also added the results of our `78-space` encoding for comparison.
 
-It's important to note here that the numbers(including some of the ratios) vary widely depending on the size of the dataset. For example, value of the objective function increases a lot when we consider a larger part of the dataset.
+It's important to note here that the numbers(including some of the ratios) vary widely depending on the size of the dataset.
 
 ### Results
 ![png](./plots/output_6_0.png)
