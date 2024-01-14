@@ -48,5 +48,6 @@ In clustering there was indeed an improvement in the clustering time with small 
 
 ### Results
 ![png](./plots/output_6_0.png)
+![png](./plots/output_7_0.png)
     
 
